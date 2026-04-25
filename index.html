@@ -1405,33 +1405,97 @@
       const [done, setDone] = useState(false);
       const mediaRef = useRef(null);
       const chunksRef = useRef([]);
+
       const startRec = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
           mediaRef.current = new MediaRecorder(stream);
           chunksRef.current = [];
           mediaRef.current.ondataavailable = e => chunksRef.current.push(e.data);
-          mediaRef.current.onstop = () => { const blob = new Blob(chunksRef.current, { type: "audio/webm" }); setAudioUrl(URL.createObjectURL(blob)); stream.getTracks().forEach(t => t.stop()); };
+          mediaRef.current.onstop = () => {
+            const blob = new Blob(chunksRef.current, { type: "audio/webm" });
+            setAudioUrl(URL.createObjectURL(blob));
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRef.current.onerror = () => {
+            setFoxMsg("Aufnahme fehlgeschlagen. Überprüfe die Mikrofon‑Erlaubnis. 📴");
+            setRecording(false);
+          };
           mediaRef.current.start();
           setRecording(true);
-        } catch { setFoxMsg("Mikrofon nicht verfügbar. Bitte bewerte dich selbst."); }
+        } catch (err) {
+          setFoxMsg("Mikrofon nicht erlaubt oder nicht verfügbar. Du kannst trotzdem üben und dich selbst bewerten. 💬");
+          setRecording(false);
+        }
       };
-      const stopRec = () => { mediaRef.current?.stop(); setRecording(false); };
+
+      const stopRec = () => {
+        if (mediaRef.current && mediaRef.current.state === "recording") {
+          mediaRef.current.stop();
+        }
+        setRecording(false);
+      };
+
       const rate = (good) => {
-        const xp = good ? 20 : 10; dispatch({ type: "EARN_XP", amount: xp }); dispatch({ type: "EARN_GOLD", amount: good ? 8 : 3 }); showToast(`+${xp} XP`, "correct");
-        setFoxMsg(good ? "Ausgezeichnet. Du klingst authentisch." : "Übung macht den Meister."); setRated(true);
-        setTimeout(() => { if (idx < prompts.length - 1) { setIdx(i => i + 1); setAudioUrl(null); setRated(false); } else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "speaking" }); setDone(true); } }, 1500);
+        const xp = good ? 20 : 10;
+        dispatch({ type: "EARN_XP", amount: xp });
+        dispatch({ type: "EARN_GOLD", amount: good ? 8 : 3 });
+        showToast(`+${xp} XP`, "correct");
+        setFoxMsg(good ? "Ausgezeichnet. Du klingst authentisch." : "Übung macht den Meister.");
+        setRated(true);
+        setTimeout(() => {
+          if (idx < prompts.length - 1) {
+            setIdx(i => i + 1);
+            setAudioUrl(null);
+            setRated(false);
+          } else {
+            dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "speaking" });
+            setDone(true);
+          }
+        }, 1500);
       };
-      if (done) return (<div className="trial-container animate-in text-center"><div style={{ fontSize: "3rem" }}>🗣️</div><h2 style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>Sprech-Halle verlassen!</h2><p style={{ color: "var(--slate)" }}>Deine Stimme hallt durch das Gewölbe.</p><button className="btn-gold mt-16" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button></div>);
+
+      if (done) return (
+        <div className="trial-container animate-in text-center">
+          <div style={{ fontSize: "3rem" }}>🗣️</div>
+          <h2 style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>Sprech‑Halle verlassen!</h2>
+          <p style={{ color: "var(--slate)" }}>Deine Stimme hallt durch das Gewölbe.</p>
+          <button className="btn-gold mt-16" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button>
+        </div>
+      );
+
       return (
         <div className="trial-container animate-in">
-          <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>🗣️ Sprech-Halle</h2></div>
+          <div className="trial-header">
+            <button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button>
+            <h2>🗣️ Sprech‑Halle</h2>
+          </div>
           <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / prompts.length) * 100}%` }}/></div>
           <div className="prompt-box">{prompts[idx]}</div>
-          <div className="flex-center"><button className={`record-btn ${recording ? "recording" : ""}`} onClick={recording ? stopRec : startRec}>{recording ? "⏹" : "🎙"}</button></div>
-          <p style={{ color: "var(--slate)", textAlign: "center", fontSize: "0.8rem", marginBottom: "16px" }}>{recording ? "Aufnahme läuft..." : "Drücke zum Aufnehmen"}</p>
-          {audioUrl && (<div style={{ marginBottom: "16px" }}><audio src={audioUrl} controls style={{ width: "100%", marginBottom: "8px" }}/><button className="btn-ghost" style={{ display: "block", margin: "0 auto" }} onClick={() => speak(zone.sentences[0]?.parts.join(" ") || zone.dictation[0], 0.75)}>🔊 Modelllösung anhören</button></div>)}
-          {!rated && (<div className="self-rate"><button className="rate-btn rate-needs" onClick={() => rate(false)}>Brauche Übung (+10 XP)</button><button className="rate-btn rate-good" onClick={() => rate(true)}>Gut genug! (+20 XP)</button></div>)}
+          <div className="flex-center">
+            <button
+              className={`record-btn ${recording ? "recording" : ""}`}
+              onClick={recording ? stopRec : startRec}
+            >{recording ? "⏹" : "🎙"}</button>
+          </div>
+          <p style={{ color: "var(--slate)", textAlign: "center", fontSize: "0.8rem", marginBottom: "16px" }}>
+            {recording ? "Aufnahme läuft..." : "Drücke zum Aufnehmen"}
+          </p>
+          {audioUrl && (
+            <div style={{ marginBottom: "16px" }}>
+              <audio key={audioUrl} src={audioUrl} controls style={{ width: "100%", marginBottom: "8px" }} />
+              <button className="btn-ghost" style={{ display: "block", margin: "0 auto" }}
+                onClick={() => speak(zone.sentences[0]?.parts.join(" ") || zone.dictation[0], 0.75)}>
+                🔊 Modelllösung anhören
+              </button>
+            </div>
+          )}
+          {!rated && (
+            <div className="self-rate">
+              <button className="rate-btn rate-needs" onClick={() => rate(false)}>Brauche Übung (+10 XP)</button>
+              <button className="rate-btn rate-good" onClick={() => rate(true)}>Gut genug! (+20 XP)</button>
+            </div>
+          )}
         </div>
       );
     }
@@ -1524,9 +1588,26 @@
       const [toast, setToast] = useState({ msg: "", type: "" });
       const saveRef = useRef(null);
       const showToast = (msg, type) => setToast({ msg, type });
-      useEffect(() => { try { const saved = localStorage.getItem(SAVE_KEY); if (saved) dispatch({ type: "LOAD", payload: JSON.parse(saved) }); } catch {} }, []);
-      useEffect(() => { clearTimeout(saveRef.current); saveRef.current = setTimeout(() => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch {} }, 500); }, [state]);
-      useEffect(() => { const msgs = ["The fog waits…","Jedes Wort ist ein Schritt.","The silence fears you.","Spreche mutig, Wanderer.","Der Nebel weicht langsam."]; const t = setInterval(() => setFoxMsg(msgs[Math.floor(Math.random() * msgs.length)]), 60000); return () => clearInterval(t); }, []);
+      const [started, setStarted] = useState(false);
+
+      useEffect(() => {
+        try {
+          const saved = localStorage.getItem(SAVE_KEY);
+          if (saved) dispatch({ type: "LOAD", payload: JSON.parse(saved) });
+        } catch {}
+      }, []);
+      useEffect(() => {
+        clearTimeout(saveRef.current);
+        saveRef.current = setTimeout(() => {
+          try { localStorage.setItem(SAVE_KEY, JSON.stringify(state)); } catch {}
+        }, 500);
+      }, [state]);
+      useEffect(() => {
+        const msgs = ["The fog waits…","Jedes Wort ist ein Schritt.","The silence fears you.","Spreche mutig, Wanderer.","Der Nebel weicht langsam."];
+        const t = setInterval(() => setFoxMsg(msgs[Math.floor(Math.random() * msgs.length)]), 60000);
+        return () => clearInterval(t);
+      }, []);
+
       const renderScreen = () => {
         switch (state.screen) {
           case "map": return <WorldMap state={state} dispatch={dispatch}/>;
@@ -1541,7 +1622,41 @@
           default: return <WorldMap state={state} dispatch={dispatch}/>;
         }
       };
-      return (<div id="schattenreich"><HUD state={state} dispatch={dispatch}/>{renderScreen()}<FoxCompanion message={foxMsg} onTap={() => { if (foxMsg) speak(foxMsg, 0.8); }}/><Toast msg={toast.msg} type={toast.type}/></div>);
+
+      if (!started) {
+        return (
+          <div style={{ minHeight:"100vh", display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", padding:"20px" }}>
+            <div style={{ fontSize:"4rem", marginBottom:"16px" }}>🏰</div>
+            <h1 style={{ fontFamily:"Cinzel, serif", color:"var(--gold)", fontSize:"2rem", marginBottom:"12px" }}>Schattenreich</h1>
+            <p style={{ color:"var(--slate)", marginBottom:"36px", textAlign:"center" }}>The Shadow Language awaits.</p>
+            <button
+              onClick={() => {
+                setStarted(true);
+                // Force audio permission
+                const utt = new SpeechSynthesisUtterance(" ");
+                utt.volume = 0;
+                window.speechSynthesis.speak(utt);
+                speak("Willkommen, Wanderer.");
+                dispatch({ type: "GOTO", screen: "map" });
+              }}
+              className="btn-gold"
+              style={{ fontSize:"1.2rem", padding:"14px 32px" }}
+            >
+              Enter the Shadow Realm
+            </button>
+            <p style={{ color:"var(--slate)", fontSize:"0.75rem", marginTop:"20px" }}>Tap to begin – audio will work after this.</p>
+          </div>
+        );
+      }
+
+      return (
+        <div id="schattenreich">
+          <HUD state={state} dispatch={dispatch}/>
+          {renderScreen()}
+          <FoxCompanion message={foxMsg} onTap={() => { if (foxMsg) speak(foxMsg, 0.8); }}/>
+          <Toast msg={toast.msg} type={toast.type}/>
+        </div>
+      );
     }
 
     ReactDOM.createRoot(document.getElementById("schattenreich")).render(<App />);
