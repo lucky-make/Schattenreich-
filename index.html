@@ -144,6 +144,12 @@
     .mb-16 { margin-bottom: 16px; }
     .page-title { font-family: 'Cinzel', serif; color: var(--gold); font-size: 1.5rem; text-align: center; margin-bottom: 8px; }
     .section-label { font-family: 'Cinzel', serif; color: var(--slate); font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+    /* Flashcard preview */
+    .flashcard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .flashcard-item { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; position: relative; }
+    .flashcard-item:hover { border-color: var(--gold); transform: translateY(-3px); }
+    .flashcard-front { color: var(--gold); font-family: Georgia, serif; font-size: 1.2rem; font-weight: 600; }
+    .flashcard-back { color: var(--slate); margin-top: 8px; font-size: 0.85rem; }
     @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
     @keyframes pulse { 0%,100%{box-shadow:0 0 20px rgba(139,58,74,0.6)} 50%{box-shadow:0 0 40px rgba(139,58,74,0.9)} }
     @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-8px)} 40%,80%{transform:translateX(8px)} }
@@ -170,6 +176,9 @@
   <script type="text/babel" data-presets="react">
     const { useState, useEffect, useReducer, useRef } = React;
 
+    // ──────────────────────────────────────
+    // GAME DATA – ALL 16 ZONES
+    // ──────────────────────────────────────
     const ZONES = [
   {
     id: 1, name: "Das Stille Tor", subtitle: "The Silent Gate", level: "A1.1",
@@ -1102,6 +1111,7 @@
   },
 ];
 
+    // Audio utilities
     let germanVoice = null;
     const initVoice = () => {
       const voices = window.speechSynthesis.getVoices();
@@ -1154,14 +1164,30 @@
         case "GOTO": return { ...state, screen: action.screen, trialZone: action.zone ?? state.trialZone, trialType: action.trialType ?? state.trialType, currentZone: action.zone ?? state.currentZone };
         case "EARN_XP": { const xp = state.xp + action.amount; return { ...state, xp, level: getLevelFromXp(xp) }; }
         case "EARN_GOLD": return { ...state, gold: Math.max(0, state.gold + action.amount) };
-        case "COMPLETE_TRIAL": { const key = `${action.zone}`; const prev = state.completedTrials[key] || {}; return { ...state, completedTrials: { ...state.completedTrials, [key]: { ...prev, [action.trial]: true } } }; }
+        case "COMPLETE_TRIAL": {
+          return {
+            ...state,
+            completedTrials: {
+              ...state.completedTrials,
+              [action.zone]: { ...(state.completedTrials[action.zone] || {}), [action.trial]: true }
+            }
+          };
+        }
         case "DEFEAT_BOSS": return { ...state, bossDefeated: [...new Set([...state.bossDefeated, action.zone])] };
         case "ADD_ARTIFACT": return { ...state, artifacts: [...state.artifacts, action.artifact] };
         case "SET_SETTING": return { ...state, settings: { ...state.settings, [action.key]: action.value } };
-        case "UPDATE_STREAK": { const today = new Date().toISOString().slice(0, 10); const { lastDate, count } = state.streak; const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10); const newCount = lastDate === today ? count : lastDate === yesterday ? count + 1 : 1; return { ...state, streak: { count: newCount, lastDate: today } }; }
+        case "UPDATE_STREAK": {
+          const today = new Date().toISOString().slice(0, 10);
+          const { lastDate, count } = state.streak;
+          const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+          const newCount = lastDate === today ? count : lastDate === yesterday ? count + 1 : 1;
+          return { ...state, streak: { count: newCount, lastDate: today } };
+        }
         default: return state;
       }
     };
+
+    const shuffleArray = (arr) => [...arr].sort(() => Math.random() - 0.5);
 
     function FoxCompanion({ message, onTap }) {
       const [visible, setVisible] = useState(false);
@@ -1233,8 +1259,8 @@
 
     function ZoneView({ state, dispatch }) {
       const zone = ZONES[state.currentZone - 1];
-      const trials = state.completedTrials[String(state.currentZone)] || {};
-      const allDone = trials.lexicon && trials.sentence && trials.listening && trials.speaking;
+      const trialsForZone = state.completedTrials[state.currentZone] || {};
+      const allDone = trialsForZone.lexicon && trialsForZone.sentence && trialsForZone.listening && trialsForZone.speaking;
       const bossDefeated = state.bossDefeated.includes(state.currentZone);
       return (
         <div className="zone-view animate-in">
@@ -1247,17 +1273,17 @@
           <p className="section-label">Prüfungen</p>
           <div className="trial-grid">
             {[
-              { key: "lexicon", icon: "📚", name: "Lexikon-Keller", desc: "Vocab Vault · 10 words per round" },
-              { key: "sentence", icon: "⚒️", name: "Satz-Schmiede", desc: "Sentence Forge · build sentences" },
-              { key: "listening", icon: "👂", name: "Hör-Gewölbe", desc: "Listening Hollow · dictation" },
-              { key: "speaking", icon: "🗣️", name: "Sprech-Halle", desc: "Speaking Hall · speak freely" },
+              { key: "lexicon", icon: "📚", name: "Lexikon-Keller", desc: "Learn 10 words · then quiz" },
+              { key: "sentence", icon: "⚒️", name: "Satz-Schmiede", desc: "Build sentences from jumbled words" },
+              { key: "listening", icon: "👂", name: "Hör-Gewölbe", desc: "Listen & type what you hear" },
+              { key: "speaking", icon: "🗣️", name: "Sprech-Halle", desc: "Speak & compare" },
             ].map(t => (
-              <div key={t.key} className={`trial-card ${trials[t.key] ? "done" : ""}`}
+              <div key={t.key} className={`trial-card ${trialsForZone[t.key] ? "done" : ""}`}
                 onClick={() => dispatch({ type: "GOTO", screen: `trial-${t.key}`, zone: state.currentZone, trialType: t.key })}>
                 <div className="trial-icon">{t.icon}</div>
                 <div className="trial-name">{t.name}</div>
                 <div className="trial-desc">{t.desc}</div>
-                {trials[t.key] && <div style={{ color: "var(--correct)", marginTop: "6px", fontSize: "0.8rem" }}>✓</div>}
+                {trialsForZone[t.key] && <div style={{ color: "var(--correct)", marginTop: "6px", fontSize: "0.8rem" }}>✓</div>}
               </div>
             ))}
           </div>
@@ -1286,14 +1312,26 @@
 
     function TrialLexicon({ state, dispatch, setFoxMsg, showToast }) {
       const zone = ZONES[state.trialZone - 1];
+      const [phase, setPhase] = useState("study"); // study | quiz
       const [idx, setIdx] = useState(0);
       const [selected, setSelected] = useState(null);
       const [flash, setFlash] = useState(null);
       const [done, setDone] = useState(false);
-      const vocab = zone.vocab.slice(0, 10);
+      const [vocab, setVocab] = useState(() => shuffleArray(zone.vocab).slice(0, 10));
       const word = vocab[idx];
-      const [opts, setOpts] = useState(() => { const wrongs = zone.vocab.filter(v => v.en !== word.en).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.en); return [...wrongs, word.en].sort(() => Math.random() - 0.5); });
-      useEffect(() => { const wrongs = zone.vocab.filter(v => v.en !== word.en).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.en); setOpts([...wrongs, word.en].sort(() => Math.random() - 0.5)); setSelected(null); setFlash(null); }, [idx]);
+      const [opts, setOpts] = useState(() => {
+        const wrongs = zone.vocab.filter(v => v.en !== word.en).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.en);
+        return [...wrongs, word.en].sort(() => Math.random() - 0.5);
+      });
+
+      useEffect(() => {
+        if (phase === "quiz") {
+          const wrongs = zone.vocab.filter(v => v.en !== word.en).sort(() => Math.random() - 0.5).slice(0, 3).map(v => v.en);
+          setOpts([...wrongs, word.en].sort(() => Math.random() - 0.5));
+          setSelected(null); setFlash(null);
+        }
+      }, [idx, phase]);
+
       const handleSelect = (opt) => {
         if (selected !== null) return;
         setSelected(opt);
@@ -1301,9 +1339,31 @@
         setFlash(correct ? "correct" : "wrong");
         if (correct) { dispatch({ type: "EARN_XP", amount: 10 }); dispatch({ type: "EARN_GOLD", amount: 5 }); playTone(800, 100); setFoxMsg("Richtig. Der Nebel weicht."); showToast("+10 XP · +5 Gold", "correct"); }
         else { dispatch({ type: "EARN_GOLD", amount: -2 }); playTone(150, 150, "square"); setFoxMsg(`Nicht ganz. Die richtige Antwort: "${word.en}"`); showToast("−2 Gold", "wrong"); }
-        setTimeout(() => { if (idx < vocab.length - 1) setIdx(i => i + 1); else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "lexicon" }); dispatch({ type: "ADD_ARTIFACT", artifact: { word: word.de, emoji: zone.artifact.emoji, zoneId: zone.id } }); setDone(true); } }, 1500);
+        setTimeout(() => {
+          if (idx < vocab.length - 1) setIdx(i => i + 1);
+          else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "lexicon" }); dispatch({ type: "ADD_ARTIFACT", artifact: { word: word.de, emoji: zone.artifact.emoji, zoneId: zone.id } }); setDone(true); }
+        }, 1500);
       };
+
       if (done) return (<div className="trial-container animate-in text-center"><div style={{ fontSize: "3rem", marginBottom: "16px" }}>{zone.artifact.emoji}</div><h2 style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>Prüfung abgeschlossen!</h2><p style={{ color: "var(--slate)" }}>Du hast {zone.artifact.name} erhalten.</p><button className="btn-gold mt-16" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button></div>);
+
+      if (phase === "study") return (
+        <div className="trial-container animate-in">
+          <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>📚 Lexikon-Keller</h2></div>
+          <p className="section-label">Study these words – tap to hear</p>
+          <div className="flashcard-grid">
+            {vocab.map((w, i) => (
+              <div key={i} className="flashcard-item" onClick={() => speak(w.de)}>
+                <div className="flashcard-front">{w.article ? `${w.article} ` : ""}{w.de}</div>
+                <div className="flashcard-back">{w.en}</div>
+                <button className="speak-btn" style={{ position: "absolute", top: 4, right: 4 }} onClick={(e) => { e.stopPropagation(); speak(w.de); }}>🔊</button>
+              </div>
+            ))}
+          </div>
+          <button className="btn-gold" onClick={() => { setPhase("quiz"); setIdx(0); }}>Start Quiz</button>
+        </div>
+      );
+
       return (
         <div className="trial-container animate-in">
           <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>📚 Lexikon-Keller</h2></div>
@@ -1320,13 +1380,14 @@
 
     function TrialSentence({ state, dispatch, setFoxMsg, showToast }) {
       const zone = ZONES[state.trialZone - 1];
-      const sentences = zone.sentences.slice(0, 5);
+      const allSentences = zone.sentences;
+      const [roundSentences, setRoundSentences] = useState(() => shuffleArray(allSentences).slice(0, 5));
       const [idx, setIdx] = useState(0);
       const [placed, setPlaced] = useState([]);
       const [shake, setShake] = useState(false);
       const [checked, setChecked] = useState(null);
       const [done, setDone] = useState(false);
-      const sent = sentences[idx];
+      const sent = roundSentences[idx];
       const [chips, setChips] = useState(() => [...sent.parts].sort(() => Math.random() - 0.5).map((word, i) => ({ word, id: i, used: false })));
       useEffect(() => { setChips([...sent.parts].sort(() => Math.random() - 0.5).map((word, i) => ({ word, id: i, used: false }))); setPlaced([]); setChecked(null); }, [idx]);
       const placeChip = (chip) => { if (chip.used || checked) return; setChips(c => c.map(ch => ch.id === chip.id ? { ...ch, used: true } : ch)); setPlaced(p => [...p, chip]); };
@@ -1335,7 +1396,7 @@
         const answer = placed.map(c => c.word).join(" ");
         if (answer.toLowerCase() === sent.parts.join(" ").toLowerCase()) {
           setChecked("correct"); dispatch({ type: "EARN_XP", amount: 20 }); dispatch({ type: "EARN_GOLD", amount: 10 }); speak(sent.parts.join(" ")); playTone(880, 120); setTimeout(() => playTone(1100, 120), 150); setFoxMsg("Richtig. Der Nebel weicht."); showToast("+20 XP · +10 Gold", "correct");
-          setTimeout(() => { if (idx < sentences.length - 1) setIdx(i => i + 1); else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "sentence" }); setDone(true); } }, 1800);
+          setTimeout(() => { if (idx < roundSentences.length - 1) setIdx(i => i + 1); else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "sentence" }); setDone(true); } }, 1800);
         } else {
           setShake(true); setTimeout(() => setShake(false), 500); playTone(160, 200, "square"); setFoxMsg("Das Verb steht an zweiter Stelle. Versuche es nochmal."); showToast("Versuch es noch einmal", "wrong");
           setPlaced([]); setChips(c => c.map(ch => ({ ...ch, used: false })));
@@ -1345,7 +1406,7 @@
       return (
         <div className="trial-container animate-in">
           <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>⚒️ Satz-Schmiede</h2></div>
-          <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / sentences.length) * 100}%` }}/></div>
+          <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / roundSentences.length) * 100}%` }}/></div>
           <p className="translation-hint">📖 {sent.translation}</p>
           <p className="section-label">Verfügbare Wörter</p>
           <div className="chip-pool">{chips.map(chip => (<div key={chip.id} className={`word-chip ${chip.used ? "placed" : ""}`} onClick={() => placeChip(chip)}>{chip.word}</div>))}</div>
@@ -1361,15 +1422,16 @@
 
     function TrialListening({ state, dispatch, setFoxMsg, showToast }) {
       const zone = ZONES[state.trialZone - 1];
-      const sentences = zone.dictation.slice(0, 5);
+      const allDictation = zone.dictation;
+      const [roundSentences, setRoundSentences] = useState(() => shuffleArray(allDictation).slice(0, 5));
       const [idx, setIdx] = useState(0);
       const [input, setInput] = useState("");
       const [result, setResult] = useState(null);
       const [done, setDone] = useState(false);
       const [totalScore, setTotalScore] = useState(0);
-      const playSentence = () => speak(sentences[idx], 0.75);
+      const playSentence = () => speak(roundSentences[idx], 0.75);
       const submit = () => {
-        const target = sentences[idx].toLowerCase().replace(/[.,!?]/g, "");
+        const target = roundSentences[idx].toLowerCase().replace(/[.,!?]/g, "");
         const answer = input.toLowerCase().replace(/[.,!?]/g, "");
         const tWords = target.split(/\s+/);
         const aWords = answer.split(/\s+/);
@@ -1379,13 +1441,13 @@
         const xp = Math.round(score / 100 * 15); dispatch({ type: "EARN_XP", amount: xp });
         if (score >= 80) { playTone(800, 100); setFoxMsg("Sehr gut! Du hörst gut zu."); showToast(`+${xp} XP · ${score}%`, "correct"); }
         else { playTone(200, 200); setFoxMsg(`${score}% richtig. Höre nochmal zu.`); showToast(`${score}% · +${xp} XP`, "wrong"); }
-        setTimeout(() => { if (idx < sentences.length - 1) { setIdx(i => i + 1); setInput(""); setResult(null); } else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "listening" }); setDone(true); } }, 2500);
+        setTimeout(() => { if (idx < roundSentences.length - 1) { setIdx(i => i + 1); setInput(""); setResult(null); } else { dispatch({ type: "COMPLETE_TRIAL", zone: state.trialZone, trial: "listening" }); setDone(true); } }, 2500);
       };
-      if (done) return (<div className="trial-container animate-in text-center"><div style={{ fontSize: "3rem" }}>👂</div><h2 style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>Gewölbe erkundet!</h2><p style={{ color: "var(--slate)" }}>Durchschnitt: {Math.round(totalScore / sentences.length)}%</p><button className="btn-gold mt-16" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button></div>);
+      if (done) return (<div className="trial-container animate-in text-center"><div style={{ fontSize: "3rem" }}>👂</div><h2 style={{ fontFamily: "Cinzel, serif", color: "var(--gold)" }}>Gewölbe erkundet!</h2><p style={{ color: "var(--slate)" }}>Durchschnitt: {Math.round(totalScore / roundSentences.length)}%</p><button className="btn-gold mt-16" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button></div>);
       return (
         <div className="trial-container animate-in">
           <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>👂 Hör-Gewölbe</h2></div>
-          <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / sentences.length) * 100}%` }}/></div>
+          <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / roundSentences.length) * 100}%` }}/></div>
           <div className="text-center mb-16"><button className="btn-gold" onClick={playSentence}>🔊 Anhören</button><p style={{ color: "var(--slate)", fontSize: "0.8rem", marginTop: "8px" }}>Klicke mehrmals zum Anhören</p></div>
           <p className="section-label">Was hörst du?</p>
           <textarea className="listen-textarea" value={input} onChange={e => setInput(e.target.value)} placeholder="Schreibe den deutschen Satz..." disabled={result !== null}/>
@@ -1466,36 +1528,13 @@
 
       return (
         <div className="trial-container animate-in">
-          <div className="trial-header">
-            <button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button>
-            <h2>🗣️ Sprech‑Halle</h2>
-          </div>
+          <div className="trial-header"><button className="back-btn" onClick={() => dispatch({ type: "GOTO", screen: "zone" })}>← Zone</button><h2>🗣️ Sprech‑Halle</h2></div>
           <div className="progress-bar"><div className="progress-fill" style={{ width: `${(idx / prompts.length) * 100}%` }}/></div>
           <div className="prompt-box">{prompts[idx]}</div>
-          <div className="flex-center">
-            <button
-              className={`record-btn ${recording ? "recording" : ""}`}
-              onClick={recording ? stopRec : startRec}
-            >{recording ? "⏹" : "🎙"}</button>
-          </div>
-          <p style={{ color: "var(--slate)", textAlign: "center", fontSize: "0.8rem", marginBottom: "16px" }}>
-            {recording ? "Aufnahme läuft..." : "Drücke zum Aufnehmen"}
-          </p>
-          {audioUrl && (
-            <div style={{ marginBottom: "16px" }}>
-              <audio key={audioUrl} src={audioUrl} controls style={{ width: "100%", marginBottom: "8px" }} />
-              <button className="btn-ghost" style={{ display: "block", margin: "0 auto" }}
-                onClick={() => speak(zone.sentences[0]?.parts.join(" ") || zone.dictation[0], 0.75)}>
-                🔊 Modelllösung anhören
-              </button>
-            </div>
-          )}
-          {!rated && (
-            <div className="self-rate">
-              <button className="rate-btn rate-needs" onClick={() => rate(false)}>Brauche Übung (+10 XP)</button>
-              <button className="rate-btn rate-good" onClick={() => rate(true)}>Gut genug! (+20 XP)</button>
-            </div>
-          )}
+          <div className="flex-center"><button className={`record-btn ${recording ? "recording" : ""}`} onClick={recording ? stopRec : startRec}>{recording ? "⏹" : "🎙"}</button></div>
+          <p style={{ color: "var(--slate)", textAlign: "center", fontSize: "0.8rem", marginBottom: "16px" }}>{recording ? "Aufnahme läuft..." : "Drücke zum Aufnehmen"}</p>
+          {audioUrl && (<div style={{ marginBottom: "16px" }}><audio key={audioUrl} src={audioUrl} controls style={{ width: "100%", marginBottom: "8px" }}/><button className="btn-ghost" style={{ display: "block", margin: "0 auto" }} onClick={() => speak(zone.sentences[0]?.parts.join(" ") || zone.dictation[0], 0.75)}>🔊 Modelllösung anhören</button></div>)}
+          {!rated && (<div className="self-rate"><button className="rate-btn rate-needs" onClick={() => rate(false)}>Brauche Übung (+10 XP)</button><button className="rate-btn rate-good" onClick={() => rate(true)}>Gut genug! (+20 XP)</button></div>)}
         </div>
       );
     }
@@ -1509,18 +1548,46 @@
       const [score, setScore] = useState(0);
       const [done, setDone] = useState(false);
       const timerRef = useRef(null);
-      useEffect(() => {
-        timerRef.current = setInterval(() => { setTimer(t => { if (t <= 1) { handleSelect(-1); return 45; } return t - 1; }); }, 1000);
-        return () => clearInterval(timerRef.current);
-      }, [idx]);
+      const handleSelectRef = useRef(null);
+
+      const advance = () => {
+        if (idx < questions.length - 1) {
+          setIdx(i => i + 1);
+          setSelected(null);
+          setTimer(45);
+        } else {
+          setDone(true);
+        }
+      };
+
       const handleSelect = (optIdx) => {
         if (selected !== null) return;
         clearInterval(timerRef.current);
-        const q = questions[idx]; const correct = optIdx === q.correct; setSelected(optIdx);
+        const q = questions[idx];
+        const correct = optIdx === q.correct;
+        setSelected(optIdx);
         if (correct) { setScore(s => s + 1); playTone(880, 100); showToast("Richtig! +1", "correct"); }
         else { playTone(120, 250, "sawtooth"); showToast(`Falsch. Richtig: ${q.opts[q.correct]}`, "wrong"); }
-        setTimeout(() => { if (idx < questions.length - 1) { setIdx(i => i + 1); setSelected(null); setTimer(45); } else setDone(true); }, 1600);
+        setTimeout(advance, 1600);
       };
+
+      useEffect(() => {
+        handleSelectRef.current = handleSelect;
+      }, [idx, selected]);
+
+      useEffect(() => {
+        timerRef.current = setInterval(() => {
+          setTimer(t => {
+            if (t <= 1) {
+              if (handleSelectRef.current) handleSelectRef.current(-1);
+              return 45;
+            }
+            return t - 1;
+          });
+        }, 1000);
+        return () => clearInterval(timerRef.current);
+      }, [idx]);
+
       useEffect(() => {
         if (done) {
           const passed = score / questions.length >= 0.8;
@@ -1528,6 +1595,7 @@
           else { dispatch({ type: "EARN_GOLD", amount: -40 }); setFoxMsg("Der Nebel bleibt... Versuche es erneut."); }
         }
       }, [done]);
+
       if (done) {
         const pct = Math.round(score / questions.length * 100); const passed = pct >= 80;
         return (<div className="boss-screen animate-in text-center"><div style={{ fontSize: "3rem", marginBottom: "16px" }}>{passed ? "🏆" : "💀"}</div><h1 className="boss-title">{passed ? "Sieg!" : "Der Nebel bleibt..."}</h1><div className="score-display"><div className="score-num">{pct}%</div><div className="score-label">{score} / {questions.length} richtig</div><p style={{ color: "var(--slate)", marginTop: "12px" }}>{passed ? `+200 XP · +150 Gold · Zone ${state.trialZone + 1} freigeschaltet!` : "−40 Gold · Versuche es erneut."}</p></div><button className="btn-gold" onClick={() => dispatch({ type: "GOTO", screen: passed ? "map" : "zone" })}>{passed ? "→ Karte" : "↺ Nochmal"}</button></div>);
@@ -1632,7 +1700,6 @@
             <button
               onClick={() => {
                 setStarted(true);
-                // Force audio permission
                 const utt = new SpeechSynthesisUtterance(" ");
                 utt.volume = 0;
                 window.speechSynthesis.speak(utt);
