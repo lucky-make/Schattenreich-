@@ -1,0 +1,2390 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Schattenreich: Der Nigerianische Weg</title>
+<style>
+:root {
+  --bg-deep: #0a0020;
+  --bg-mid: #1a0a3e;
+  --bg-card: #12002e;
+  --text-cream: #F5E6D3;
+  --text-muted: #a89880;
+  --gold: #FFD700;
+  --gold-dim: #b8960a;
+  --correct: #4CAF50;
+  --wrong: #8B0000;
+  --wrong-bright: #cc2222;
+  --blue: #00BFFF;
+  --blue-dim: #006080;
+  --border: rgba(255,215,0,0.2);
+  --border-bright: rgba(255,215,0,0.6);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg-deep);
+  color: var(--text-cream);
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow: hidden;
+}
+#root { width: 100%; height: 100%; }
+
+/* SCREEN SYSTEM */
+.screen {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.screen-content {
+  flex: 1; overflow-y: auto;
+  padding: 16px;
+  padding-bottom: 80px;
+  -webkit-overflow-scrolling: touch;
+}
+.hidden { display: none !important; }
+
+/* HUD */
+.hud {
+  background: rgba(10,0,32,0.95);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex; align-items: center; gap: 12px;
+  flex-shrink: 0;
+  backdrop-filter: blur(10px);
+}
+.hud-stat {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 13px; font-weight: 600;
+}
+.hud-stat .icon { font-size: 16px; }
+.hud-gold { color: var(--gold); }
+.hud-xp { color: var(--blue); }
+.hud-streak { color: #ff6b35; }
+.xp-bar-wrap {
+  flex: 1; height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 3px; overflow: hidden;
+}
+.xp-bar {
+  height: 100%; background: linear-gradient(90deg, var(--blue-dim), var(--blue));
+  border-radius: 3px; transition: width 0.5s ease;
+}
+.back-btn {
+  background: none; border: none; color: var(--gold);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  flex-shrink: 0;
+}
+
+/* CARDS */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.card-gold {
+  border-color: var(--border-bright);
+  background: linear-gradient(135deg, #0d0025, #1a0a3e);
+}
+
+/* BUTTONS */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: #000; font-weight: 700; font-size: 15px;
+  border: none; border-radius: 10px;
+  padding: 12px 20px; cursor: pointer;
+  width: 100%; margin-bottom: 10px;
+  transition: transform 0.1s, opacity 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: scale(0.97); }
+.btn-secondary {
+  background: linear-gradient(135deg, #1a0a3e, #2a1a5e);
+  color: var(--text-cream);
+  border: 1px solid var(--border-bright);
+}
+.btn-correct {
+  background: linear-gradient(135deg, #1a4a1a, var(--correct));
+  color: #fff;
+}
+.btn-wrong {
+  background: linear-gradient(135deg, #4a1a1a, var(--wrong-bright));
+  color: #fff;
+}
+.btn-blue {
+  background: linear-gradient(135deg, var(--blue-dim), var(--blue));
+  color: #000;
+}
+.btn-sm {
+  width: auto; padding: 8px 14px;
+  font-size: 13px; margin-bottom: 0;
+}
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* TYPOGRAPHY */
+h1 { font-size: 28px; font-weight: 800; color: var(--gold); margin-bottom: 8px; }
+h2 { font-size: 20px; font-weight: 700; color: var(--gold); margin-bottom: 8px; }
+h3 { font-size: 16px; font-weight: 700; color: var(--text-cream); margin-bottom: 6px; }
+p { font-size: 14px; line-height: 1.6; color: var(--text-muted); margin-bottom: 8px; }
+.german-text {
+  font-family: Georgia, serif;
+  font-size: 18px; font-weight: 600;
+  color: var(--text-cream);
+  line-height: 1.5;
+}
+.english-text {
+  font-size: 14px; color: var(--text-muted); font-style: italic;
+}
+.gold-text { color: var(--gold); }
+.blue-text { color: var(--blue); }
+.correct-text { color: var(--correct); }
+.wrong-text { color: var(--wrong-bright); }
+
+/* BERTRAM */
+.bertram-wrap {
+  display: flex; gap: 12px; align-items: flex-start;
+  margin-bottom: 16px;
+}
+.bertram-fox {
+  font-size: 40px; flex-shrink: 0;
+  animation: foxFloat 3s ease-in-out infinite;
+}
+@keyframes foxFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.bertram-bubble {
+  background: linear-gradient(135deg, #0d0025, #1a0a3e);
+  border: 1px solid var(--gold);
+  border-radius: 12px 12px 12px 4px;
+  padding: 12px 14px;
+  flex: 1;
+  font-size: 14px; line-height: 1.6;
+  color: var(--text-cream);
+  font-style: italic;
+}
+
+/* WORLD MAP */
+.world-map {
+  background: linear-gradient(180deg, #0a0020 0%, #0a1a20 50%, #001a0a 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative; overflow: hidden;
+  min-height: 200px;
+}
+.map-path {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  justify-content: center;
+}
+.zone-node {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700;
+  cursor: pointer; transition: transform 0.2s;
+  border: 2px solid transparent;
+  position: relative;
+  -webkit-tap-highlight-color: transparent;
+}
+.zone-node:active { transform: scale(0.9); }
+.zone-locked {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.2);
+  cursor: not-allowed;
+}
+.zone-unlocked {
+  background: linear-gradient(135deg, #1a0a3e, #2a1a5e);
+  border-color: var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+  animation: zonePulse 2s ease-in-out infinite;
+}
+@keyframes zonePulse {
+  0%,100% { box-shadow: 0 0 10px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 20px rgba(255,215,0,0.6); }
+}
+.zone-completed {
+  background: linear-gradient(135deg, #0a2a0a, #1a4a1a);
+  border-color: var(--correct);
+  color: var(--correct);
+}
+.zone-boss {
+  background: linear-gradient(135deg, #2a0a0a, #4a1a1a);
+  border-color: var(--wrong-bright);
+  color: var(--wrong-bright);
+}
+.zone-level-badge {
+  font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px;
+  margin-bottom: 8px; display: inline-block;
+}
+.badge-a1 { background: rgba(255,215,0,0.2); color: var(--gold); }
+.badge-a2 { background: rgba(0,191,255,0.2); color: var(--blue); }
+.badge-b1 { background: rgba(76,175,80,0.2); color: var(--correct); }
+
+/* TRIAL CARDS */
+.trial-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 10px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  display: flex; align-items: center; gap: 12px;
+}
+.trial-card:active { border-color: var(--gold); }
+.trial-card.trial-done { border-color: var(--correct); }
+.trial-card.trial-active { border-color: var(--gold); background: linear-gradient(135deg, #0d0025, #1a0a3e); }
+.trial-num {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: rgba(255,215,0,0.1);
+  border: 1px solid var(--border-bright);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 700; color: var(--gold);
+  flex-shrink: 0;
+}
+.trial-num.done { background: rgba(76,175,80,0.2); border-color: var(--correct); color: var(--correct); }
+
+/* QUIZ */
+.quiz-question {
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.quiz-progress {
+  display: flex; gap: 6px; margin-bottom: 16px;
+}
+.quiz-dot {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: rgba(255,255,255,0.1);
+}
+.quiz-dot.done { background: var(--correct); }
+.quiz-dot.current { background: var(--gold); }
+.option-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  width: 100%; margin-bottom: 8px;
+  color: var(--text-cream);
+  font-size: 14px; cursor: pointer;
+  text-align: left; transition: border-color 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  font-family: inherit;
+}
+.option-btn:active { border-color: var(--gold); }
+.option-btn.correct { border-color: var(--correct); background: rgba(76,175,80,0.1); color: var(--correct); }
+.option-btn.wrong { border-color: var(--wrong-bright); background: rgba(139,0,0,0.2); color: var(--wrong-bright); }
+.option-btn:disabled { cursor: default; }
+
+/* WORD TILES */
+.word-tiles {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px;
+}
+.word-tile {
+  background: linear-gradient(135deg, #1a0a3e, #2a1a5e);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-family: Georgia, serif;
+  font-size: 15px; color: var(--text-cream);
+  cursor: pointer; user-select: none;
+  transition: transform 0.1s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.word-tile:active { transform: scale(0.95); }
+.word-tile.used { opacity: 0.3; cursor: not-allowed; }
+.answer-slots {
+  min-height: 50px;
+  border: 1px dashed var(--border-bright);
+  border-radius: 10px;
+  padding: 10px;
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 16px;
+  background: rgba(255,215,0,0.02);
+}
+.answer-slot-word {
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: #000; border-radius: 6px;
+  padding: 6px 10px;
+  font-family: Georgia, serif;
+  font-size: 15px; font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* LISTENING */
+.waveform {
+  display: flex; align-items: center; justify-content: center;
+  gap: 3px; height: 40px; margin: 12px 0;
+}
+.wave-bar {
+  width: 4px; border-radius: 2px;
+  background: var(--blue);
+  animation: waveAnim 0.8s ease-in-out infinite;
+}
+.wave-bar:nth-child(2) { animation-delay: 0.1s; }
+.wave-bar:nth-child(3) { animation-delay: 0.2s; }
+.wave-bar:nth-child(4) { animation-delay: 0.3s; }
+.wave-bar:nth-child(5) { animation-delay: 0.4s; }
+.wave-bar:nth-child(6) { animation-delay: 0.3s; }
+.wave-bar:nth-child(7) { animation-delay: 0.2s; }
+.wave-bar:nth-child(8) { animation-delay: 0.1s; }
+@keyframes waveAnim {
+  0%,100% { height: 8px; }
+  50% { height: 32px; }
+}
+.waveform.idle .wave-bar { height: 4px; animation: none; }
+
+/* HACK JOURNAL */
+.hack-card {
+  background: linear-gradient(135deg, #0d0025, #1a0a3e);
+  border: 1px solid var(--gold);
+  border-radius: 10px; padding: 14px;
+  margin-bottom: 10px;
+}
+.hack-title {
+  font-size: 14px; font-weight: 700; color: var(--gold);
+  margin-bottom: 6px;
+}
+.hack-body {
+  font-size: 13px; color: var(--text-cream); line-height: 1.6;
+}
+.hack-example {
+  font-family: Georgia, serif;
+  font-size: 14px; color: var(--blue);
+  margin-top: 6px;
+}
+
+/* BOSS BATTLE */
+.boss-wrap {
+  text-align: center;
+  padding: 20px 0;
+}
+.boss-health {
+  display: flex; gap: 12px; margin-bottom: 20px;
+}
+.health-bar-wrap {
+  flex: 1;
+}
+.health-bar-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+.health-bar {
+  height: 10px; border-radius: 5px;
+  background: rgba(255,255,255,0.1); overflow: hidden;
+}
+.health-fill {
+  height: 100%; border-radius: 5px;
+  transition: width 0.5s ease;
+}
+.health-player { background: linear-gradient(90deg, var(--correct), #8BC34A); }
+.health-boss { background: linear-gradient(90deg, var(--wrong-bright), #ff4444); }
+.timer-circle {
+  width: 60px; height: 60px; border-radius: 50%;
+  border: 3px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; color: var(--gold);
+  margin: 0 auto 16px;
+}
+.timer-circle.urgent { border-color: var(--wrong-bright); color: var(--wrong-bright); animation: pulse 0.5s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+/* REWARD FLASH */
+.reward-flash {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  background: rgba(255,215,0,0.95);
+  color: #000; border-radius: 20px;
+  padding: 20px 32px;
+  font-size: 28px; font-weight: 800;
+  z-index: 1000; pointer-events: none;
+  transition: transform 0.2s, opacity 0.3s;
+}
+.reward-flash.show { transform: translate(-50%, -50%) scale(1); }
+.reward-flash.hide { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+
+/* DOPAMINE SUMMARY */
+.summary-stat {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 15px;
+}
+.summary-val { font-weight: 800; font-size: 22px; color: var(--gold); }
+
+/* SCROLL HELPERS */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,215,0,0.3); border-radius: 2px; }
+
+/* INPUT */
+.text-input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-bright);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: var(--text-cream);
+  font-size: 15px; font-family: Georgia, serif;
+  margin-bottom: 12px;
+  outline: none;
+}
+.text-input:focus { border-color: var(--gold); }
+
+/* DIFF DISPLAY */
+.diff-wrap { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+.diff-word { font-size: 15px; font-family: Georgia, serif; }
+.diff-ok { color: var(--correct); }
+.diff-bad { color: var(--wrong-bright); text-decoration: underline; }
+.diff-miss { color: var(--text-muted); font-style: italic; }
+
+/* START SCREEN */
+.start-bg {
+  background: radial-gradient(ellipse at center, #1a0a3e 0%, #0a0020 70%);
+  min-height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 32px 20px; text-align: center;
+}
+.start-title {
+  font-family: Georgia, serif;
+  font-size: 32px; font-weight: 800;
+  color: var(--gold);
+  margin-bottom: 4px;
+  text-shadow: 0 0 40px rgba(255,215,0,0.5);
+}
+.start-sub {
+  font-size: 14px; color: var(--text-muted);
+  margin-bottom: 32px;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+.start-fox { font-size: 80px; margin-bottom: 16px; animation: foxFloat 3s ease-in-out infinite; }
+
+/* REPLACE METHOD */
+.sentence-template { 
+  font-family: Georgia, serif; font-size: 17px;
+  line-height: 1.8; color: var(--text-cream);
+}
+.slot-word {
+  display: inline-block;
+  background: rgba(255,215,0,0.15);
+  border: 1px solid var(--gold);
+  border-radius: 6px; padding: 2px 8px;
+  color: var(--gold); cursor: pointer;
+  margin: 2px; font-weight: 700;
+  transition: background 0.2s;
+}
+.slot-word:active { background: rgba(255,215,0,0.3); }
+.slot-options {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 10px 0; padding: 10px;
+  background: rgba(0,0,0,0.3); border-radius: 8px;
+}
+.slot-option {
+  background: rgba(255,215,0,0.1);
+  border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 12px;
+  color: var(--text-cream); cursor: pointer;
+  font-family: Georgia, serif; font-size: 14px;
+  -webkit-tap-highlight-color: transparent;
+}
+.slot-option:active { background: rgba(255,215,0,0.25); border-color: var(--gold); }
+.slot-option.selected { border-color: var(--gold); color: var(--gold); }
+
+/* NOTIFICATION */
+.notif {
+  position: fixed; top: 80px; left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--bg-mid);
+  border: 1px solid var(--gold);
+  border-radius: 10px; padding: 10px 20px;
+  font-size: 14px; color: var(--text-cream);
+  z-index: 999; opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  text-align: center; max-width: 280px;
+  pointer-events: none;
+}
+.notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<div id="reward-flash" class="reward-flash">+XP! 🌟</div>
+<div id="notif" class="notif"></div>
+
+<script>
+// ============================================================
+// GAME DATA
+// ============================================================
+
+const ZONES = [
+  // ---- A1 ZONES 1-16 ----
+  {
+    id:1, level:"A1", name:"Das Stille Tor von Lagos", parallel:"First Steps in German",
+    grammar:"Verb second position, W-questions, nicht, sein/haben",
+    hackIds:[0,1],
+    sentences:[
+      {de:"Ich heiße Dike und ich komme aus Nigeria.", en:"My name is Dike and I come from Nigeria.", slots:[{word:"Dike",opts:["Max","Anna","Emre"]},{word:"Nigeria",opts:["Deutschland","Ghana","England"]}]},
+      {de:"Wie heißen Sie? Ich bin Lehrerin.", en:"What is your name? I am a teacher.", slots:[{word:"Lehrerin",opts:["Student","Arzt","Ingenieur"]}]},
+      {de:"Haben Sie einen Ausweis?", en:"Do you have an ID?", slots:[{word:"Ausweis",opts:["Pass","Führerschein","Visum"]}]},
+      {de:"Ich bin nicht müde, ich bin hungrig.", en:"I am not tired, I am hungry.", slots:[{word:"müde",opts:["krank","glücklich","traurig"]},{word:"hungrig",opts:["durstig","wach","fertig"]}]},
+      {de:"Wo wohnen Sie? Ich wohne in Berlin.", en:"Where do you live? I live in Berlin.", slots:[{word:"Berlin",opts:["Mannheim","Hamburg","München"]}]},
+      {de:"Was machen Sie beruflich?", en:"What do you do for work?", slots:[{word:"beruflich",opts:["heute","hier","jetzt"]}]},
+      {de:"Er hat eine Frage. Sie hat keine Zeit.", en:"He has a question. She has no time.", slots:[{word:"Frage",opts:["Antwort","Idee","Lösung"]},{word:"Zeit",opts:["Geld","Arbeit","Plan"]}]},
+      {de:"Wie viel kostet das? Es kostet fünf Euro.", en:"How much does that cost? It costs five euros.", slots:[{word:"fünf",opts:["drei","zehn","zwanzig"]}]},
+      {de:"Sprechen Sie Deutsch? Ja, ein bisschen.", en:"Do you speak German? Yes, a little.", slots:[{word:"Deutsch",opts:["Englisch","Französisch","Spanisch"]}]},
+      {de:"Das ist nicht richtig. Das ist falsch.", en:"That is not right. That is wrong.", slots:[{word:"richtig",opts:["gut","schön","einfach"]},{word:"falsch",opts:["schwierig","teuer","langsam"]}]},
+      {de:"Ich heiße nicht Max. Ich heiße Dike.", en:"My name is not Max. My name is Dike.", slots:[{word:"Max",opts:["Thomas","Jan","Felix"]}]},
+      {de:"Woher kommen Sie? Ich komme aus Lagos.", en:"Where are you from? I come from Lagos.", slots:[{word:"Lagos",opts:["Abuja","Accra","Nairobi"]}]},
+      {de:"Wer ist das? Das ist mein Freund.", en:"Who is that? That is my friend.", slots:[{word:"Freund",opts:["Bruder","Chef","Kollege"]}]},
+      {de:"Wann beginnt die Arbeit? Um acht Uhr.", en:"When does work start? At eight o'clock.", slots:[{word:"Arbeit",opts:["Schule","Ausbildung","Kurs"]}]},
+      {de:"Ich bin zwanzig Jahre alt.", en:"I am twenty years old.", slots:[{word:"zwanzig",opts:["achtzehn","einundzwanzig","fünfundzwanzig"]}]},
+      {de:"Er ist kein Arzt. Er ist Ingenieur.", en:"He is not a doctor. He is an engineer.", slots:[{word:"Arzt",opts:["Lehrer","Chef","Freund"]},{word:"Ingenieur",opts:["Student","Programmierer","Techniker"]}]},
+      {de:"Haben wir morgen Schule?", en:"Do we have school tomorrow?", slots:[{word:"morgen",opts:["heute","übermorgen","nächste Woche"]}]},
+      {de:"Was ist das? Das ist ein Computer.", en:"What is that? That is a computer.", slots:[{word:"Computer",opts:["Handy","Buch","Tisch"]}]},
+      {de:"Ich verstehe das nicht. Können Sie das wiederholen?", en:"I don't understand that. Can you repeat that?", slots:[{word:"wiederholen",opts:["erklären","übersetzen","sagen"]}]},
+      {de:"Wie geht es Ihnen? Danke, gut.", en:"How are you? Thanks, good.", slots:[{word:"gut",opts:["sehr gut","so lala","nicht so gut"]}]}
+    ],
+    bossQuestions:[
+      {q:"Translate: 'What is your name?'",opts:["Wie heißen Sie?","Wo wohnen Sie?","Was machen Sie?"],a:0},
+      {q:"Fill in: 'Ich ___ nicht müde.'",opts:["bin","habe","ist"],a:0},
+      {q:"Which is correct?",opts:["Ich komme aus Nigeria.","Ich komme Nigeria.","Ich aus Nigeria komme."],a:0},
+      {q:"'Haben Sie' means:",opts:["Do you have","Are you","Do you know"],a:0},
+      {q:"Correct negation of 'Ich bin müde':",opts:["Ich bin nicht müde.","Ich nicht bin müde.","Ich bin kein müde."],a:0},
+      {q:"'Woher kommen Sie?' asks about:",opts:["Origin","Location","Time"],a:0},
+      {q:"'Er hat keine Zeit' means:",opts:["He has no time","He is not on time","He has time"],a:0},
+      {q:"Verb position: Statement starts with 'Morgen':",opts:["Morgen arbeite ich.","Morgen ich arbeite.","Morgen ich arbeite."],a:0},
+      {q:"'Wie viel kostet das?' asks about:",opts:["Price","Time","Name"],a:0},
+      {q:"'Ja, ein bisschen' means:",opts:["Yes, a little","Yes, a lot","Yes, please"],a:0}
+    ]
+  },
+  {
+    id:2, level:"A1", name:"Der Familienwald", parallel:"Family & Connections",
+    grammar:"Noun genders der/die/das, possessive mein/dein",
+    hackIds:[2,3],
+    sentences:[
+      {de:"Mein Vater ist groß und meine Mutter ist klein.", en:"My father is tall and my mother is short.", slots:[{word:"groß",opts:["jung","alt","stark"]},{word:"klein",opts:["jung","alt","schwach"]}]},
+      {de:"Das ist meine Schwester. Sie ist siebzehn Jahre alt.", en:"That is my sister. She is seventeen years old.", slots:[{word:"Schwester",opts:["Bruder","Cousine","Tante"]}]},
+      {de:"Mein Bruder wohnt in Köln.", en:"My brother lives in Cologne.", slots:[{word:"Bruder",opts:["Onkel","Vater","Großvater"]}]},
+      {de:"Dein Hund ist sehr süß.", en:"Your dog is very cute.", slots:[{word:"Hund",opts:["Katze","Kind","Baby"]}]},
+      {de:"Meine Familie ist groß. Wir haben fünf Kinder.", en:"My family is big. We have five children.", slots:[{word:"groß",opts:["klein","schön","interessant"]},{word:"fünf",opts:["drei","sechs","zwei"]}]},
+      {de:"Das Kind ist jung, aber der Mann ist alt.", en:"The child is young, but the man is old.", slots:[{word:"jung",opts:["klein","neu","gut"]},{word:"alt",opts:["groß","stark","müde"]}]},
+      {de:"Ist das deine Mutter? Nein, das ist meine Tante.", en:"Is that your mother? No, that is my aunt.", slots:[{word:"Tante",opts:["Cousine","Schwägerin","Nachbarin"]}]},
+      {de:"Mein Großvater lebt nicht mehr. Er war sehr nett.", en:"My grandfather is no longer alive. He was very nice.", slots:[{word:"nett",opts:["stark","klug","lustig"]}]},
+      {de:"Die Familie ist wichtig für mich.", en:"Family is important to me.", slots:[{word:"wichtig",opts:["groß","schön","neu"]}]},
+      {de:"Mein Onkel hat eine rote Jacke.", en:"My uncle has a red jacket.", slots:[{word:"rote",opts:["blaue","schwarze","weiße"]},{word:"Jacke",opts:["Hose","Tasche","Uhr"]}]},
+      {de:"Wie alt ist dein Bruder?", en:"How old is your brother?", slots:[{word:"Bruder",opts:["Vater","Onkel","Sohn"]}]},
+      {de:"Meine Großmutter kocht sehr gut.", en:"My grandmother cooks very well.", slots:[{word:"kocht",opts:["singt","lacht","arbeitet"]}]},
+      {de:"Hast du Geschwister? Ja, ich habe zwei Schwestern.", en:"Do you have siblings? Yes, I have two sisters.", slots:[{word:"zwei",opts:["drei","vier","eine"]}]},
+      {de:"Mein Vater arbeitet als Ingenieur.", en:"My father works as an engineer.", slots:[{word:"Ingenieur",opts:["Arzt","Lehrer","Fahrer"]}]},
+      {de:"Das ist mein kleiner Cousin. Er ist süß.", en:"That is my little cousin. He is cute.", slots:[{word:"kleiner",opts:["großer","lustiger","stiller"]}]},
+      {de:"Meine Eltern sind sehr streng.", en:"My parents are very strict.", slots:[{word:"streng",opts:["nett","ruhig","müde"]}]},
+      {de:"Wir essen jeden Sonntag zusammen.", en:"We eat together every Sunday.", slots:[{word:"Sonntag",opts:["Samstag","Freitag","Abend"]}]},
+      {de:"Dein Vater sieht jung aus.", en:"Your father looks young.", slots:[{word:"jung",opts:["müde","stark","nett"]}]},
+      {de:"Ich vermisse meine Familie sehr.", en:"I miss my family very much.", slots:[{word:"Familie",opts:["Freunde","Heimat","Nigeria"]}]},
+      {de:"Meine Mutter schickt mir jeden Monat Geld.", en:"My mother sends me money every month.", slots:[{word:"Monat",opts:["Woche","Jahr","Tag"]}]}
+    ],
+    bossQuestions:[
+      {q:"'der Vater' — gender?",opts:["masculine","feminine","neuter"],a:0},
+      {q:"'meine Mutter' — 'meine' is used because:",opts:["Mutter is feminine","Mutter is plural","Random rule"],a:0},
+      {q:"'die Familie' — gender?",opts:["feminine","masculine","neuter"],a:0},
+      {q:"'das Kind' — gender?",opts:["neuter","masculine","feminine"],a:0},
+      {q:"Correct: 'That is my brother'",opts:["Das ist mein Bruder.","Das ist meine Bruder.","Das ist meinen Bruder."],a:0},
+      {q:"'Hast du Geschwister?' means:",opts:["Do you have siblings?","Do you have sisters?","Are you siblings?"],a:0},
+      {q:"'Dein Hund' — whose dog?",opts:["Your dog","My dog","His dog"],a:0},
+      {q:"Adjective: 'groß' means:",opts:["big/tall","small","old"],a:0},
+      {q:"'Meine Eltern sind...' — 'Eltern' is:",opts:["plural (parents)","singular (parent)","feminine"],a:0},
+      {q:"'Ich vermisse meine Familie' means:",opts:["I miss my family","I visit my family","I love my family"],a:0}
+    ]
+  },
+  {
+    id:3, level:"A1", name:"Das Haus der Tausend Räume", parallel:"Finding Accommodation",
+    grammar:"Present tense regular verbs, stem-changing, separable verbs",
+    hackIds:[4,5],
+    sentences:[
+      {de:"Ich stehe um sechs Uhr auf.", en:"I get up at six o'clock.", slots:[{word:"sechs",opts:["sieben","acht","fünf"]}]},
+      {de:"Das Schlafzimmer ist links, das Badezimmer ist rechts.", en:"The bedroom is on the left, the bathroom is on the right.", slots:[{word:"links",opts:["oben","unten","vorne"]}]},
+      {de:"Ich kaufe jeden Tag im Supermarkt ein.", en:"I go shopping at the supermarket every day.", slots:[{word:"Supermarkt",opts:["Markt","Laden","Geschäft"]}]},
+      {de:"Das Wohnzimmer ist sehr groß.", en:"The living room is very large.", slots:[{word:"groß",opts:["hell","modern","gemütlich"]}]},
+      {de:"Er liest ein Buch im Schlafzimmer.", en:"He reads a book in the bedroom.", slots:[{word:"liest",opts:["schreibt","findet","nimmt"]}]},
+      {de:"Wir wohnen in einer kleinen Wohnung.", en:"We live in a small apartment.", slots:[{word:"kleinen",opts:["großen","neuen","alten"]}]},
+      {de:"Die Küche hat einen Herd und einen Kühlschrank.", en:"The kitchen has a stove and a refrigerator.", slots:[{word:"Herd",opts:["Tisch","Stuhl","Schrank"]}]},
+      {de:"Um wie viel Uhr schlafen Sie?", en:"What time do you go to sleep?", slots:[{word:"schlafen",opts:["aufstehen","essen","ankommen"]}]},
+      {de:"Ich mache das Licht aus.", en:"I turn off the light.", slots:[{word:"Licht",opts:["Fernseher","Radio","Heizung"]}]},
+      {de:"Fährt der Bus um acht Uhr ab?", en:"Does the bus depart at eight o'clock?", slots:[{word:"Bus",opts:["Zug","Tram","Flugzeug"]}]},
+      {de:"Das Zimmer ist sauber und ordentlich.", en:"The room is clean and tidy.", slots:[{word:"sauber",opts:["groß","hell","ruhig"]},{word:"ordentlich",opts:["schön","neu","warm"]}]},
+      {de:"Ich dusche mich jeden Morgen.", en:"I shower every morning.", slots:[{word:"Morgen",opts:["Abend","Tag","Mittag"]}]},
+      {de:"Der Aufzug funktioniert nicht.", en:"The elevator is not working.", slots:[{word:"Aufzug",opts:["Computer","Drucker","Heizung"]}]},
+      {de:"Wie viele Zimmer hat die Wohnung?", en:"How many rooms does the apartment have?", slots:[{word:"Zimmer",opts:["Bäder","Balkone","Etagen"]}]},
+      {de:"Ich räume mein Zimmer auf.", en:"I tidy up my room.", slots:[{word:"Zimmer",opts:["Schreibtisch","Bett","Regal"]}]},
+      {de:"Die Miete kostet achthundert Euro im Monat.", en:"The rent costs eight hundred euros per month.", slots:[{word:"achthundert",opts:["sechshundert","tausend","siebenhundert"]}]},
+      {de:"Er schläft bis elf Uhr.", en:"He sleeps until eleven o'clock.", slots:[{word:"elf",opts:["zehn","neun","zwölf"]}]},
+      {de:"Wo ist der Schlüssel? Er liegt auf dem Tisch.", en:"Where is the key? It is on the table.", slots:[{word:"Tisch",opts:["Stuhl","Regal","Bett"]}]},
+      {de:"Wir sehen abends fern.", en:"We watch TV in the evenings.", slots:[{word:"abends",opts:["morgens","nachmittags","nachts"]}]},
+      {de:"Die Wohnung hat einen schönen Balkon.", en:"The apartment has a nice balcony.", slots:[{word:"schönen",opts:["großen","neuen","kleinen"]}]}
+    ],
+    bossQuestions:[
+      {q:"Separable verb: 'aufstehen' splits as:",opts:["Ich stehe auf.","Ich aufstehe.","Ich stehauf."],a:0},
+      {q:"Stem-changing: 'lesen' → er ___",opts:["liest","lest","lese"],a:0},
+      {q:"'Ich kaufe ein' comes from:",opts:["einkaufen","kaufen","ankaufen"],a:0},
+      {q:"'Das Badezimmer' — gender?",opts:["neuter","feminine","masculine"],a:0},
+      {q:"Correct time expression:",opts:["um sechs Uhr","zu sechs Uhr","bei sechs Uhr"],a:0},
+      {q:"'Ich mache das Licht aus' — verb position:",opts:["Verb 2nd, particle last","All at start","Verb at end"],a:0},
+      {q:"'Die Küche' is:",opts:["kitchen","bedroom","bathroom"],a:0},
+      {q:"Present tense: 'wohnen' → du ___",opts:["wohnst","wohnest","wohnt"],a:0},
+      {q:"'ordentlich' means:",opts:["tidy","loud","expensive"],a:0},
+      {q:"'Um wie viel Uhr?' asks:",opts:["At what time","How often","Where"],a:0}
+    ]
+  },
+  {
+    id:4, level:"A1", name:"Der Kulinarische Markt", parallel:"Nigerian Food vs German Food",
+    grammar:"Accusative case der→den, möchten, negation kein",
+    hackIds:[6,7],
+    sentences:[
+      {de:"Ich möchte einen Kaffee, bitte.", en:"I would like a coffee, please.", slots:[{word:"Kaffee",opts:["Tee","Saft","Wein"]}]},
+      {de:"Ich esse keinen Fisch. Ich esse lieber Huhn.", en:"I don't eat fish. I prefer to eat chicken.", slots:[{word:"Fisch",opts:["Schweinefleisch","Rindfleisch","Schinken"]}]},
+      {de:"Das Brot schmeckt sehr gut hier.", en:"The bread tastes very good here.", slots:[{word:"gut",opts:["süß","salzig","frisch"]}]},
+      {de:"Haben Sie einen Tisch für zwei Personen?", en:"Do you have a table for two people?", slots:[{word:"zwei",opts:["drei","vier","eine"]}]},
+      {de:"Ich hätte gern die Speisekarte.", en:"I would like the menu.", slots:[{word:"Speisekarte",opts:["Rechnung","Empfehlung","Weinkarte"]}]},
+      {de:"Das kostet drei Euro fünfzig.", en:"That costs three euros fifty.", slots:[{word:"drei",opts:["zwei","fünf","sieben"]}]},
+      {de:"Ich trinke keinen Alkohol.", en:"I don't drink alcohol.", slots:[{word:"Alkohol",opts:["Kaffee","Saft","Milch"]}]},
+      {de:"Ist das Essen scharf oder mild?", en:"Is the food spicy or mild?", slots:[{word:"scharf",opts:["süß","sauer","salzig"]}]},
+      {de:"Ich vermisse das nigerianische Essen sehr.", en:"I miss Nigerian food very much.", slots:[{word:"nigerianische",opts:["afrikanische","asiatische","türkische"]}]},
+      {de:"Können Sie bitte ein vegetarisches Gericht empfehlen?", en:"Can you please recommend a vegetarian dish?", slots:[{word:"vegetarisches",opts:["günstiges","großes","warmes"]}]},
+      {de:"Die Portion ist sehr groß.", en:"The portion is very large.", slots:[{word:"groß",opts:["klein","teuer","lecker"]}]},
+      {de:"Ich möchte zahlen, bitte.", en:"I would like to pay, please.", slots:[{word:"zahlen",opts:["bestellen","warten","gehen"]}]},
+      {de:"Das Frühstück ist von sieben bis zehn Uhr.", en:"Breakfast is from seven to ten o'clock.", slots:[{word:"Frühstück",opts:["Mittagessen","Abendessen","Buffet"]}]},
+      {de:"Suya ist mein Lieblingsessen.", en:"Suya is my favorite food.", slots:[{word:"Suya",opts:["Jollof","Egusi","Puff-Puff"]}]},
+      {de:"Das Wasser ist kalt, der Tee ist heiß.", en:"The water is cold, the tea is hot.", slots:[{word:"kalt",opts:["warm","frisch","gut"]}]},
+      {de:"Ich nehme das Mittagsmenü.", en:"I'll take the lunch menu.", slots:[{word:"Mittagsmenü",opts:["Tagesmenü","Abendmenü","Buffet"]}]},
+      {de:"Haben Sie Halal-Essen?", en:"Do you have halal food?", slots:[{word:"Halal",opts:["vegetarisches","veganes","biologisches"]}]},
+      {de:"Die Rechnung, bitte.", en:"The bill, please.", slots:[{word:"Rechnung",opts:["Karte","Speisekarte","Empfehlung"]}]},
+      {de:"Es gibt keinen Zucker mehr.", en:"There is no more sugar.", slots:[{word:"Zucker",opts:["Salz","Pfeffer","Öl"]}]},
+      {de:"Ich esse gern deutsches Brot.", en:"I like to eat German bread.", slots:[{word:"deutsches",opts:["frisches","süßes","dunkles"]}]}
+    ],
+    bossQuestions:[
+      {q:"Accusative: 'der Kaffee' → 'Ich möchte ___'",opts:["einen Kaffee","ein Kaffee","dem Kaffee"],a:0},
+      {q:"'kein' negates:",opts:["nouns","adjectives","verbs"],a:0},
+      {q:"'möchten' expresses:",opts:["desire/would like","ability","obligation"],a:0},
+      {q:"'Ich esse keinen Fisch' — why 'keinen'?",opts:["Fisch is masculine accusative","Fisch is feminine","Random"],a:0},
+      {q:"'Die Rechnung' means:",opts:["The bill","The menu","The receipt"],a:0},
+      {q:"Accusative: 'die Karte' → 'Ich habe ___'",opts:["eine Karte","ein Karte","einen Karte"],a:0},
+      {q:"'Ich hätte gern' is more polite than:",opts:["Ich möchte","Ich will","Ich brauche"],a:0},
+      {q:"'scharf' in food context means:",opts:["spicy","sharp","sour"],a:0},
+      {q:"'Haben Sie Tisch für zwei?' — grammar issue?",opts:["Missing 'einen'","Missing 'dem'","Correct"],a:0},
+      {q:"'Es gibt keinen Zucker' means:",opts:["There is no sugar","There is some sugar","I want sugar"],a:0}
+    ]
+  },
+  {
+    id:5, level:"A1", name:"Die Eisenstadt", parallel:"Lagos Transport vs German Transport",
+    grammar:"Dative case, dative prepositions mit/nach/bei/von/zu/aus",
+    hackIds:[8,9],
+    sentences:[
+      {de:"Ich fahre mit dem Bus zur Arbeit.", en:"I travel to work by bus.", slots:[{word:"Bus",opts:["Zug","Fahrrad","Auto"]}]},
+      {de:"Biegen Sie links ab bei der Ampel.", en:"Turn left at the traffic light.", slots:[{word:"links",opts:["rechts","geradeaus","hier"]}]},
+      {de:"Die U-Bahn fährt nach Mannheim.", en:"The subway goes to Mannheim.", slots:[{word:"Mannheim",opts:["Berlin","Frankfurt","Hamburg"]}]},
+      {de:"Ich komme aus Nigeria.", en:"I come from Nigeria.", slots:[{word:"Nigeria",opts:["Ghana","Kamerun","Senegal"]}]},
+      {de:"Der Bahnhof ist neben dem Supermarkt.", en:"The train station is next to the supermarket.", slots:[{word:"Supermarkt",opts:["Hotel","Krankenhaus","Park"]}]},
+      {de:"Wie weit ist es zum Zentrum?", en:"How far is it to the center?", slots:[{word:"Zentrum",opts:["Bahnhof","Flughafen","Krankenhaus"]}]},
+      {de:"Ich wohne bei meinem Freund.", en:"I live at my friend's place.", slots:[{word:"Freund",opts:["Kollegen","Onkel","Bruder"]}]},
+      {de:"Von hier bis zum Bahnhof sind es fünf Minuten.", en:"From here to the train station is five minutes.", slots:[{word:"fünf",opts:["zehn","drei","zwanzig"]}]},
+      {de:"Ich fahre mit dem Fahrrad zum Einkaufen.", en:"I ride my bike for shopping.", slots:[{word:"Fahrrad",opts:["Roller","Bus","Zug"]}]},
+      {de:"Gehen Sie geradeaus und dann rechts.", en:"Go straight and then right.", slots:[{word:"geradeaus",opts:["links","durch den Park","bis zur Kreuzung"]}]},
+      {de:"Der Zug kommt von Frankfurt.", en:"The train comes from Frankfurt.", slots:[{word:"Frankfurt",opts:["Berlin","München","Köln"]}]},
+      {de:"Ich fahre nach Hause um sechs Uhr.", en:"I go home at six o'clock.", slots:[{word:"sechs",opts:["fünf","sieben","acht"]}]},
+      {de:"Mit wem fahren Sie? Mit meinem Kollegen.", en:"Who are you traveling with? With my colleague.", slots:[{word:"Kollegen",opts:["Freund","Bruder","Chef"]}]},
+      {de:"Die Straßenbahn hält vor dem Rathaus.", en:"The tram stops in front of the town hall.", slots:[{word:"Rathaus",opts:["Bahnhof","Supermarkt","Krankenhaus"]}]},
+      {de:"Ist die nächste Station weit?", en:"Is the next station far?", slots:[{word:"weit",opts:["hier","links","hinter dem Park"]}]},
+      {de:"Ich steige am Hauptbahnhof aus.", en:"I get off at the main train station.", slots:[{word:"Hauptbahnhof",opts:["Flughafen","Busbahnhof","Endstation"]}]},
+      {de:"Wo ist die nächste Bushaltestelle?", en:"Where is the nearest bus stop?", slots:[{word:"Bushaltestelle",opts:["U-Bahn-Station","Haltestelle","Tankstelle"]}]},
+      {de:"Ich fahre mit dem Zug nach Berlin.", en:"I travel to Berlin by train.", slots:[{word:"Berlin",opts:["Köln","Hamburg","München"]}]},
+      {de:"Das Ticket kostet acht Euro fünfzig.", en:"The ticket costs eight euros fifty.", slots:[{word:"acht",opts:["sechs","neun","zehn"]}]},
+      {de:"Entschuldigung, wo ist der Ausgang?", en:"Excuse me, where is the exit?", slots:[{word:"Ausgang",opts:["Eingang","Aufzug","Schalter"]}]}
+    ],
+    bossQuestions:[
+      {q:"'mit dem Bus' — 'mit' takes which case?",opts:["Dative","Accusative","Nominative"],a:0},
+      {q:"'nach' is used for:",opts:["Cities and countries","Buildings","People"],a:0},
+      {q:"'Ich komme aus' means:",opts:["I come from","I go to","I live in"],a:0},
+      {q:"Dative: 'der Bahnhof' → 'bei ___'",opts:["dem Bahnhof","den Bahnhof","der Bahnhof"],a:0},
+      {q:"'von...bis' means:",opts:["from...to","with...and","by...at"],a:0},
+      {q:"'geradeaus' means:",opts:["straight ahead","turn left","turn right"],a:0},
+      {q:"'Ich fahre zu meinem Freund' — 'zu' takes:",opts:["Dative","Accusative","Genitive"],a:0},
+      {q:"'Die U-Bahn' is:",opts:["subway/metro","bus","tram"],a:0},
+      {q:"Dative: 'die Ampel' → 'bei ___'",opts:["der Ampel","die Ampel","den Ampel"],a:0},
+      {q:"'Entschuldigung' is used when:",opts:["Excusing yourself/asking for attention","Saying goodbye","Saying thank you"],a:0}
+    ]
+  },
+  {
+    id:6, level:"A1", name:"Die Kristallschule", parallel:"School & Ausbildung",
+    grammar:"Adjective endings nominative with definite article, modal wollen",
+    hackIds:[10,11],
+    sentences:[
+      {de:"Ich will eine IT-Ausbildung machen.", en:"I want to do an IT apprenticeship.", slots:[{word:"IT-Ausbildung",opts:["Ausbildung zum Koch","kaufmännische Ausbildung","Ausbildung im Krankenhaus"]}]},
+      {de:"Die neue Berufsschule ist sehr modern.", en:"The new vocational school is very modern.", slots:[{word:"neue",opts:["alte","große","kleine"]}]},
+      {de:"Der gute Lehrer erklärt alles auf Deutsch.", en:"The good teacher explains everything in German.", slots:[{word:"gute",opts:["strenge","nette","junge"]}]},
+      {de:"Das schnelle Internet ist sehr wichtig für die Ausbildung.", en:"Fast internet is very important for the apprenticeship.", slots:[{word:"schnelle",opts:["sichere","stabile","gute"]}]},
+      {de:"Wir wollen Deutsch lernen.", en:"We want to learn German.", slots:[{word:"lernen",opts:["sprechen","schreiben","verstehen"]}]},
+      {de:"Die Ausbildung dauert drei Jahre.", en:"The apprenticeship takes three years.", slots:[{word:"drei",opts:["zwei","dreieinhalb","vier"]}]},
+      {de:"Ich will nicht aufgeben.", en:"I don't want to give up.", slots:[{word:"aufgeben",opts:["schlafen","warten","zurückgehen"]}]},
+      {de:"Die praktische Ausbildung ist im Betrieb.", en:"The practical training is at the company.", slots:[{word:"praktische",opts:["theoretische","technische","digitale"]}]},
+      {de:"Der neue Azubi kommt aus Nigeria.", en:"The new apprentice comes from Nigeria.", slots:[{word:"neue",opts:["erste","einzige","junge"]}]},
+      {de:"Was wollen Sie werden? Ich will Fachinformatiker werden.", en:"What do you want to become? I want to become an IT specialist.", slots:[{word:"Fachinformatiker",opts:["Programmierer","Netzwerktechniker","Systemadministrator"]}]},
+      {de:"Das Zeugnis ist sehr wichtig für die Bewerbung.", en:"The certificate is very important for the application.", slots:[{word:"Zeugnis",opts:["Lebenslauf","Anschreiben","Empfehlung"]}]},
+      {de:"Wollen Sie das nochmal wiederholen?", en:"Do you want to repeat that again?", slots:[{word:"wiederholen",opts:["üben","lesen","erklären"]}]},
+      {de:"Die tägliche Übung macht den Meister.", en:"Daily practice makes perfect.", slots:[{word:"tägliche",opts:["regelmäßige","intensive","gute"]}]},
+      {de:"Ich will in Deutschland arbeiten.", en:"I want to work in Germany.", slots:[{word:"Deutschland",opts:["Mannheim","Berlin","Europa"]}]},
+      {de:"Der erste Schultag ist sehr aufregend.", en:"The first day of school is very exciting.", slots:[{word:"erste",opts:["neue","letzte","beste"]}]},
+      {de:"Die Mathematik ist schwierig, aber wichtig.", en:"Math is difficult, but important.", slots:[{word:"schwierig",opts:["langweilig","interessant","nützlich"]}]},
+      {de:"Ich will das System verstehen.", en:"I want to understand the system.", slots:[{word:"System",opts:["Programm","Netzwerk","Gerät"]}]},
+      {de:"Die Klasse hat zwanzig Schüler.", en:"The class has twenty students.", slots:[{word:"zwanzig",opts:["fünfzehn","dreißig","zehn"]}]},
+      {de:"Wir wollen das Beste geben.", en:"We want to give our best.", slots:[{word:"Beste",opts:["Mögliche","Maximum","Richtige"]}]},
+      {de:"Der Ausbilder ist streng, aber fair.", en:"The trainer is strict but fair.", slots:[{word:"streng",opts:["nett","ruhig","kompetent"]},{word:"fair",opts:["freundlich","geduldig","kompetent"]}]}
+    ],
+    bossQuestions:[
+      {q:"'wollen' conjugation: 'er ___'",opts:["will","wollen","willst"],a:0},
+      {q:"Adj ending: 'der ___ Lehrer' (gut)",opts:["gute","guten","gutem"],a:0},
+      {q:"'die ___ Berufsschule' (neu)",opts:["neue","neuer","neuen"],a:0},
+      {q:"'das ___ Internet' (schnell)",opts:["schnelle","schneller","schnellen"],a:0},
+      {q:"'Ich will Fachinformatiker werden' — word order:",opts:["Correct: verb 2nd, infinitive last","Wrong order","'werden' should be first"],a:0},
+      {q:"'Ausbildung' is:",opts:["vocational training","university degree","job interview"],a:0},
+      {q:"'Azubi' is short for:",opts:["Auszubildender (apprentice)","Ausbilder (trainer)","Ausbildungsort"],a:0},
+      {q:"'Die tägliche Übung' — adj ending for feminine nominative with 'die':",opts:["-e","-en","-er"],a:0},
+      {q:"'Ich will nicht aufgeben' — 'aufgeben' means:",opts:["give up","go out","give away"],a:0},
+      {q:"Ausbildung typically lasts:",opts:["2-3.5 years","1 year","4-5 years"],a:0}
+    ]
+  },
+  {
+    id:7, level:"A1", name:"Das Zeitreich", parallel:"Daily Routine in Germany",
+    grammar:"Temporal prepositions am/im, frequency adverbs immer/oft/manchmal/nie",
+    hackIds:[12,13],
+    sentences:[
+      {de:"Am Montag habe ich immer viel Arbeit.", en:"On Monday I always have a lot of work.", slots:[{word:"Montag",opts:["Dienstag","Mittwoch","Donnerstag"]}]},
+      {de:"Im Januar ist es sehr kalt in Deutschland.", en:"In January it is very cold in Germany.", slots:[{word:"Januar",opts:["Februar","Dezember","November"]}]},
+      {de:"Ich lerne manchmal bis Mitternacht.", en:"I sometimes study until midnight.", slots:[{word:"manchmal",opts:["oft","immer","selten"]}]},
+      {de:"Jeden Morgen trinke ich Kaffee.", en:"Every morning I drink coffee.", slots:[{word:"Kaffee",opts:["Tee","Wasser","Saft"]}]},
+      {de:"Im Sommer ist die Ausbildung intensiv.", en:"In summer the apprenticeship is intensive.", slots:[{word:"Sommer",opts:["Winter","Herbst","Frühling"]}]},
+      {de:"Wie oft lernst du Deutsch? Jeden Tag.", en:"How often do you study German? Every day.", slots:[{word:"Jeden Tag",opts:["Zweimal die Woche","Manchmal","Immer"]}]},
+      {de:"Am Wochenende schlafe ich manchmal lange.", en:"On the weekend I sometimes sleep long.", slots:[{word:"manchmal",opts:["immer","oft","nie"]}]},
+      {de:"Ich esse nie Fast Food.", en:"I never eat fast food.", slots:[{word:"Fast Food",opts:["Fleisch","Zucker","Junk Food"]}]},
+      {de:"Die Berufsschule ist am Dienstag und Donnerstag.", en:"Vocational school is on Tuesday and Thursday.", slots:[{word:"Dienstag und Donnerstag",opts:["Montag und Mittwoch","Freitag","Mittwoch und Freitag"]}]},
+      {de:"Im Herbst beginnt das neue Ausbildungsjahr.", en:"In autumn the new training year begins.", slots:[{word:"Herbst",opts:["September","Oktober","Januar"]}]},
+      {de:"Ich stehe immer um sechs Uhr dreißig auf.", en:"I always get up at six thirty.", slots:[{word:"sechs Uhr dreißig",opts:["sieben Uhr","halb sieben","sieben Uhr fünfzehn"]}]},
+      {de:"Am Abend ist es halb acht.", en:"In the evening it is half past seven.", slots:[{word:"halb acht",opts:["sieben Uhr dreißig","Viertel vor acht","acht Uhr"]}]},
+      {de:"Wie spät ist es? Es ist Viertel nach drei.", en:"What time is it? It is quarter past three.", slots:[{word:"Viertel nach drei",opts:["Viertel vor vier","halb vier","drei Uhr fünfzehn"]}]},
+      {de:"Ich lerne oft am Abend.", en:"I often study in the evening.", slots:[{word:"oft",opts:["manchmal","immer","selten"]}]},
+      {de:"Im Winter wird es früh dunkel.", en:"In winter it gets dark early.", slots:[{word:"früh",opts:["sehr","schon um vier","schnell"]}]},
+      {de:"Jeden Freitag gibt es eine Prüfung.", en:"Every Friday there is a test.", slots:[{word:"Freitag",opts:["Montag","Donnerstag","Mittwoch"]}]},
+      {de:"Wir treffen uns am Samstag um zwei Uhr.", en:"We meet on Saturday at two o'clock.", slots:[{word:"Samstag",opts:["Sonntag","Freitag","Dienstag"]}]},
+      {de:"Im Februar gibt es manchmal Schnee.", en:"In February there is sometimes snow.", slots:[{word:"Februar",opts:["Januar","März","Dezember"]}]},
+      {de:"Ich schlafe nie nach Mitternacht.", en:"I never sleep after midnight.", slots:[{word:"nie",opts:["manchmal","selten","immer"]}]},
+      {de:"Die Arbeit beginnt pünktlich um acht Uhr.", en:"Work starts punctually at eight o'clock.", slots:[{word:"acht",opts:["sieben","neun","halb neun"]}]}
+    ],
+    bossQuestions:[
+      {q:"'Am Montag' — 'am' is used for:",opts:["Days of the week","Months","Seasons"],a:0},
+      {q:"'Im Januar' — 'im' is used for:",opts:["Months and seasons","Days","Specific dates"],a:0},
+      {q:"'immer' means:",opts:["always","often","sometimes"],a:0},
+      {q:"'manchmal' means:",opts:["sometimes","never","always"],a:0},
+      {q:"'nie' means:",opts:["never","not","no"],a:0},
+      {q:"'halb acht' means:",opts:["7:30","8:30","8:00"],a:0},
+      {q:"'Viertel nach drei' means:",opts:["3:15","2:45","3:30"],a:0},
+      {q:"'Wie oft' asks about:",opts:["Frequency","Time","Duration"],a:0},
+      {q:"'jeden Tag' means:",opts:["every day","one day","all day"],a:0},
+      {q:"Seasons use 'im': Im Sommer, Im Winter... which is different?",opts:["Am Montag (day)","Im März (month)","Im Herbst (season)"],a:0}
+    ]
+  },
+  {
+    id:8, level:"A1", name:"Der Silberne Marktplatz", parallel:"Shopping in Germany",
+    grammar:"Comparative and superlative, infinitive with zu",
+    hackIds:[14,15],
+    sentences:[
+      {de:"Diese Jacke ist teurer als jene.", en:"This jacket is more expensive than that one.", slots:[{word:"Jacke",opts:["Hose","Schuhe","Hemd"]}]},
+      {de:"Ich versuche, Geld zu sparen.", en:"I try to save money.", slots:[{word:"sparen",opts:["ausgeben","verdienen","tauschen"]}]},
+      {de:"Das ist das günstigste Angebot im Geschäft.", en:"That is the cheapest offer in the store.", slots:[{word:"günstigste",opts:["beste","teuerste","größte"]}]},
+      {de:"Es ist wichtig, den Kassenbon zu behalten.", en:"It is important to keep the receipt.", slots:[{word:"behalten",opts:["lesen","prüfen","zeigen"]}]},
+      {de:"Diese Schuhe sind bequemer als meine alten.", en:"These shoes are more comfortable than my old ones.", slots:[{word:"bequemer",opts:["billiger","schöner","besser"]}]},
+      {de:"Ich habe vor, nächste Woche einzukaufen.", en:"I plan to go shopping next week.", slots:[{word:"einzukaufen",opts:["zu sparen","zu gehen","Kleidung zu kaufen"]}]},
+      {de:"Die Öffnungszeiten sind von neun bis zwanzig Uhr.", en:"The opening hours are from nine to eight pm.", slots:[{word:"neun",opts:["acht","zehn","sieben"]}]},
+      {de:"Dieses Hemd ist am billigsten.", en:"This shirt is the cheapest.", slots:[{word:"Hemd",opts:["Hose","Jacke","Kleid"]}]},
+      {de:"Es ist schön, im Stadtmarkt einzukaufen.", en:"It is nice to shop at the city market.", slots:[{word:"schön",opts:["günstig","einfach","praktisch"]}]},
+      {de:"Ich brauche eine neue Hose für die Arbeit.", en:"I need new pants for work.", slots:[{word:"Hose",opts:["Jacke","Schuhe","Hemd"]}]},
+      {de:"Welche Größe haben Sie?", en:"What size do you wear?", slots:[{word:"Größe",opts:["Nummer","Maß","Farbe"]}]},
+      {de:"Kann ich das anprobieren?", en:"Can I try this on?", slots:[{word:"anprobieren",opts:["kaufen","zurückgeben","wechseln"]}]},
+      {de:"Das ist mir zu groß. Haben Sie eine kleinere Größe?", en:"That is too big for me. Do you have a smaller size?", slots:[{word:"groß",opts:["klein","teuer","eng"]}]},
+      {de:"Ich bezahle mit Karte.", en:"I pay by card.", slots:[{word:"Karte",opts:["Bargeld","EC-Karte","App"]}]},
+      {de:"Der Markt ist am Samstag am günstigsten.", en:"The market is cheapest on Saturday.", slots:[{word:"Samstag",opts:["Mittwoch","Sonntag","Dienstag"]}]},
+      {de:"Es lohnt sich, Preise zu vergleichen.", en:"It is worth it to compare prices.", slots:[{word:"vergleichen",opts:["prüfen","fragen","suchen"]}]},
+      {de:"Welche Farbe gefällt Ihnen besser?", en:"Which color do you like better?", slots:[{word:"besser",opts:["mehr","am meisten","lieber"]}]},
+      {de:"Das ist reduziert. Es kostet jetzt zwanzig Euro.", en:"That is reduced. It now costs twenty euros.", slots:[{word:"zwanzig",opts:["fünfzehn","dreißig","fünfundzwanzig"]}]},
+      {de:"Ich möchte das umtauschen.", en:"I would like to exchange this.", slots:[{word:"umtauschen",opts:["zurückgeben","behalten","kaufen"]}]},
+      {de:"Das rote Hemd gefällt mir am besten.", en:"I like the red shirt the best.", slots:[{word:"rote",opts:["blaue","schwarze","weiße"]}]}
+    ],
+    bossQuestions:[
+      {q:"Comparative of 'günstig':",opts:["günstiger","günstigst","am günstig"],a:0},
+      {q:"Superlative of 'billig':",opts:["am billigsten","billiger","am billig"],a:0},
+      {q:"Infinitive with zu: 'Ich versuche ___ sparen'",opts:["zu","zum","für"],a:0},
+      {q:"'es lohnt sich' means:",opts:["it's worth it","it costs","it helps"],a:0},
+      {q:"'Öffnungszeiten' means:",opts:["opening hours","prices","offers"],a:0},
+      {q:"'teurer als' — 'als' is used for:",opts:["Unequal comparisons","Equal comparisons","Superlatives"],a:0},
+      {q:"'Kann ich das anprobieren?' means:",opts:["Can I try this on?","Can I buy this?","Can I return this?"],a:0},
+      {q:"'am besten' is the superlative of:",opts:["gut","schön","groß"],a:0},
+      {q:"'Ich habe vor, zu...' means:",opts:["I plan to...","I forget to...","I try to..."],a:0},
+      {q:"'Bargeld' means:",opts:["cash","card","account"],a:0}
+    ]
+  },
+  {
+    id:9, level:"A1", name:"Der Nebelmoor", parallel:"Environment & Germany",
+    grammar:"Konjunktiv II würde + infinitive, passive voice Präsens",
+    hackIds:[16,17],
+    sentences:[
+      {de:"Ich würde gern mehr recyceln.", en:"I would like to recycle more.", slots:[{word:"recyceln",opts:["sparen","lernen","helfen"]}]},
+      {de:"Der Müll wird jeden Montag abgeholt.", en:"The garbage is collected every Monday.", slots:[{word:"Montag",opts:["Dienstag","Mittwoch","Freitag"]}]},
+      {de:"Würden Sie mir bitte helfen?", en:"Would you please help me?", slots:[{word:"helfen",opts:["erklären","zeigen","sagen"]}]},
+      {de:"In Deutschland wird Müll streng getrennt.", en:"In Germany garbage is strictly separated.", slots:[{word:"streng",opts:["sorgfältig","täglich","offiziell"]}]},
+      {de:"Ich würde nie Plastik in die Natur werfen.", en:"I would never throw plastic into nature.", slots:[{word:"Plastik",opts:["Müll","Papier","Glas"]}]},
+      {de:"Die Glasflasche wird in den grünen Container geworfen.", en:"The glass bottle is thrown into the green container.", slots:[{word:"grünen",opts:["blauen","gelben","schwarzen"]}]},
+      {de:"Würdest du mir das erklären?", en:"Would you explain that to me?", slots:[{word:"erklären",opts:["zeigen","geben","schicken"]}]},
+      {de:"Papier wird in die blaue Tonne gegeben.", en:"Paper is put in the blue bin.", slots:[{word:"blaue",opts:["grüne","gelbe","schwarze"]}]},
+      {de:"Ich würde gern ein E-Bike kaufen.", en:"I would like to buy an e-bike.", slots:[{word:"E-Bike",opts:["Elektroauto","Solarpanel","Fahrrad"]}]},
+      {de:"In Deutschland wird viel Energie gespart.", en:"In Germany a lot of energy is saved.", slots:[{word:"Energie",opts:["Wasser","Strom","Gas"]}]},
+      {de:"Was würdest du in dieser Situation machen?", en:"What would you do in this situation?", slots:[{word:"Situation",opts:["Lage","Sache","Problem"]}]},
+      {de:"Der gelbe Sack wird einmal pro Woche geleert.", en:"The yellow bag is emptied once per week.", slots:[{word:"einmal",opts:["zweimal","dreimal","täglich"]}]},
+      {de:"Würden Sie langsamer sprechen, bitte?", en:"Would you please speak more slowly?", slots:[{word:"langsamer",opts:["lauter","klarer","einfacher"]}]},
+      {de:"Das Licht wird automatisch ausgeschaltet.", en:"The light is turned off automatically.", slots:[{word:"ausgeschaltet",opts:["eingeschaltet","gedimmt","reguliert"]}]},
+      {de:"Ich würde nie Strom verschwenden.", en:"I would never waste electricity.", slots:[{word:"Strom",opts:["Wasser","Gas","Energie"]}]},
+      {de:"In Deutschland wird das Wasser klar getrennt.", en:"In Germany water is clearly separated.", slots:[{word:"klar",opts:["streng","sorgfältig","täglich"]}]},
+      {de:"Würden Sie das bitte nochmal sagen?", en:"Would you please say that again?", slots:[{word:"sagen",opts:["erklären","wiederholen","buchstabieren"]}]},
+      {de:"Die Wohnung wird regelmäßig gelüftet.", en:"The apartment is regularly aired out.", slots:[{word:"regelmäßig",opts:["täglich","wöchentlich","abends"]}]},
+      {de:"Ich würde gern mehr Deutsch sprechen.", en:"I would like to speak more German.", slots:[{word:"sprechen",opts:["lernen","schreiben","üben"]}]},
+      {de:"In Nigeria wird leider viel Plastik verbrannt.", en:"Unfortunately in Nigeria a lot of plastic is burned.", slots:[{word:"Plastik",opts:["Müll","Papier","Abfall"]}]}
+    ],
+    bossQuestions:[
+      {q:"'würde + infinitive' is used for:",opts:["Hypotheticals/polite requests","Past events","Commands"],a:0},
+      {q:"Passive: 'wird + ___' requires:",opts:["past participle","infinitive","present participle"],a:0},
+      {q:"'Der Müll wird abgeholt' — who does the action?",opts:["Not specified (passive)","I do","He does"],a:0},
+      {q:"'Würden Sie mir helfen?' is:",opts:["Polite request","Command","Question about past"],a:0},
+      {q:"'Mülltrennung' means:",opts:["waste separation","waste collection","recycling center"],a:0},
+      {q:"'der gelbe Sack' is for:",opts:["Packaging/plastic","Paper","Glass"],a:0},
+      {q:"'würde' is conjugated from:",opts:["werden","wollen","wünschen"],a:0},
+      {q:"Passive of 'Man spart Energie':",opts:["Energie wird gespart","Energie spart man","Man wird Energie gespart"],a:0},
+      {q:"'Ich würde nie...' means:",opts:["I would never...","I never...","I don't want to..."],a:0},
+      {q:"Blue bin ('blaue Tonne') in Germany is for:",opts:["Paper","Glass","Organic waste"],a:0}
+    ]
+  },
+  {
+    id:10, level:"A1", name:"Die Traumfabrik", parallel:"Job Applications & CV",
+    grammar:"Konjunktiv II wäre/hätte, reflexive verbs",
+    hackIds:[18,19],
+    sentences:[
+      {de:"Ich bewerbe mich für eine IT-Ausbildung.", en:"I am applying for an IT apprenticeship.", slots:[{word:"IT-Ausbildung",opts:["Stelle als Koch","Position im Büro","Praktikum"]}]},
+      {de:"Hätten Sie Interesse an meiner Bewerbung?", en:"Would you be interested in my application?", slots:[{word:"Bewerbung",opts:["Erfahrung","Qualifikation","Person"]}]},
+      {de:"Ich stelle mich vor: Ich heiße Dike.", en:"I introduce myself: My name is Dike.", slots:[{word:"Dike",opts:["Max","Anna","Jonas"]}]},
+      {de:"Wäre es möglich, ein Praktikum zu machen?", en:"Would it be possible to do an internship?", slots:[{word:"Praktikum",opts:["Gespräch","Treffen","Interview"]}]},
+      {de:"Ich interessiere mich für Informatik.", en:"I am interested in computer science.", slots:[{word:"Informatik",opts:["Netzwerktechnik","Systemintegration","IT-Sicherheit"]}]},
+      {de:"Ich habe mich gut auf das Gespräch vorbereitet.", en:"I have prepared well for the interview.", slots:[{word:"gut",opts:["intensiv","lange","gründlich"]}]},
+      {de:"Das wäre eine tolle Chance für mich.", en:"That would be a great opportunity for me.", slots:[{word:"tolle",opts:["wichtige","große","einmalige"]}]},
+      {de:"Ich freue mich auf eine Antwort.", en:"I look forward to a response.", slots:[{word:"Antwort",opts:["Einladung","Rückmeldung","Nachricht"]}]},
+      {de:"Hätten Sie Zeit für ein kurzes Telefonat?", en:"Would you have time for a brief phone call?", slots:[{word:"kurzes",opts:["persönliches","schnelles","informelles"]}]},
+      {de:"Ich kümmere mich immer um meine Aufgaben.", en:"I always take care of my tasks.", slots:[{word:"Aufgaben",opts:["Pflichten","Verantwortungen","Projekte"]}]},
+      {de:"Was wären Ihre Erwartungen an mich?", en:"What would be your expectations of me?", slots:[{word:"Erwartungen",opts:["Anforderungen","Wünsche","Bedingungen"]}]},
+      {de:"Ich befasse mich täglich mit Computern.", en:"I work with computers daily.", slots:[{word:"täglich",opts:["regelmäßig","oft","immer"]}]},
+      {de:"Das hätte ich besser machen können.", en:"I could have done that better.", slots:[{word:"besser",opts:["anders","früher","effizienter"]}]},
+      {de:"Ich bedanke mich für Ihre Zeit.", en:"I thank you for your time.", slots:[{word:"Zeit",opts:["Antwort","Chance","Möglichkeit"]}]},
+      {de:"Wäre eine Probezeit möglich?", en:"Would a trial period be possible?", slots:[{word:"Probezeit",opts:["Praktikum","Einarbeitung","Testphase"]}]},
+      {de:"Ich setze mich immer voll ein.", en:"I always give my full commitment.", slots:[{word:"voll",opts:["komplett","maximal","total"]}]},
+      {de:"Ich erinnere mich an alles Wichtige.", en:"I remember everything important.", slots:[{word:"Wichtige",opts:["Gelernte","Gehörte","Gesagte"]}]},
+      {de:"Hätten Sie Empfehlungen für mich?", en:"Would you have recommendations for me?", slots:[{word:"Empfehlungen",opts:["Tipps","Hinweise","Ratschläge"]}]},
+      {de:"Ich fühle mich bereit für die Ausbildung.", en:"I feel ready for the apprenticeship.", slots:[{word:"bereit",opts:["motiviert","gut vorbereitet","geeignet"]}]},
+      {de:"Wäre Anfang September ein guter Starttermin?", en:"Would the beginning of September be a good start date?", slots:[{word:"September",opts:["Oktober","Januar","August"]}]}
+    ],
+    bossQuestions:[
+      {q:"'hätte' is the Konjunktiv II of:",opts:["haben","halten","heißen"],a:0},
+      {q:"'wäre' is the Konjunktiv II of:",opts:["sein","werden","wollen"],a:0},
+      {q:"Reflexive verb: 'Ich bewerbe ___'",opts:["mich","mir","sich"],a:0},
+      {q:"'Ich freue mich auf' means:",opts:["I look forward to","I am happy about","I am excited that"],a:0},
+      {q:"'Hätten Sie Zeit?' is more polite than:",opts:["'Haben Sie Zeit?'","'Sie haben Zeit'","'Geben Sie Zeit'"],a:0},
+      {q:"'sich vorstellen' means:",opts:["to introduce oneself","to imagine","to stand up"],a:0},
+      {q:"'Bewerbung' means:",opts:["application","resume","interview"],a:0},
+      {q:"'Ich bedanke mich' means:",opts:["I thank you","I apologize","I congratulate"],a:0},
+      {q:"'Wäre es möglich?' translates as:",opts:["Would it be possible?","Is it possible?","Was it possible?"],a:0},
+      {q:"'sich kümmern um' means:",opts:["to take care of","to ask about","to look for"],a:0}
+    ]
+  },
+  // Zones 11-16 (abbreviated but complete)
+  {
+    id:11, level:"A1", name:"Das Stürmische Meer", parallel:"Travel Nigeria to Germany",
+    grammar:"Plusquamperfekt hatte/war + Partizip II",
+    hackIds:[20,21],
+    sentences:[
+      {de:"Ich hatte meinen Pass schon vorbereitet.", en:"I had already prepared my passport.", slots:[{word:"Pass",opts:["Visum","Ticket","Impfausweis"]}]},
+      {de:"Der Flug war pünktlich angekommen.", en:"The flight had arrived on time.", slots:[{word:"pünktlich",opts:["früh","verspätet","endlich"]}]},
+      {de:"Ich hatte noch nie in einem Flugzeug gesessen.", en:"I had never sat in an airplane before.", slots:[{word:"Flugzeug",opts:["Bus","Zug","Schiff"]}]},
+      {de:"Wir hatten das Gepäck bereits aufgegeben.", en:"We had already checked in the luggage.", slots:[{word:"aufgegeben",opts:["eingecheckt","verstaut","gewogen"]}]},
+      {de:"Das Visum war nach drei Wochen genehmigt worden.", en:"The visa had been approved after three weeks.", slots:[{word:"drei",opts:["vier","sechs","zwei"]}]},
+      {de:"Ich war noch nie in Deutschland gewesen.", en:"I had never been to Germany before.", slots:[{word:"Deutschland",opts:["Europa","Berlin","Frankfurt"]}]},
+      {de:"Sie hatten uns am Flughafen abgeholt.", en:"They had picked us up at the airport.", slots:[{word:"Flughafen",opts:["Bahnhof","Terminal","Zoll"]}]},
+      {de:"Ich hatte alles für die Reise gepackt.", en:"I had packed everything for the trip.", slots:[{word:"Reise",opts:["Ausbildung","Ankunft","Abreise"]}]},
+      {de:"Der Zoll hatte keine Fragen gestellt.", en:"Customs had not asked any questions.", slots:[{word:"Fragen",opts:["Probleme","Schwierigkeiten","Formulare"]}]},
+      {de:"Wir waren erschöpft angekommen.", en:"We had arrived exhausted.", slots:[{word:"erschöpft",opts:["müde","hungrig","nervös"]}]},
+      {de:"Ich hatte nie gedacht, dass Deutschland so kalt ist.", en:"I had never thought that Germany would be so cold.", slots:[{word:"kalt",opts:["groß","anders","schön"]}]},
+      {de:"Das Gepäck war verloren gegangen.", en:"The luggage had gotten lost.", slots:[{word:"verloren gegangen",opts:["beschädigt worden","verspätet angekommen","gefunden worden"]}]},
+      {de:"Ich hatte meinen Koffer gut gepackt.", en:"I had packed my suitcase well.", slots:[{word:"gut",opts:["sorgfältig","schnell","bereits"]}]},
+      {de:"Sie war in Frankfurt gelandet.", en:"She had landed in Frankfurt.", slots:[{word:"Frankfurt",opts:["München","Düsseldorf","Berlin"]}]},
+      {de:"Wir hatten die Einreisekarte ausgefüllt.", en:"We had filled out the entry card.", slots:[{word:"Einreisekarte",opts:["Zollformular","Visa-Dokument","Gesundheitsdokument"]}]},
+      {de:"Er hatte das Hotel bereits gebucht.", en:"He had already booked the hotel.", slots:[{word:"Hotel",opts:["Zimmer","Apartment","Hostel"]}]},
+      {de:"Ich hatte mich auf die Kälte vorbereitet.", en:"I had prepared myself for the cold.", slots:[{word:"Kälte",opts:["Sprache","Kultur","Bürokratie"]}]},
+      {de:"Der Bus war ohne uns abgefahren.", en:"The bus had left without us.", slots:[{word:"Bus",opts:["Zug","Flugzeug","Taxi"]}]},
+      {de:"Ich hatte Deutschland nur aus dem Internet gekannt.", en:"I had only known Germany from the internet.", slots:[{word:"Internet",opts:["Fernsehen","Büchern","Erzählungen"]}]},
+      {de:"Wir waren endlich in Deutschland angekommen.", en:"We had finally arrived in Germany.", slots:[{word:"endlich",opts:["sicher","glücklich","erschöpft"]}]}
+    ],
+    bossQuestions:[
+      {q:"Plusquamperfekt uses 'hatte/war' + ___",opts:["past participle","infinitive","present participle"],a:0},
+      {q:"'Ich hatte gepackt' = I had ___",opts:["packed","was packing","pack"],a:0},
+      {q:"'Ich war angekommen' — why 'war' not 'hatte'?",opts:["Movement/change of state verbs use 'sein'","Random choice","'ankommen' is irregular"],a:0},
+      {q:"'Das Visum war genehmigt worden' — this is:",opts:["Passive Plusquamperfekt","Active Plusquamperfekt","Simple past"],a:0},
+      {q:"'Ich hatte noch nie' means:",opts:["I had never","I have never","I never had"],a:0},
+      {q:"Past participle of 'packen':",opts:["gepackt","packte","gepacken"],a:0},
+      {q:"Past participle of 'ankommen':",opts:["angekommen","ankam","geankommen"],a:0},
+      {q:"'Wir waren erschöpft angekommen' — word order:",opts:["Correct: waren + adjective + participle","Wrong","Needs 'hatten'"],a:0},
+      {q:"'Zoll' at an airport means:",opts:["Customs","Exit","Check-in"],a:0},
+      {q:"Which verb uses 'sein' in perfect tenses?",opts:["gehen (to go)","machen (to do)","kochen (to cook)"],a:0}
+    ]
+  },
+  {
+    id:12, level:"A1", name:"Der Philosophenturm", parallel:"Opinions & Arguments",
+    grammar:"Extended participial phrases, discourse connectors",
+    hackIds:[22,23],
+    sentences:[
+      {de:"Einerseits ist die Ausbildung schwierig, andererseits ist sie sehr wertvoll.", en:"On one hand the apprenticeship is difficult, on the other hand it is very valuable.", slots:[{word:"schwierig",opts:["lang","teuer","intensiv"]},{word:"wertvoll",opts:["praktisch","sinnvoll","wichtig"]}]},
+      {de:"Meiner Meinung nach ist Deutsch lernbar.", en:"In my opinion, German is learnable.", slots:[{word:"lernbar",opts:["schwierig","wichtig","notwendig"]}]},
+      {de:"Ich finde, dass Deutschland sehr organisiert ist.", en:"I think that Germany is very organized.", slots:[{word:"organisiert",opts:["sauber","pünktlich","effizient"]}]},
+      {de:"Einerseits vermisse ich Nigeria, andererseits lerne ich viel.", en:"On one hand I miss Nigeria, on the other hand I learn a lot.", slots:[{word:"Nigeria",opts:["meine Familie","Lagos","mein Land"]}]},
+      {de:"Das stimmt, aber ich sehe das anders.", en:"That's true, but I see it differently.", slots:[{word:"anders",opts:["positiver","nicht so","differenzierter"]}]},
+      {de:"Ich bin der Meinung, dass Vielfalt wichtig ist.", en:"I am of the opinion that diversity is important.", slots:[{word:"Vielfalt",opts:["Integration","Bildung","Zusammenarbeit"]}]},
+      {de:"Einerseits ist das teuer, andererseits ist es die Zukunft.", en:"On one hand it is expensive, on the other hand it is the future.", slots:[{word:"teuer",opts:["schwierig","zeitaufwändig","kompliziert"]}]},
+      {de:"Das finde ich nicht überzeugend.", en:"I don't find that convincing.", slots:[{word:"überzeugend",opts:["richtig","fair","verständlich"]}]},
+      {de:"Ich stimme Ihnen zu, dass das wichtig ist.", en:"I agree with you that this is important.", slots:[{word:"wichtig",opts:["richtig","notwendig","gut"]}]},
+      {de:"Meiner Erfahrung nach ist Geduld der Schlüssel.", en:"In my experience, patience is the key.", slots:[{word:"Geduld",opts:["Arbeit","Ehrlichkeit","Konsistenz"]}]},
+      {de:"Das ist ein interessanter Punkt.", en:"That is an interesting point.", slots:[{word:"interessanter",opts:["wichtiger","guter","neuer"]}]},
+      {de:"Ich verstehe Ihren Standpunkt, aber...", en:"I understand your point of view, but...", slots:[{word:"Standpunkt",opts:["Argument","Meinung","Perspektive"]}]},
+      {de:"Einerseits ist Deutsch schwer, andererseits öffnet es viele Türen.", en:"On one hand German is hard, on the other hand it opens many doors.", slots:[{word:"Türen",opts:["Möglichkeiten","Chancen","Wege"]}]},
+      {de:"Ich bin nicht sicher, ob das richtig ist.", en:"I am not sure if that is right.", slots:[{word:"richtig",opts:["sinnvoll","fair","korrekt"]}]},
+      {de:"Das ist Ihre Meinung, nicht die Realität.", en:"That is your opinion, not reality.", slots:[{word:"Realität",opts:["Wahrheit","Tatsache","Lage"]}]},
+      {de:"Ich sehe das Problem aus einer anderen Perspektive.", en:"I see the problem from a different perspective.", slots:[{word:"anderen",opts:["neuen","positiven","praktischen"]}]},
+      {de:"Man könnte argumentieren, dass...", en:"One could argue that...", slots:[{word:"argumentieren",opts:["sagen","behaupten","denken"]}]},
+      {de:"Das ist schwer zu entscheiden.", en:"That is hard to decide.", slots:[{word:"entscheiden",opts:["sagen","beurteilen","verstehen"]}]},
+      {de:"Einerseits will ich helfen, andererseits habe ich keine Zeit.", en:"On one hand I want to help, on the other hand I have no time.", slots:[{word:"helfen",opts:["kommen","mitmachen","unterstützen"]}]},
+      {de:"Ich finde Ihren Vorschlag sehr gut.", en:"I find your suggestion very good.", slots:[{word:"gut",opts:["interessant","sinnvoll","hilfreich"]}]}
+    ],
+    bossQuestions:[
+      {q:"'einerseits...andererseits' means:",opts:["on one hand...on the other","firstly...secondly","either...or"],a:0},
+      {q:"'Meiner Meinung nach' means:",opts:["In my opinion","According to me","My opinion is"],a:0},
+      {q:"'Ich finde, dass...' introduces:",opts:["an opinion","a question","a command"],a:0},
+      {q:"'Ich stimme zu' means:",opts:["I agree","I understand","I continue"],a:0},
+      {q:"'Das finde ich nicht überzeugend' means:",opts:["I don't find that convincing","I find that not good","I don't think so"],a:0},
+      {q:"'Standpunkt' means:",opts:["point of view","standstill","point"],a:0},
+      {q:"Polite disagreement phrase:",opts:["Ich verstehe Ihren Standpunkt, aber...","Das ist falsch.","Nein."],a:0},
+      {q:"'Man könnte argumentieren' — 'man' refers to:",opts:["one/people in general","I","you"],a:0},
+      {q:"'Perspektive' is:",opts:["feminine (die)","masculine (der)","neuter (das)"],a:0},
+      {q:"'Das stimmt' means:",opts:["That's true","That's fine","That stops"],a:0}
+    ]
+  },
+  {
+    id:13, level:"A1", name:"Die Schwarze Bibliothek", parallel:"IT Documentation",
+    grammar:"Subjunctive II complex conditionals, passive with modals",
+    hackIds:[24,25],
+    sentences:[
+      {de:"Der Fehler muss behoben werden.", en:"The error must be fixed.", slots:[{word:"behoben",opts:["analysiert","dokumentiert","gemeldet"]}]},
+      {de:"Das System soll täglich gesichert werden.", en:"The system should be backed up daily.", slots:[{word:"täglich",opts:["wöchentlich","automatisch","regelmäßig"]}]},
+      {de:"Die Daten könnten verloren gehen.", en:"The data could be lost.", slots:[{word:"verloren gehen",opts:["beschädigt werden","gelöscht werden","korrumpiert werden"]}]},
+      {de:"Der Bericht muss bis Freitag fertig sein.", en:"The report must be finished by Friday.", slots:[{word:"Freitag",opts:["Montag","Ende der Woche","morgen"]}]},
+      {de:"Die Software darf nicht ohne Lizenz installiert werden.", en:"The software may not be installed without a license.", slots:[{word:"Lizenz",opts:["Genehmigung","Erlaubnis","Zertifikat"]}]},
+      {de:"Das Passwort muss regelmäßig geändert werden.", en:"The password must be regularly changed.", slots:[{word:"regelmäßig",opts:["monatlich","sofort","täglich"]}]},
+      {de:"Der Drucker kann nicht repariert werden.", en:"The printer cannot be repaired.", slots:[{word:"Drucker",opts:["Server","Computer","Bildschirm"]}]},
+      {de:"Das Netzwerk muss konfiguriert werden.", en:"The network must be configured.", slots:[{word:"konfiguriert",opts:["eingerichtet","aktualisiert","geprüft"]}]},
+      {de:"Die Firewall sollte aktualisiert werden.", en:"The firewall should be updated.", slots:[{word:"aktualisiert",opts:["eingestellt","geprüft","aktiviert"]}]},
+      {de:"Die Datei muss verschlüsselt werden.", en:"The file must be encrypted.", slots:[{word:"verschlüsselt",opts:["geschützt","gesichert","komprimiert"]}]},
+      {de:"Der Benutzer muss authentifiziert werden.", en:"The user must be authenticated.", slots:[{word:"authentifiziert",opts:["verifiziert","angemeldet","autorisiert"]}]},
+      {de:"Das Update kann automatisch installiert werden.", en:"The update can be installed automatically.", slots:[{word:"automatisch",opts:["manuell","remote","direkt"]}]},
+      {de:"Der Zugriff darf nicht gewährt werden.", en:"Access may not be granted.", slots:[{word:"gewährt",opts:["erlaubt","gegeben","ermöglicht"]}]},
+      {de:"Die Fehlermeldung muss dokumentiert werden.", en:"The error message must be documented.", slots:[{word:"dokumentiert",opts:["analysiert","gemeldet","behoben"]}]},
+      {de:"Das Backup muss sofort erstellt werden.", en:"The backup must be created immediately.", slots:[{word:"sofort",opts:["täglich","wöchentlich","automatisch"]}]},
+      {de:"Die Verbindung kann nicht hergestellt werden.", en:"The connection cannot be established.", slots:[{word:"hergestellt",opts:["aufgebaut","aktiviert","getestet"]}]},
+      {de:"Der Server muss neu gestartet werden.", en:"The server must be restarted.", slots:[{word:"neu gestartet",opts:["aktualisiert","geprüft","gesichert"]}]},
+      {de:"Die Konfiguration sollte gespeichert werden.", en:"The configuration should be saved.", slots:[{word:"gespeichert",opts:["dokumentiert","gesichert","exportiert"]}]},
+      {de:"Das Gerät muss auf Werkseinstellungen zurückgesetzt werden.", en:"The device must be reset to factory settings.", slots:[{word:"Werkseinstellungen",opts:["Standard","Ursprungszustand","Grundeinstellungen"]}]},
+      {de:"Die IT-Sicherheit muss priorisiert werden.", en:"IT security must be prioritized.", slots:[{word:"priorisiert",opts:["verbessert","garantiert","gewährleistet"]}]}
+    ],
+    bossQuestions:[
+      {q:"'muss + past participle + werden' is:",opts:["Passive with modal (must be done)","Active sentence","Future tense"],a:0},
+      {q:"'Die Datei muss verschlüsselt werden' — who does the action?",opts:["Not specified (passive)","The file","I"],a:0},
+      {q:"'darf nicht' means:",opts:["may not","must not always","should not sometimes"],a:0},
+      {q:"'Fehlermeldung' means:",opts:["error message","false report","failure signal"],a:0},
+      {q:"Modal + passive structure:",opts:["muss + Partizip II + werden","werden + muss + Partizip II","Partizip II + muss + werden"],a:0},
+      {q:"'Das Backup' — gender?",opts:["neuter (das)","masculine (der)","feminine (die)"],a:0},
+      {q:"'konfigurieren' means:",opts:["to configure","to control","to copy"],a:0},
+      {q:"'soll' implies:",opts:["should/is supposed to","must","can"],a:0},
+      {q:"'authentifiziert' comes from the English word:",opts:["authenticated","authorized","automated"],a:0},
+      {q:"'die Firewall' — this type of word is:",opts:["An English loanword used in German IT","A German compound word","A French word"],a:0}
+    ]
+  },
+  {
+    id:14, level:"A1", name:"Die Sprachschmiede", parallel:"Colloquial Workplace German",
+    grammar:"Double infinitive, modal particles doch/mal/ja/eben",
+    hackIds:[26,27],
+    sentences:[
+      {de:"Das ist doch klar!", en:"That is obvious! (emphasis)", slots:[{word:"klar",opts:["richtig","einfach","logisch"]}]},
+      {de:"Kannst du das mal kurz erklären?", en:"Can you briefly explain that? (softening)", slots:[{word:"erklären",opts:["zeigen","beschreiben","wiederholen"]}]},
+      {de:"Das ist ja interessant!", en:"That is indeed interesting!", slots:[{word:"interessant",opts:["toll","neu","überraschend"]}]},
+      {de:"Das ist eben so in Deutschland.", en:"That's just the way it is in Germany.", slots:[{word:"Deutschland",opts:["der Ausbildung","der Firma","dem System"]}]},
+      {de:"Ich habe versucht, das zu erklären.", en:"I tried to explain that.", slots:[{word:"erklären",opts:["verstehen","lösen","machen"]}]},
+      {de:"Darf ich doch noch eine Frage stellen?", en:"May I still ask a question? (contrast)", slots:[{word:"Frage",opts:["Punkt","Bemerkung","Frage"]}]},
+      {de:"Das machen wir eben anders hier.", en:"We just do it differently here.", slots:[{word:"anders",opts:["so","richtig","professionell"]}]},
+      {de:"Kannst du das mal bitte wiederholen?", en:"Can you please repeat that? (softening)", slots:[{word:"wiederholen",opts:["sagen","erklären","schreiben"]}]},
+      {de:"Er hat mich das wissen lassen.", en:"He let me know that.", slots:[{word:"wissen lassen",opts:["sehen lassen","hören lassen","verstehen lassen"]}]},
+      {de:"Sie hat das Gerät reparieren lassen.", en:"She had the device repaired.", slots:[{word:"Gerät",opts:["Auto","Computer","Drucker"]}]},
+      {de:"Du, ich brauche doch noch Hilfe.", en:"Hey, I do still need help.", slots:[{word:"Hilfe",opts:["Zeit","Unterstützung","Information"]}]},
+      {de:"Wir duzen uns einfach, okay?", en:"We'll just use 'du' (informal), okay?", slots:[{word:"duzen",opts:["sprechen","kommunizieren","reden"]}]},
+      {de:"Das ist ja wirklich toll!", en:"That is truly great!", slots:[{word:"toll",opts:["schön","praktisch","klug"]}]},
+      {de:"Ich wollte mal fragen, ob...", en:"I just wanted to ask whether...", slots:[{word:"fragen",opts:["sagen","wissen","anfragen"]}]},
+      {de:"Das klappt eben nicht immer.", en:"That just doesn't always work out.", slots:[{word:"klappt",opts:["funktioniert","geht","läuft"]}]},
+      {de:"Ich habe ihn kommen sehen.", en:"I saw him come/coming.", slots:[{word:"kommen",opts:["gehen","arbeiten","schreiben"]}]},
+      {de:"Sie hat mich das System zeigen lassen.", en:"She had me show her the system.", slots:[{word:"System",opts:["Programm","Netzwerk","Gerät"]}]},
+      {de:"Das ist doch nicht so schwer!", en:"That isn't so difficult! (reassuring)", slots:[{word:"schwer",opts:["kompliziert","unmöglich","stressig"]}]},
+      {de:"Ich weiß ja, dass das Zeit braucht.", en:"I know that takes time. (acknowledging)", slots:[{word:"Zeit",opts:["Geduld","Arbeit","Übung"]}]},
+      {de:"Mach das doch bitte morgen.", en:"Please just do that tomorrow. (encouraging)", slots:[{word:"morgen",opts:["heute Abend","gleich","später"]}]}
+    ],
+    bossQuestions:[
+      {q:"'mal' in 'Kannst du das mal erklären?' functions as:",opts:["Softening particle","Time expression","Question word"],a:0},
+      {q:"'doch' can express:",opts:["Contrast, emphasis, or reassurance","Only negation","Only questions"],a:0},
+      {q:"'ja' as particle (not yes) expresses:",opts:["shared knowledge/acknowledgment","question","command"],a:0},
+      {q:"'eben' expresses:",opts:["'just the way it is' resignation","time (just now)","Both A and B"],a:2},
+      {q:"Double infinitive: 'Sie hat reparieren lassen' — word order:",opts:["'lassen' comes last","'reparieren' comes last","Flexible"],a:0},
+      {q:"'lassen' + infinitive means:",opts:["to have something done","to leave something","to let something"],a:0},
+      {q:"'Wir duzen uns' means:",opts:["We use the informal 'du' with each other","We greet each other","We help each other"],a:0},
+      {q:"'das klappt' means:",opts:["that works out","that claps","that is ready"],a:0},
+      {q:"'Ich habe ihn kommen sehen' uses:",opts:["Double infinitive (sehen + kommen)","Passive voice","Konjunktiv II"],a:0},
+      {q:"Which sentence sounds softer/more polite?",opts:["Kannst du das mal erklären?","Erkläre das!","Erklär das jetzt."],a:0}
+    ]
+  },
+  {
+    id:15, level:"A1", name:"Der Silberne Horizont", parallel:"Society & Integration",
+    grammar:"Genitive case, advanced participial constructions",
+    hackIds:[28,29],
+    sentences:[
+      {de:"Das ist das Büro des Ausbilders.", en:"That is the trainer's office.", slots:[{word:"Ausbilders",opts:["Chefs","Kollegen","Lehrers"]}]},
+      {de:"Die Adresse meines Arbeitgebers steht im Vertrag.", en:"My employer's address is in the contract.", slots:[{word:"Arbeitgebers",opts:["Ausbilders","Chefs","Unternehmens"]}]},
+      {de:"Wegen des schlechten Wetters komme ich zu spät.", en:"Because of the bad weather I am late.", slots:[{word:"schlechten Wetters",opts:["Staus","Busausfalls","Verspätung"]}]},
+      {de:"Trotz der Schwierigkeiten gebe ich nicht auf.", en:"Despite the difficulties I don't give up.", slots:[{word:"Schwierigkeiten",opts:["Probleme","Herausforderungen","Hindernisse"]}]},
+      {de:"Das Ziel der Ausbildung ist ein guter Beruf.", en:"The goal of the apprenticeship is a good profession.", slots:[{word:"Ausbildung",opts:["Schule","Weiterbildung","Prüfung"]}]},
+      {de:"Innerhalb des Unternehmens gibt es viele Chancen.", en:"Within the company there are many opportunities.", slots:[{word:"Unternehmens",opts:["Teams","Projekts","Systems"]}]},
+      {de:"Außerhalb der Arbeitszeit bin ich frei.", en:"Outside of working hours I am free.", slots:[{word:"Arbeitszeit",opts:["Schulzeit","Ausbildung","Berufsschule"]}]},
+      {de:"Das ist das Eigentum der Firma.", en:"That is the company's property.", slots:[{word:"Firma",opts:["Schule","Behörde","Bibliothek"]}]},
+      {de:"Der Name des Unternehmens ist bekannt.", en:"The name of the company is well-known.", slots:[{word:"Unternehmens",opts:["Ausbilders","Lehrers","Kollegen"]}]},
+      {de:"Während der Ausbildung verdiene ich Geld.", en:"During the apprenticeship I earn money.", slots:[{word:"Ausbildung",opts:["Prüfung","Schulzeit","Einarbeitung"]}]},
+      {de:"Das ist der Wunsch meines Vaters.", en:"That is my father's wish.", slots:[{word:"Vaters",opts:["Bruders","Chefs","Ausbilders"]}]},
+      {de:"Die Aufgaben des Fachinformatikers sind komplex.", en:"The IT specialist's tasks are complex.", slots:[{word:"Fachinformatikers",opts:["Administrators","Technikers","Programmierers"]}]},
+      {de:"Das System des Unternehmens ist gut gesichert.", en:"The company's system is well secured.", slots:[{word:"gut gesichert",opts:["modern","aktuell","zuverlässig"]}]},
+      {de:"Wegen meines Visums muss ich zum Amt.", en:"Because of my visa I must go to the office.", slots:[{word:"Visums",opts:["Passes","Antrags","Dokuments"]}]},
+      {de:"Trotz des hohen Lernaufwands macht es mir Spaß.", en:"Despite the high learning effort I enjoy it.", slots:[{word:"hohen",opts:["großen","intensiven","täglichen"]}]},
+      {de:"Das ist das Büro des Chefs.", en:"That is the boss's office.", slots:[{word:"Chefs",opts:["Direktors","Ausbilders","Managers"]}]},
+      {de:"Die Regeln der deutschen Sprache sind logisch.", en:"The rules of the German language are logical.", slots:[{word:"deutschen Sprache",opts:["Grammatik","Aussprache","Schrift"]}]},
+      {de:"Innerhalb eines Jahres will ich B2 erreichen.", en:"Within one year I want to reach B2.", slots:[{word:"Jahres",opts:["Monats","Halbjahres","Semesters"]}]},
+      {de:"Das Gehalt des Azubis steigt jedes Jahr.", en:"The apprentice's salary increases every year.", slots:[{word:"Azubis",opts:["Lehrlings","Praktikanten","Schülers"]}]},
+      {de:"Das ist die Pflicht aller Mitarbeiter.", en:"That is the duty of all employees.", slots:[{word:"Mitarbeiter",opts:["Azubis","Kollegen","Angestellten"]}]}
+    ],
+    bossQuestions:[
+      {q:"Genitive masculine: 'des Vaters' means:",opts:["of the father / the father's","to the father","the father"],a:0},
+      {q:"'wegen' takes which case?",opts:["Genitive","Dative","Accusative"],a:0},
+      {q:"'trotz' takes which case?",opts:["Genitive","Dative","Accusative"],a:0},
+      {q:"'während' takes which case?",opts:["Genitive","Dative","Accusative"],a:0},
+      {q:"Genitive: 'die Firma' → 'des/der ___'",opts:["der Firma (feminine)","des Firmas","dem Firma"],a:0},
+      {q:"'innerhalb' means:",opts:["within/inside","outside","during"],a:0},
+      {q:"'außerhalb' means:",opts:["outside of","within","because of"],a:0},
+      {q:"'Das Eigentum der Firma' — genitive shows:",opts:["possession","location","time"],a:0},
+      {q:"'In spoken German, genitive is often replaced by:' ",opts:["von + Dative","zu + Dative","durch + Accusative"],a:0},
+      {q:"'Anmeldung' at the Bürgerbüro is:",opts:["Registering your address","Applying for work","Getting a visa"],a:0}
+    ]
+  },
+  {
+    id:16, level:"A1", name:"Das Ewige Schattenreich", parallel:"A1 Boss Review Zone",
+    grammar:"All A1 grammar review — full survival German",
+    hackIds:[0,8,16],
+    sentences:[
+      {de:"Ich bin Dike. Ich komme aus Nigeria und lebe jetzt in Deutschland.", en:"I am Dike. I come from Nigeria and now live in Germany.", slots:[{word:"Nigeria",opts:["Ghana","Lagos","Afrika"]}]},
+      {de:"Meine Familie ist groß. Ich habe drei Geschwister.", en:"My family is big. I have three siblings.", slots:[{word:"drei",opts:["zwei","vier","fünf"]}]},
+      {de:"Ich stehe um sechs Uhr auf und fahre mit dem Bus zur Arbeit.", en:"I get up at six and travel to work by bus.", slots:[{word:"Bus",opts:["Fahrrad","Zug","U-Bahn"]}]},
+      {de:"Ich möchte einen Kaffee und ein Brötchen, bitte.", en:"I would like a coffee and a bread roll, please.", slots:[{word:"Kaffee",opts:["Tee","Saft","Wasser"]}]},
+      {de:"Ich bewerbe mich für eine IT-Ausbildung bei Siemens.", en:"I am applying for an IT apprenticeship at Siemens.", slots:[{word:"Siemens",opts:["SAP","Bosch","Telekom"]}]},
+      {de:"Einerseits ist es schwer, andererseits lerne ich viel.", en:"On one hand it's hard, on the other hand I learn a lot.", slots:[{word:"schwer",opts:["teuer","neu","kalt"]}]},
+      {de:"Das Dokument muss bis Montag fertig sein.", en:"The document must be finished by Monday.", slots:[{word:"Montag",opts:["Freitag","morgen","Ende der Woche"]}]},
+      {de:"Der Müll des Unternehmens wird getrennt gesammelt.", en:"The company's waste is collected separately.", slots:[{word:"getrennt",opts:["regelmäßig","täglich","ordentlich"]}]},
+      {de:"Ich hatte noch nie in Deutschland gelebt, bevor ich hierher kam.", en:"I had never lived in Germany before I came here.", slots:[{word:"hierher",opts:["nach Deutschland","hierhin","dahin"]}]},
+      {de:"Kannst du das mal bitte erklären?", en:"Can you please explain that? (softened)", slots:[{word:"erklären",opts:["wiederholen","zeigen","sagen"]}]},
+      {de:"Ich interessiere mich sehr für Cybersicherheit.", en:"I am very interested in cybersecurity.", slots:[{word:"Cybersicherheit",opts:["Netzwerke","Programmierung","Systeme"]}]},
+      {de:"Trotz der Sprachbarriere versuche ich mein Bestes.", en:"Despite the language barrier I try my best.", slots:[{word:"Sprachbarriere",opts:["Schwierigkeiten","Hindernisse","Probleme"]}]},
+      {de:"Am Dienstag und Donnerstag bin ich in der Berufsschule.", en:"On Tuesday and Thursday I am at vocational school.", slots:[{word:"Berufsschule",opts:["Schule","Ausbildungsbetrieb","Prüfung"]}]},
+      {de:"Das System wird täglich gesichert.", en:"The system is backed up daily.", slots:[{word:"täglich",opts:["wöchentlich","automatisch","regelmäßig"]}]},
+      {de:"Ich würde gern Deutsch fließend sprechen.", en:"I would like to speak German fluently.", slots:[{word:"fließend",opts:["gut","perfekt","besser"]}]},
+      {de:"Diese Arbeit ist wichtiger als jene.", en:"This work is more important than that one.", slots:[{word:"wichtiger",opts:["schwerer","besser","größer"]}]},
+      {de:"Im Winter ist es in Deutschland sehr kalt.", en:"In winter it is very cold in Germany.", slots:[{word:"Winter",opts:["Januar","Dezember","Herbst"]}]},
+      {de:"Ich habe mich gut auf die Prüfung vorbereitet.", en:"I have prepared well for the exam.", slots:[{word:"gut",opts:["gründlich","intensiv","sorgfältig"]}]},
+      {de:"Das ist eben das Leben als Azubi.", en:"That's just life as an apprentice.", slots:[{word:"Azubi",opts:["Ausländer","Student","Anfänger"]}]},
+      {de:"Das Ziel meiner Reise ist die Ausbildung in Deutschland.", en:"The goal of my journey is the apprenticeship in Germany.", slots:[{word:"Reise",opts:["Arbeit","Bildung","Geschichte"]}]}
+    ],
+    bossQuestions:[
+      {q:"A1 Boss: 'Ich bewerbe mich' uses which verb type?",opts:["Reflexive verb","Separable verb","Modal verb"],a:0},
+      {q:"'des Unternehmens' is which case?",opts:["Genitive","Dative","Accusative"],a:0},
+      {q:"'Ich hatte gelebt' is which tense?",opts:["Plusquamperfekt","Präteritum","Perfekt"],a:0},
+      {q:"Modal passive: 'Das Dokument muss ___ sein'",opts:["fertig","fertige","fertig werden"],a:0},
+      {q:"'Einerseits...andererseits' is a:",opts:["Discourse connector pair","Temporal expression","Modal particle"],a:0},
+      {q:"'Im Winter' — 'im' is contraction of:",opts:["in + dem","in + das","in + der"],a:0},
+      {q:"'Trotz der Schwierigkeiten' — case?",opts:["Genitive","Dative","Accusative"],a:0},
+      {q:"'doch mal bitte' contains how many particles?",opts:["3","2","1"],a:0},
+      {q:"Separable verb in 'Ich stehe auf':",opts:["aufstehen","stehen","stehe"],a:0},
+      {q:"'Ich interessiere mich für' — preposition 'für' takes:",opts:["Accusative","Dative","Genitive"],a:0}
+    ]
+  },
+  // A2 ZONES 17-46 (representative sample — key zones)
+  {
+    id:17, level:"A2", name:"Der Uhrturm", parallel:"German Punctuality Culture",
+    grammar:"Telling time official vs colloquial, temporal adverbs",
+    hackIds:[0,12],
+    sentences:[
+      {de:"Der Zug fährt um vierzehn Uhr dreißig ab.", en:"The train departs at 14:30.", slots:[{word:"vierzehn",opts:["fünfzehn","dreizehn","sechzehn"]}]},
+      {de:"Zuerst frühstücke ich, dann fahre ich zur Arbeit.", en:"First I have breakfast, then I go to work.", slots:[{word:"Arbeit",opts:["Schule","Ausbildung","Berufsschule"]}]},
+      {de:"In Deutschland ist Pünktlichkeit sehr wichtig.", en:"In Germany punctuality is very important.", slots:[{word:"Pünktlichkeit",opts:["Höflichkeit","Genauigkeit","Zuverlässigkeit"]}]},
+      {de:"Danach gehe ich in die Bibliothek.", en:"After that I go to the library.", slots:[{word:"Bibliothek",opts:["Mensa","Berufsschule","Fitnessstudio"]}]},
+      {de:"Der Termin ist um siebzehn Uhr fünfzehn.", en:"The appointment is at 17:15.", slots:[{word:"siebzehn",opts:["achtzehn","sechzehn","fünfzehn"]}]},
+      {de:"Vorher muss ich noch einkaufen.", en:"Before that I still need to go shopping.", slots:[{word:"einkaufen",opts:["kochen","lernen","arbeiten"]}]},
+      {de:"Um Punkt neun Uhr beginnt die Besprechung.", en:"The meeting starts at exactly nine o'clock.", slots:[{word:"neun",opts:["acht","zehn","elf"]}]},
+      {de:"Ich komme fünf Minuten zu früh.", en:"I arrive five minutes early.", slots:[{word:"fünf",opts:["drei","zehn","zwanzig"]}]},
+      {de:"Zuerst lerne ich, danach entspanne ich.", en:"First I study, then I relax.", slots:[{word:"entspanne",opts:["schlafe","koche","spiele"]}]},
+      {de:"Die Ausbildung beginnt am ersten September.", en:"The apprenticeship starts on the first of September.", slots:[{word:"ersten September",opts:["zweiten Oktober","dritten August","vierten Januar"]}]},
+      {de:"Ich bin immer pünktlich, nie zu spät.", en:"I am always punctual, never late.", slots:[{word:"pünktlich",opts:["früh","rechtzeitig","vorbereitet"]}]},
+      {de:"Dann gehen wir zusammen essen.", en:"Then we'll go eat together.", slots:[{word:"essen",opts:["lernen","spielen","spazieren"]}]},
+      {de:"Die Arbeit endet um achtzehn Uhr.", en:"Work ends at 18:00.", slots:[{word:"achtzehn",opts:["siebzehn","sechzehn","neunzehn"]}]},
+      {de:"Erst dann kann ich nach Hause gehen.", en:"Only then can I go home.", slots:[{word:"Hause",opts:["draußen","einkaufen","laufen"]}]},
+      {de:"Zuerst die Arbeit, danach das Vergnügen.", en:"First the work, then the pleasure.", slots:[{word:"Vergnügen",opts:["Pause","Essen","Entspannung"]}]},
+      {de:"Die Berufsschule fängt um sieben Uhr dreißig an.", en:"Vocational school starts at 7:30.", slots:[{word:"sieben",opts:["acht","sechs","sieben"]}]},
+      {de:"Ich stehe um sechs auf und bin um sieben fertig.", en:"I get up at six and am ready by seven.", slots:[{word:"fertig",opts:["angezogen","gefrühstückt","vorbereitet"]}]},
+      {de:"Der nächste Termin ist übermorgen.", en:"The next appointment is the day after tomorrow.", slots:[{word:"übermorgen",opts:["morgen","nächste Woche","am Montag"]}]},
+      {de:"Schritt für Schritt lerne ich die Sprache.", en:"Step by step I learn the language.", slots:[{word:"Sprache",opts:["Grammatik","Aussprache","Vokabeln"]}]},
+      {de:"Danach werde ich viel besser Deutsch sprechen.", en:"After that I will speak German much better.", slots:[{word:"besser",opts:["fließend","sicher","klarer"]}]}
+    ],
+    bossQuestions:[
+      {q:"Official time: '14:30' is spoken as:",opts:["vierzehn Uhr dreißig","halb drei","zwei Uhr dreißig"],a:0},
+      {q:"Colloquial: 'halb drei' means:",opts:["2:30","3:30","3:00"],a:0},
+      {q:"'zuerst' means:",opts:["first","then","after"],a:0},
+      {q:"'danach' means:",opts:["after that","before that","at the same time"],a:0},
+      {q:"'um Punkt neun' means:",opts:["at exactly nine","around nine","before nine"],a:0},
+      {q:"'übermorgen' means:",opts:["day after tomorrow","yesterday","next week"],a:0},
+      {q:"'vorher' means:",opts:["before that","after that","during"],a:0},
+      {q:"German punctuality: being 5 minutes late is considered:",opts:["Impolite in professional settings","Normal","Early"],a:0},
+      {q:"'Termin' means:",opts:["appointment/deadline","time","timing"],a:0},
+      {q:"'Erst dann' means:",opts:["Only then","First","At that time"],a:0}
+    ]
+  },
+  {
+    id:25, level:"A2", name:"Die Wohngemeinschaft", parallel:"Finding a WG in Germany",
+    grammar:"Prepositions of place neben/zwischen/gegenüber/hinter/vor",
+    hackIds:[5,15],
+    sentences:[
+      {de:"Das Bad ist neben der Küche.", en:"The bathroom is next to the kitchen.", slots:[{word:"Küche",opts:["Schlafzimmer","Wohnzimmer","Eingang"]}]},
+      {de:"Mein Zimmer liegt zwischen dem Bad und der Küche.", en:"My room is between the bathroom and the kitchen.", slots:[{word:"Bad",opts:["Wohnzimmer","Eingang","Keller"]}]},
+      {de:"Die Post ist gegenüber dem Supermarkt.", en:"The post office is across from the supermarket.", slots:[{word:"Supermarkt",opts:["Bahnhof","Park","Krankenhaus"]}]},
+      {de:"Der Schlüssel liegt hinter der Tür.", en:"The key is behind the door.", slots:[{word:"Tür",opts:["Topf","Schrank","Vase"]}]},
+      {de:"Das Auto steht vor dem Haus.", en:"The car is in front of the house.", slots:[{word:"Haus",opts:["Garage","Eingang","Supermarkt"]}]},
+      {de:"In einer WG teilt man sich Küche und Bad.", en:"In a shared flat you share kitchen and bathroom.", slots:[{word:"Küche und Bad",opts:["Wohnzimmer und Küche","Bad und Eingang","alle Räume"]}]},
+      {de:"Die Miete beträgt vierhundert Euro warm.", en:"The rent is four hundred euros (utilities included).", slots:[{word:"vierhundert",opts:["dreihundert","fünfhundert","sechshundert"]}]},
+      {de:"Das Zimmer liegt neben dem Hauptbahnhof.", en:"The room is next to the main train station.", slots:[{word:"Hauptbahnhof",opts:["Park","Büro","Supermarkt"]}]},
+      {de:"Zwischen den Mitbewohnern gibt es Regeln.", en:"Between the roommates there are rules.", slots:[{word:"Regeln",opts:["Probleme","Vereinbarungen","Gespräche"]}]},
+      {de:"Die Waschmaschine steht neben dem Trockner.", en:"The washing machine is next to the dryer.", slots:[{word:"Trockner",opts:["Kühlschrank","Ofen","Heizung"]}]},
+      {de:"Gegenüber meiner Wohnung ist ein Park.", en:"Across from my apartment is a park.", slots:[{word:"Park",opts:["Laden","Schule","Restaurant"]}]},
+      {de:"Vor dem Einzug muss man eine Kaution zahlen.", en:"Before moving in you must pay a deposit.", slots:[{word:"Kaution",opts:["Miete","Gebühr","Abgabe"]}]},
+      {de:"Das Fahrrad steht hinter dem Haus.", en:"The bicycle is behind the house.", slots:[{word:"Haus",opts:["Supermarkt","Baum","Zaun"]}]},
+      {de:"Mein Schreibtisch steht vor dem Fenster.", en:"My desk is in front of the window.", slots:[{word:"Fenster",opts:["Wand","Regal","Bett"]}]},
+      {de:"Die WG ist in der Nähe der Berufsschule.", en:"The shared flat is near the vocational school.", slots:[{word:"Berufsschule",opts:["Arbeit","Uni","Innenstadt"]}]},
+      {de:"Zwischen meinem Zimmer und dem Bad gibt es Schall.", en:"Between my room and the bathroom there is noise.", slots:[{word:"Schall",opts:["eine Wand","eine Tür","Lärm"]}]},
+      {de:"Das Regal steht neben dem Bett.", en:"The shelf is next to the bed.", slots:[{word:"Bett",opts:["Schrank","Fenster","Tisch"]}]},
+      {de:"Ich wohne gegenüber dem Bahnhof.", en:"I live across from the train station.", slots:[{word:"Bahnhof",opts:["Park","Supermarkt","Schule"]}]},
+      {de:"Vor meiner Haustür liegt eine Fußmatte.", en:"In front of my front door is a doormat.", slots:[{word:"Fußmatte",opts:["Paket","Zeitung","Brief"]}]},
+      {de:"Die Küche ist hinter dem Wohnzimmer.", en:"The kitchen is behind the living room.", slots:[{word:"Küche",opts:["Bad","Keller","Abstellraum"]}]}
+    ],
+    bossQuestions:[
+      {q:"These prepositions take Dative for location:",opts:["neben/zwischen/vor/hinter/gegenüber","mit/nach/von/zu","durch/für/gegen/um"],a:0},
+      {q:"'neben' means:",opts:["next to","behind","between"],a:0},
+      {q:"'gegenüber' means:",opts:["across from / opposite","next to","behind"],a:0},
+      {q:"'zwischen' means:",opts:["between","beside","in front of"],a:0},
+      {q:"'Kaution' means:",opts:["security deposit","monthly rent","utility costs"],a:0},
+      {q:"'Das Auto steht vor dem Haus' — case of 'dem'?",opts:["Dative (location)","Accusative (movement)","Nominative"],a:0},
+      {q:"'warm' in rental ads means:",opts:["Utilities included","Heated apartment","Summer price"],a:0},
+      {q:"'WG' stands for:",opts:["Wohngemeinschaft (shared flat)","Wohngebäude","Wohngeld"],a:0},
+      {q:"'Mitbewohner' means:",opts:["roommate","neighbor","coworker"],a:0},
+      {q:"Dative: 'die Küche' → 'neben ___'",opts:["der Küche","die Küche","den Küche"],a:0}
+    ]
+  },
+  // B1 sample zones
+  {
+    id:47, level:"B1", name:"Die Brücke der Entscheidungen", parallel:"Choosing Your Ausbildung",
+    grammar:"Subordinate clauses obwohl/während/bevor/nachdem/seit/bis/sobald",
+    hackIds:[19,25],
+    sentences:[
+      {de:"Obwohl die Ausbildung schwer ist, mache ich weiter.", en:"Although the apprenticeship is hard, I continue.", slots:[{word:"schwer",opts:["lang","teuer","intensiv"]}]},
+      {de:"Ich lerne Deutsch, während ich in Nigeria bin.", en:"I learn German while I am in Nigeria.", slots:[{word:"Nigeria",opts:["Lagos","Afrika","der Heimat"]}]},
+      {de:"Bevor ich mich bewerbe, muss ich B1 erreichen.", en:"Before I apply, I must reach B1.", slots:[{word:"B1",opts:["B2","A2","das Ziel"]}]},
+      {de:"Nachdem ich die Ausbildung abgeschlossen habe, suche ich einen Job.", en:"After I have completed the apprenticeship, I look for a job.", slots:[{word:"Job",opts:["Stelle","Arbeit","Anstellung"]}]},
+      {de:"Seit ich Deutsch lerne, denke ich anders.", en:"Since I started learning German, I think differently.", slots:[{word:"anders",opts:["strukturierter","logischer","klarer"]}]},
+      {de:"Ich warte, bis ich eine Zusage bekomme.", en:"I wait until I receive an acceptance.", slots:[{word:"Zusage",opts:["Antwort","Einladung","Rückmeldung"]}]},
+      {de:"Sobald ich in Deutschland bin, fange ich an.", en:"As soon as I am in Germany, I start.", slots:[{word:"fange ich an",opts:["lerne ich","arbeite ich","beginne ich"]}]},
+      {de:"Obwohl es schwierig ist, glaube ich an mich.", en:"Although it is difficult, I believe in myself.", slots:[{word:"glaube ich an mich",opts:["gebe ich nicht auf","mache ich weiter","lerne ich"]}]},
+      {de:"Während die anderen schlafen, lerne ich.", en:"While the others sleep, I study.", slots:[{word:"schlafen",opts:["ausgehen","spielen","fernsehen"]}]},
+      {de:"Bevor du aufgibst, denk nochmal nach.", en:"Before you give up, think again.", slots:[{word:"aufgibst",opts:["schläfst","anfängst","gehst"]}]},
+      {de:"Nachdem er die Prüfung bestanden hatte, feierte er.", en:"After he had passed the exam, he celebrated.", slots:[{word:"feierte",opts:["schlief","ruhte sich aus","freute sich"]}]},
+      {de:"Seit ich Schattenreich spiele, lerne ich effizienter.", en:"Since I've been playing Schattenreich, I learn more efficiently.", slots:[{word:"effizienter",opts:["schneller","besser","konsequenter"]}]},
+      {de:"Ich bleibe, bis ich erfolgreich bin.", en:"I stay until I am successful.", slots:[{word:"erfolgreich",opts:["fertig","bereit","qualifiziert"]}]},
+      {de:"Sobald das Visum genehmigt ist, buche ich den Flug.", en:"As soon as the visa is approved, I book the flight.", slots:[{word:"Flug",opts:["Ticket","Hotel","Wohnung"]}]},
+      {de:"Obwohl die Bürokratie nervig ist, ist sie notwendig.", en:"Although the bureaucracy is annoying, it is necessary.", slots:[{word:"nervig",opts:["kompliziert","zeitaufwändig","frustrierend"]}]},
+      {de:"Während der Ausbildung verdiene ich Geld.", en:"During the apprenticeship I earn money.", slots:[{word:"Ausbildung",opts:["Prüfung","Arbeit","Berufsschule"]}]},
+      {de:"Bevor ich schlafe, lerne ich noch ein bisschen.", en:"Before I sleep, I study a little more.", slots:[{word:"schlafe",opts:["esse","ausgehe","aufhöre"]}]},
+      {de:"Nachdem ich B2 erreicht habe, bewerbe ich mich.", en:"After I have reached B2, I apply.", slots:[{word:"B2",opts:["das Zertifikat","das Ziel","den Kurs"]}]},
+      {de:"Seit drei Monaten lebe ich in Deutschland.", en:"For three months I have been living in Germany.", slots:[{word:"drei Monaten",opts:["einem Jahr","sechs Wochen","zwei Jahren"]}]},
+      {de:"Ich übe, bis meine Aussprache perfekt ist.", en:"I practice until my pronunciation is perfect.", slots:[{word:"perfekt",opts:["gut","besser","klar"]}]}
+    ],
+    bossQuestions:[
+      {q:"In subordinate clauses introduced by 'obwohl', verb goes:",opts:["to the end","to position 2","to the start"],a:0},
+      {q:"'obwohl' means:",opts:["although","because","while"],a:0},
+      {q:"'während' as conjunction means:",opts:["while","after","before"],a:0},
+      {q:"'bevor' means:",opts:["before","after","since"],a:0},
+      {q:"'nachdem' means:",opts:["after","before","when"],a:0},
+      {q:"'seit' with present tense means:",opts:["since/for (ongoing action)","after","until"],a:0},
+      {q:"'sobald' means:",opts:["as soon as","while","although"],a:0},
+      {q:"'bis' as conjunction means:",opts:["until","since","while"],a:0},
+      {q:"Sentence: 'Obwohl es schwer ist, ___ ich weiter.' Verb?",opts:["mache","macht","machen"],a:0},
+      {q:"'Seit ich Deutsch lerne, denke ich anders.' — tense after 'seit'?",opts:["Present (ongoing)","Past","Future"],a:0}
+    ]
+  },
+  {
+    id:72, level:"B1", name:"Die Botschaft", parallel:"Formal Written German",
+    grammar:"Formal letter writing, diplomatic vocabulary",
+    hackIds:[28,29],
+    sentences:[
+      {de:"Sehr geehrte Damen und Herren,", en:"Dear Sir or Madam,", slots:[{word:"Damen und Herren",opts:["Frau Schmidt","Herr Müller","Damen"]}]},
+      {de:"hiermit bewerbe ich mich um die Ausbildungsstelle als Fachinformatiker.", en:"I hereby apply for the apprenticeship position as IT specialist.", slots:[{word:"Fachinformatiker",opts:["Systemintegrator","Anwendungsentwickler","IT-Techniker"]}]},
+      {de:"Mit freundlichen Grüßen,", en:"With kind regards,", slots:[{word:"freundlichen",opts:["herzlichen","besten","hochachtungsvollen"]}]},
+      {de:"Ich würde mich sehr über eine Einladung zum Vorstellungsgespräch freuen.", en:"I would be very happy about an invitation to an interview.", slots:[{word:"Vorstellungsgespräch",opts:["Gespräch","Termin","Treffen"]}]},
+      {de:"Bezüglich Ihrer Stellenausschreibung möchte ich mich bewerben.", en:"With regard to your job posting I would like to apply.", slots:[{word:"Stellenausschreibung",opts:["Anzeige","Stelle","Position"]}]},
+      {de:"Anbei finden Sie meinen Lebenslauf und mein Anschreiben.", en:"Enclosed you will find my CV and cover letter.", slots:[{word:"Lebenslauf und mein Anschreiben",opts:["Zeugnisse","Referenzen","Unterlagen"]}]},
+      {de:"Ich stehe Ihnen gerne für Rückfragen zur Verfügung.", en:"I am happy to be available for any questions.", slots:[{word:"Rückfragen",opts:["Fragen","Informationen","Details"]}]},
+      {de:"Mein frühestmöglicher Eintrittstermin wäre der erste September.", en:"My earliest possible start date would be the first of September.", slots:[{word:"erste September",opts:["erste Oktober","zweite August","erste Januar"]}]},
+      {de:"Über eine positive Rückmeldung würde ich mich sehr freuen.", en:"I would be very happy about a positive reply.", slots:[{word:"positive",opts:["baldige","schnelle","freundliche"]}]},
+      {de:"Ich bin überzeugt, dass ich eine Bereicherung für Ihr Unternehmen wäre.", en:"I am convinced that I would be an asset to your company.", slots:[{word:"Bereicherung",opts:["Verstärkung","gute Ergänzung","Vorteil"]}]},
+      {de:"In Bezug auf Ihre Anfrage möchte ich Folgendes mitteilen.", en:"Regarding your inquiry I would like to share the following.", slots:[{word:"Anfrage",opts:["Frage","Bewerbung","Nachricht"]}]},
+      {de:"Ich verweise auf unsere telefonische Absprache vom letzten Montag.", en:"I refer to our phone conversation from last Monday.", slots:[{word:"Montag",opts:["Dienstag","Mittwoch","Freitag"]}]},
+      {de:"Für Ihre Bemühungen bedanke ich mich herzlich.", en:"I sincerely thank you for your efforts.", slots:[{word:"Bemühungen",opts:["Zeit","Unterstützung","Hilfe"]}]},
+      {de:"Ich bitte um Ihre Genehmigung für...", en:"I request your approval for...", slots:[{word:"Genehmigung",opts:["Zustimmung","Erlaubnis","Bestätigung"]}]},
+      {de:"Es wäre mir eine Freude, Sie persönlich kennenzulernen.", en:"It would be my pleasure to meet you in person.", slots:[{word:"persönlich",opts:["bald","direkt","in Ihrem Büro"]}]},
+      {de:"Ich hoffe, dass meine Bewerbung Ihr Interesse weckt.", en:"I hope that my application catches your interest.", slots:[{word:"weckt",opts:["findet","bekommt","erregt"]}]},
+      {de:"Selbstverständlich stehe ich für ein Vorstellungsgespräch bereit.", en:"Of course I am available for an interview.", slots:[{word:"Selbstverständlich",opts:["Gerne","Natürlich","Sicher"]}]},
+      {de:"Bitte teilen Sie mir Ihren Entscheid bis Ende der Woche mit.", en:"Please inform me of your decision by the end of the week.", slots:[{word:"Ende der Woche",opts:["Montag","baldmöglichst","dem fünfzehnten"]}]},
+      {de:"Ich freue mich auf eine positive Zusammenarbeit.", en:"I look forward to positive cooperation.", slots:[{word:"positive",opts:["gute","erfolgreiche","langfristige"]}]},
+      {de:"Hochachtungsvoll, Dike Okonkwo.", en:"Respectfully yours, Dike Okonkwo.", slots:[{word:"Hochachtungsvoll",opts:["Mit freundlichen Grüßen","Herzliche Grüße","Viele Grüße"]}]}
+    ],
+    bossQuestions:[
+      {q:"Formal letter opening:",opts:["Sehr geehrte Damen und Herren,","Hallo!","Liebe Leute,"],a:0},
+      {q:"Formal closing:",opts:["Mit freundlichen Grüßen,","Tschüss!","Bis dann!"],a:0},
+      {q:"Most formal closing:",opts:["Hochachtungsvoll,","Mit freundlichen Grüßen,","Herzliche Grüße,"],a:0},
+      {q:"'Anbei' in formal letters means:",opts:["Enclosed/attached","Hereby","Regarding"],a:0},
+      {q:"'Bezüglich' means:",opts:["Regarding/with respect to","Because of","During"],a:0},
+      {q:"'Rückfragen' means:",opts:["follow-up questions","return questions","wrong questions"],a:0},
+      {q:"'hiermit' means:",opts:["hereby","here","with this"],a:0},
+      {q:"'Lebenslauf' is:",opts:["CV/resume","cover letter","reference letter"],a:0},
+      {q:"'Anschreiben' in job applications is:",opts:["Cover letter","CV","Certificate"],a:0},
+      {q:"'frühestmöglicher Eintrittstermin' means:",opts:["earliest possible start date","earliest arrival time","first interview date"],a:0}
+    ]
+  },
+  {
+    id:76, level:"B1", name:"Das Kino der Träume", parallel:"B1 Boss — Ausbildung Simulation",
+    grammar:"All subordinate clauses review, interview vocabulary",
+    hackIds:[0,8,16,22,28],
+    sentences:[
+      {de:"Ich möchte Fachinformatiker für Systemintegration werden, weil mich IT-Sicherheit fasziniert.", en:"I want to become an IT systems integration specialist because IT security fascinates me.", slots:[{word:"Systemintegration",opts:["Anwendungsentwicklung","Netzwerktechnik","Datenbankentwicklung"]}]},
+      {de:"In fünf Jahren sehe ich mich als Cybersecurity-Experten.", en:"In five years I see myself as a cybersecurity expert.", slots:[{word:"fünf",opts:["drei","zehn","sieben"]}]},
+      {de:"Ich bringe Motivation, Lernbereitschaft und technisches Interesse mit.", en:"I bring motivation, willingness to learn, and technical interest.", slots:[{word:"Lernbereitschaft",opts:["Erfahrung","Kenntnisse","Fähigkeiten"]}]},
+      {de:"Obwohl ich noch lerne, bin ich sehr engagiert.", en:"Although I am still learning, I am very committed.", slots:[{word:"engagiert",opts:["motiviert","lernbereit","fleißig"]}]},
+      {de:"Nachdem ich die Ausbildung abgeschlossen habe, möchte ich weiterlernen.", en:"After I have completed the apprenticeship, I want to continue learning.", slots:[{word:"weiterlernen",opts:["spezialisieren","zertifizieren","ausbauen"]}]},
+      {de:"Seit ich mich für IT interessiere, lerne ich täglich.", en:"Since I have been interested in IT, I learn daily.", slots:[{word:"täglich",opts:["regelmäßig","intensiv","konsequent"]}]},
+      {de:"Ich kann Probleme lösen, indem ich systematisch denke.", en:"I can solve problems by thinking systematically.", slots:[{word:"systematisch",opts:["strukturiert","analytisch","logisch"]}]},
+      {de:"Meine Stärken sind Ausdauer, Teamfähigkeit und Problemlösungskompetenz.", en:"My strengths are perseverance, teamwork ability, and problem-solving skills.", slots:[{word:"Ausdauer",opts:["Lernbereitschaft","Kreativität","Ehrgeiz"]}]},
+      {de:"Ich habe mich für Ihr Unternehmen entschieden, weil es innovativ ist.", en:"I chose your company because it is innovative.", slots:[{word:"innovativ",opts:["bekannt","groß","regional"]}]},
+      {de:"Sobald ich die Sprache fließend spreche, werde ich effizienter arbeiten.", en:"As soon as I speak the language fluently, I will work more efficiently.", slots:[{word:"fließend",opts:["gut","sicher","besser"]}]},
+      {de:"Ich bin bereit, hart zu arbeiten und viel zu lernen.", en:"I am ready to work hard and learn a lot.", slots:[{word:"hart",opts:["intensiv","viel","effizient"]}]},
+      {de:"Was mich an der IT-Ausbildung reizt, ist die Vielseitigkeit.", en:"What attracts me to IT training is the versatility.", slots:[{word:"Vielseitigkeit",opts:["Praxis","Herausforderung","Zukunftsorientierung"]}]},
+      {de:"Ich arbeite gut im Team, aber auch selbstständig.", en:"I work well in a team, but also independently.", slots:[{word:"selbstständig",opts:["alleine","eigenverantwortlich","fokussiert"]}]},
+      {de:"Während der Ausbildung möchte ich so viel wie möglich lernen.", en:"During the apprenticeship I want to learn as much as possible.", slots:[{word:"möglich",opts:["kann","erlaubt ist","realistisch ist"]}]},
+      {de:"Bevor ich nach Deutschland kam, habe ich mich intensiv vorbereitet.", en:"Before I came to Germany, I prepared intensively.", slots:[{word:"intensiv",opts:["gut","lang","gründlich"]}]},
+      {de:"Trotz der Herausforderungen bin ich zuversichtlich.", en:"Despite the challenges I am confident.", slots:[{word:"zuversichtlich",opts:["motiviert","optimistisch","bereit"]}]},
+      {de:"Ich strebe danach, den Betrieb durch meine Arbeit zu bereichern.", en:"I strive to enrich the company through my work.", slots:[{word:"bereichern",opts:["unterstützen","verbessern","stärken"]}]},
+      {de:"Mit Ihnen zusammenzuarbeiten wäre eine großartige Chance für mich.", en:"Working with you would be a great opportunity for me.", slots:[{word:"großartige",opts:["wichtige","wertvolle","einmalige"]}]},
+      {de:"Ich lerne schnell und nehme konstruktive Kritik gerne an.", en:"I learn quickly and gladly accept constructive criticism.", slots:[{word:"schnell",opts:["gut","gerne","immer"]}]},
+      {de:"Ich bin überzeugt: diese Ausbildung ist mein Weg zum Erfolg.", en:"I am convinced: this apprenticeship is my path to success.", slots:[{word:"Weg",opts:["Schlüssel","Einstieg","Start"]}]}
+    ],
+    bossQuestions:[
+      {q:"Final Boss Q1: 'Warum möchten Sie Fachinformatiker werden?' Best answer:",opts:["Weil mich IT-Sicherheit fasziniert und ich technische Probleme lösen möchte.","Weil es gutes Geld gibt.","Weil alle es machen."],a:0},
+      {q:"'Wo sehen Sie sich in 5 Jahren?' Best answer:",opts:["Als zertifizierter Cybersecurity-Experte in einem starken IT-Team.","Ich weiß es nicht.","Vielleicht noch hier."],a:0},
+      {q:"Subordinate clause verb position in 'Ich komme, weil ich lerne.':",opts:["'lerne' is at the end (correct)","'lerne' is at position 2","'lerne' is at the start"],a:0},
+      {q:"'obwohl' + verb at end. Example correct form:",opts:["Obwohl es schwer ist, mache ich weiter.","Obwohl ist es schwer, mache ich weiter.","Obwohl es schwer, ist mache ich weiter."],a:0},
+      {q:"Best way to describe a strength in German:",opts:["Meine Stärke ist Ausdauer und Lernbereitschaft.","Ich bin stark.","Ich gut."],a:0},
+      {q:"Formal 'Sie' vs informal 'du' — in an Ausbildung interview you use:",opts:["Sie (formal)","du (informal)","Both"],a:0},
+      {q:"'Lernbereitschaft' means:",opts:["willingness to learn","learning ability","learning method"],a:0},
+      {q:"'sobald' in 'Sobald ich fließend spreche, werde ich...' — verb of subordinate clause:",opts:["'spreche' goes to end","'spreche' stays at position 2","No rule for 'sobald'"],a:0},
+      {q:"'Teamfähigkeit' means:",opts:["ability to work in a team","team leadership","team management"],a:0},
+      {q:"FINAL: 'Ich bin überzeugt, dass diese Ausbildung mein Weg zum Erfolg ist.' — this uses:",opts:["dass-clause (verb to end)","weil-clause","obwohl-clause"],a:0}
+    ]
+  }
+];
+
+// Fill remaining zones with generated structure
+const ALL_ZONE_IDS = [];
+for(let i=1;i<=76;i++) ALL_ZONE_IDS.push(i);
+function getZone(id) {
+  return ZONES.find(z=>z.id===id) || generateFallbackZone(id);
+}
+function generateFallbackZone(id) {
+  const level = id<=16?"A1":id<=46?"A2":"B1";
+  const names = {
+    18:"Das Verkehrsmuseum",19:"Der Postpalast",20:"Das Modeatelier",
+    21:"Die Tierhandlung",22:"Der Sportplatz",23:"Das Krankenhaus",
+    24:"Der Wochenmarkt",26:"Das Filmtheater",27:"Die Bergwanderung",
+    28:"Der Geburtstagskalender",29:"Das Kochstudio",30:"Die Bibliothek der Schatten",
+    31:"Der Stadtpark",32:"Das Internetcafé",33:"Der Flughafen",
+    34:"Das Telefonat",35:"Die Waschküche",36:"Das Klassenzimmer",
+    37:"Die Straßenkarte",38:"Der Kleiderschrank",39:"Die Festung der Freundschaft",
+    40:"Der Weinkeller",41:"Das Hotel am Meer",42:"Der Fahrradweg",
+    43:"Der Hörsaal",44:"Das Fotostudio",45:"Die Möbelwerkstatt",46:"Das Fest der Laternen",
+    48:"Der Konferenzraum",49:"Die Wetterwarte",50:"Das Tonstudio",
+    51:"Die Kunstgalerie",52:"Das Rathaus",53:"Der Tiergarten",
+    54:"Die Redaktion",55:"Die Gärtnerei",56:"Das Theater am Abgrund",
+    57:"Die Messehalle",58:"Die Küstenstraße",59:"Das Gewölbe der Erinnerungen",
+    60:"Die Start-up-Garage",61:"Der Wanderweg",62:"Das Synchronstudio",
+    63:"Der Flohmarkt",64:"Das Observatorium",65:"Die Pralinenfabrik",
+    66:"Die Wohnungsbesichtigung",67:"Das Sportstadion",68:"Die Schneiderwerkstatt",
+    69:"Der Weihnachtsmarkt",70:"Das Café der Dichter",71:"Der Flusshafen",
+    73:"Der Doktorhut",74:"Der Maskenball",75:"Das Aquarium"
+  };
+  // Generate basic sentences for missing zones
+  const sentences = [
+    {de:"Ich lerne jeden Tag Deutsch.",en:"I learn German every day.",slots:[{word:"jeden Tag",opts:["oft","intensiv","regelmäßig"]}]},
+    {de:"Das ist eine wichtige Lektion.",en:"That is an important lesson.",slots:[{word:"wichtige",opts:["schwierige","neue","interessante"]}]},
+    {de:"Ich verstehe das jetzt besser.",en:"I understand that better now.",slots:[{word:"besser",opts:["gut","vollständig","richtig"]}]},
+    {de:"Können Sie das bitte wiederholen?",en:"Can you please repeat that?",slots:[{word:"wiederholen",opts:["erklären","sagen","buchstabieren"]}]},
+    {de:"Ich mache Fortschritte.",en:"I am making progress.",slots:[{word:"Fortschritte",opts:["Fehler","Übungen","Tests"]}]},
+    {de:"Das ist nicht so einfach.",en:"That is not so easy.",slots:[{word:"einfach",opts:["schwierig","klar","logisch"]}]},
+    {de:"Ich brauche mehr Übung.",en:"I need more practice.",slots:[{word:"Übung",opts:["Zeit","Hilfe","Geduld"]}]},
+    {de:"Heute lerne ich neue Vokabeln.",en:"Today I learn new vocabulary.",slots:[{word:"Vokabeln",opts:["Grammatik","Sätze","Regeln"]}]},
+    {de:"Die Grammatik ist komplex aber lernbar.",en:"The grammar is complex but learnable.",slots:[{word:"komplex",opts:["schwierig","interessant","wichtig"]}]},
+    {de:"Ich übe täglich mit einem Lernspiel.",en:"I practice daily with a learning game.",slots:[{word:"Lernspiel",opts:["Partner","App","Buch"]}]},
+    {de:"Fehler sind Teil des Lernprozesses.",en:"Errors are part of the learning process.",slots:[{word:"Lernprozesses",opts:["Wegs","Fortschritts","Systems"]}]},
+    {de:"Ich lese deutsche Texte jeden Abend.",en:"I read German texts every evening.",slots:[{word:"Texte",opts:["Bücher","Artikel","Nachrichten"]}]},
+    {de:"Das Hören ist schwieriger als das Lesen.",en:"Listening is harder than reading.",slots:[{word:"Hören",opts:["Sprechen","Schreiben","Verstehen"]}]},
+    {de:"Ich spreche mit Muttersprachlern online.",en:"I speak with native speakers online.",slots:[{word:"online",opts:["täglich","regelmäßig","oft"]}]},
+    {de:"Die Aussprache verbessert sich mit der Zeit.",en:"Pronunciation improves with time.",slots:[{word:"Zeit",opts:["Übung","Praxis","Erfahrung"]}]},
+    {de:"Ich notiere alle neuen Wörter.",en:"I note all new words.",slots:[{word:"notiere",opts:["lerne","memoriere","schreibe"]}]},
+    {de:"Das macht mir viel Spaß.",en:"I enjoy that a lot.",slots:[{word:"Spaß",opts:["Freude","Motivation","Interesse"]}]},
+    {de:"Ich bin sehr motiviert.",en:"I am very motivated.",slots:[{word:"motiviert",opts:["engagiert","lernbereit","fleißig"]}]},
+    {de:"Jeden Tag werde ich besser.",en:"Every day I get better.",slots:[{word:"besser",opts:["stärker","sicherer","fließender"]}]},
+    {de:"Das Ziel ist die B2-Prüfung.",en:"The goal is the B2 exam.",slots:[{word:"B2-Prüfung",opts:["Ausbildung","Zertifizierung","Prüfung"]}]}
+  ];
+  const bossQuestions = [
+    {q:"'Ich lerne' — which verb form?",opts:["1st person singular present","2nd person","3rd person"],a:0},
+    {q:"'jeden Tag' means:",opts:["every day","one day","a day"],a:0},
+    {q:"'verstehen' means:",opts:["to understand","to learn","to speak"],a:0},
+    {q:"'Fortschritte machen' means:",opts:["to make progress","to make mistakes","to make notes"],a:0},
+    {q:"'täglich' means:",opts:["daily","weekly","monthly"],a:0},
+    {q:"'Muttersprachler' means:",opts:["native speaker","mother tongue","German speaker"],a:0},
+    {q:"'Aussprache' means:",opts:["pronunciation","expression","exercise"],a:0},
+    {q:"'motiviert' is which word class?",opts:["Adjective","Noun","Verb"],a:0},
+    {q:"'Das macht mir Spaß' means:",opts:["I enjoy that","That makes me happy","That is fun"],a:0},
+    {q:"'Das Ziel ist...' — 'Ziel' is:",opts:["neuter (das)","masculine (der)","feminine (die)"],a:0}
+  ];
+  return {
+    id, level,
+    name: names[id] || `Zone ${id}`,
+    parallel: `German ${level} content`,
+    grammar: `${level} grammar focus`,
+    hackIds: [0,1],
+    sentences,
+    bossQuestions
+  };
+}
+
+const HACKS = [
+  {id:0, title:"-en Verb Hack", body:"Remove -en from any infinitive → add e/st/t/en/t/en for ich/du/er/wir/ihr/sie", example:"mach-en → ich mache, du machst, er macht"},
+  {id:1, title:"Every Noun Capitalized", body:"EVERY noun in German is capitalized. You can spot nouns instantly when reading.", example:"der Mann, die Frau, das Kind, der Computer, die Information"},
+  {id:2, title:"-tion Words Stay -tion", body:"English -tion words keep -tion in German, and are ALWAYS feminine (die).", example:"Information, Situation, Nation, Kommunikation, Motivation"},
+  {id:3, title:"Compound Word Gluing", body:"German glues nouns together. Longer word = more specific meaning.", example:"Hand + Schuh = Handschuh (glove), Kühl + Schrank = Kühlschrank (fridge)"},
+  {id:4, title:"-lich Hack (English -ly)", body:"-ly adjectives become -lich in German. Spot the pattern and generate words.", example:"friendly = freundlich, possible = möglich, natural = natürlich, logical = logisch"},
+  {id:5, title:"un- Prefix Works Like English", body:"un- means the opposite, exactly like English. Endless vocabulary for free.", example:"möglich → unmöglich, glücklich → unglücklich, klar → unklar"},
+  {id:6, title:"-ment Words Stay -ment", body:"English -ment words keep -ment in German (usually neuter, das).", example:"Dokument, Instrument, Argument, Kommentar, Experiment"},
+  {id:7, title:"ge- Prefix = Past Participle", body:"ge- at the start of a word usually signals a past participle (something that happened).", example:"gemacht (made), gesagt (said), gegangen (gone), geschrieben (written)"},
+  {id:8, title:"-ist Words Stay -ist", body:"English -ist words keep -ist in German. They are always masculine (der).", example:"Journalist, Optimist, Terrorist, Pessimist, Activist"},
+  {id:9, title:"Adjective = Adverb Hack", body:"In German, adjectives and adverbs are the same word. No -ly needed.", example:"schnell (fast/quickly), laut (loud/loudly), gut (good/well), langsam (slow/slowly)"},
+  {id:10, title:"-ik Words (English -ic/-ics)", body:"English -ic/-ics becomes -ik in German. Always feminine (die).", example:"Musik, Mathematik, Physik, Informatik, Ethik, Technik"},
+  {id:11, title:"Capital Letters Show Nouns", body:"If you see a capital in the middle of a sentence, that word is 100% a noun.", example:"Ich lerne die Sprache in der Schule. → Sprache and Schule are nouns"},
+  {id:12, title:"Numbers Pattern Hack", body:"German numbers 13-19 follow a pattern: single digit + zehn.", example:"dreizehn (3+10), vierzehn (4+10), siebzehn (7+10), neunzehn (9+10)"},
+  {id:13, title:"Time: halb/viertel Shortcut", body:"halb X = X:30 (half towards X), Viertel nach X = X:15, Viertel vor X = X:45", example:"halb acht = 7:30 | Viertel nach drei = 3:15 | Viertel vor vier = 3:45"},
+  {id:14, title:"-er Suffix = More (Comparative)", body:"Add -er to any adjective to make it comparative, just like English.", example:"schnell → schneller (faster), groß → größer (bigger), alt → älter (older)"},
+  {id:15, title:"am + -sten = Most (Superlative)", body:"am + adjective + -sten/esten = the most. Simple formula.", example:"am schnellsten (fastest), am größten (biggest), am besten (best, irregular)"},
+  {id:16, title:"würde = Would Hack", body:"würde + infinitive = would + verb. Konjunktiv II made easy for most verbs.", example:"ich würde gehen (I would go), er würde kaufen (he would buy)"},
+  {id:17, title:"werden = Will/Become (Dual)", body:"'werden' means BOTH 'will' (future) AND 'become'. Context tells you which.", example:"Ich werde Arzt (I will become a doctor) | Er wird kommen (He will come)"},
+  {id:18, title:"hätte = Had / Would Have", body:"hätte is Konjunktiv II of haben. Used for hypotheticals and polite requests.", example:"Ich hätte Zeit (I would have time) | Hätten Sie eine Frage? (Would you have a question?)"},
+  {id:19, title:"wäre = Was / Would Be", body:"wäre is Konjunktiv II of sein. Same word, different time contexts.", example:"Das wäre gut (That would be good) | Wenn ich reich wäre... (If I were rich...)"},
+  {id:20, title:"hatte + Participle = Had Done", body:"hatte + past participle = Plusquamperfekt = had done. The past-in-the-past tense.", example:"Ich hatte gegessen (I had eaten) | Er hatte geschlafen (He had slept)"},
+  {id:21, title:"war + Participle = Had Gone", body:"war + past participle (for movement/change) = had gone/arrived etc.", example:"Ich war gegangen (I had gone) | Sie war angekommen (She had arrived)"},
+  {id:22, title:"einerseits/andererseits = Essay Hack", body:"einerseits...andererseits instantly sounds sophisticated in any argument or essay.", example:"Einerseits ist es teuer, andererseits ist es sehr nützlich."},
+  {id:23, title:"Meiner Meinung nach = In My Opinion", body:"Use 'Meiner Meinung nach' at the start of any sentence to express opinions formally.", example:"Meiner Meinung nach ist Deutsch lernbar. (In my opinion, German is learnable.)"},
+  {id:24, title:"Passive = wird + Partizip II", body:"German passive voice formula: wird + past participle. That's literally all it is.", example:"Das wird gemacht. (That is done.) | Der Server wird gesichert. (The server is secured.)"},
+  {id:25, title:"Subordinate Clause Verb to END", body:"This is the biggest German secret. In any clause after weil/dass/obwohl etc., verb goes to the end.", example:"...weil ich Deutsch LERNE. | ...dass er kommt. | ...obwohl es schwer IST."},
+  {id:26, title:"doch = The Most Misunderstood Word", body:"doch has 3 meanings: 1) Yes-to-a-negative 2) Contrast/but 3) Emphasis particle. Context is everything.", example:"Kommst du? Doch! (You're not coming? Yes I am!) | Das ist doch klar! (That's obvious!)"},
+  {id:27, title:"mal Softens Commands", body:"Adding 'mal' to a request instantly makes it sound friendlier and more natural.", example:"Erklär das! (Explain that!) → Erklär das mal! (Could you explain that?)"},
+  {id:28, title:"Genitive = 's in English", body:"German genitive works like English possessive 's. des/der shows possession.", example:"das Auto des Mannes = the man's car | die Tasche der Frau = the woman's bag"},
+  {id:29, title:"von as Genitive Shortcut", body:"In spoken German, 'von + Dative' replaces genitive. Equally understood and sounds natural.", example:"das Auto des Mannes → das Auto von dem Mann (the man's car)"}
+];
+
+// ============================================================
+// GAME STATE
+// ============================================================
+const SAVE_KEY = "schattenreich_nigerian_save";
+
+function loadSave() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+
+function defaultState() {
+  return {
+    screen: "start",
+    currentZoneId: 1,
+    completedTrials: {}, // {zoneId: [0,1,2,3,4]}
+    bossDefeated: {},    // {zoneId: true}
+    recapCompleted: {},  // {zoneId: true}
+    xp: 0, gold: 0, level: 1,
+    streak: 0, lastPlayedDate: null,
+    unlockedHacks: [],
+    weakSpots: {},       // {grammarKey: count}
+    settings: { audioEnabled: true },
+    sessionStats: { sentences: 0, hacks: 0, xpEarned: 0 }
+  };
+}
+
+let STATE = loadSave() || defaultState();
+
+function saveState() {
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(STATE)); } catch(e) {}
+}
+
+function updateStreak() {
+  const today = new Date().toDateString();
+  if(STATE.lastPlayedDate !== today) {
+    const yesterday = new Date(Date.now()-86400000).toDateString();
+    if(STATE.lastPlayedDate === yesterday) {
+      STATE.streak = (STATE.streak||0)+1;
+    } else if(STATE.lastPlayedDate !== today) {
+      STATE.streak = 1;
+    }
+    STATE.lastPlayedDate = today;
+    saveState();
+  }
+}
+
+function getUnlockedZones() {
+  const unlocked = new Set([1]);
+  for(let id=1; id<=76; id++) {
+    if(STATE.bossDefeated[id]) {
+      if(id<76) unlocked.add(id+1);
+    }
+  }
+  return unlocked;
+}
+
+// ============================================================
+// AUDIO
+// ============================================================
+let speechVoice = null;
+function initSpeech() {
+  if(!window.speechSynthesis) return;
+  function findVoice() {
+    const voices = speechSynthesis.getVoices();
+    speechVoice = voices.find(v=>v.lang.startsWith('de-DE')) ||
+                  voices.find(v=>v.lang.startsWith('de')) ||
+                  null;
+  }
+  findVoice();
+  speechSynthesis.onvoiceschanged = findVoice;
+}
+
+function speak(text, rate=0.85) {
+  if(!STATE.settings.audioEnabled || !window.speechSynthesis) return;
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.lang = 'de-DE';
+  utt.rate = rate;
+  utt.pitch = 1.05;
+  if(speechVoice) utt.voice = speechVoice;
+  speechSynthesis.speak(utt);
+}
+
+// ============================================================
+// UI HELPERS
+// ============================================================
+function $(id) { return document.getElementById(id); }
+function show(id) { $(id) && $(id).classList.remove('hidden'); }
+function hide(id) { $(id) && $(id).classList.add('hidden'); }
+function el(tag, cls, html) {
+  const e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(html) e.innerHTML = html;
+  return e;
+}
+function showNotif(msg, duration=2500) {
+  const n = $('notif'); if(!n) return;
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(()=>n.classList.remove('show'), duration);
+}
+function flashReward(msg) {
+  const r = $('reward-flash'); if(!r) return;
+  r.textContent = msg;
+  r.classList.add('show');
+  r.classList.remove('hide');
+  setTimeout(()=>{ r.classList.add('hide'); setTimeout(()=>r.classList.remove('show','hide'),300); }, 1200);
+}
+function addXP(amount, giveGold=0) {
+  STATE.xp += amount;
+  STATE.gold += giveGold;
+  STATE.sessionStats.xpEarned += amount;
+  // Level up every 500 XP
+  const newLevel = Math.floor(STATE.xp/500)+1;
+  if(newLevel > STATE.level) {
+    STATE.level = newLevel;
+    showNotif(`⬆️ Level ${STATE.level} erreicht!`);
+  }
+  saveState();
+  updateHUD();
+}
+
+// ============================================================
+// SCREENS
+// ============================================================
+const screens = ['screen-start','screen-map','screen-zone','screen-trial','screen-boss','screen-summary','screen-journal','screen-recap'];
+
+function showScreen(name) {
+  screens.forEach(s=>{ const el=$('s-'+s.replace('screen-','')); if(el) el.classList.add('hidden'); });
+  const target = $('s-'+name);
+  if(target) {
+    target.classList.remove('hidden');
+    target.scrollTop = 0;
+  }
+  STATE.screen = name;
+}
+
+// ============================================================
+// HUD
+// ============================================================
+function updateHUD() {
+  const hud = $('hud'); if(!hud) return;
+  const maxXP = STATE.level * 500;
+  const curXP = STATE.xp % 500;
+  hud.innerHTML = `
+    <span class="hud-stat hud-gold"><span class="icon">🥇</span>${STATE.gold}</span>
+    <span class="hud-stat hud-xp"><span class="icon">⚡</span>Lv${STATE.level}</span>
+    <div class="xp-bar-wrap"><div class="xp-bar" style="width:${Math.min(100,(curXP/500)*100)}%"></div></div>
+    <span class="hud-stat hud-streak"><span class="icon">🔥</span>${STATE.streak}</span>
+  `;
+}
+
+// ============================================================
+// START SCREEN
+// ============================================================
+function renderStart() {
+  const s = $('s-start'); if(!s) return;
+  s.innerHTML = `
+    <div class="start-bg">
+      <div class="start-fox">🦊</div>
+      <h1 class="start-title">Schattenreich</h1>
+      <p class="start-sub">Der Nigerianische Weg</p>
+      <div class="bertram-wrap" style="text-align:left;margin-bottom:24px">
+        <span class="bertram-fox">🦊</span>
+        <div class="bertram-bubble">
+          76 zones stand between you and the Ausbildungsvertrag. The Germans built their language like they build their cars — precise, logical, and intimidating until you understand the engineering. Even Dangote started somewhere. Let us begin.
+        </div>
+      </div>
+      <button class="btn" onclick="startGame()">▶ Reise beginnen</button>
+      <button class="btn btn-secondary" onclick="showScreen('journal')">📖 Bertrams Journal</button>
+      ${loadSave() ? '<button class="btn btn-secondary" onclick="exportSave()">💾 Speicherstand exportieren</button>' : ''}
+      <div style="margin-top:16px;font-size:12px;color:var(--text-muted)">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="audio-toggle" ${STATE.settings.audioEnabled?'checked':''} onchange="toggleAudio(this)">
+          🔊 Deutsche Sprachausgabe aktivieren
+        </label>
+      </div>
+    </div>
+  `;
+}
+
+function toggleAudio(cb) {
+  STATE.settings.audioEnabled = cb.checked;
+  saveState();
+}
+
+function startGame() {
+  updateStreak();
+  STATE.sessionStats = { sentences: 0, hacks: 0, xpEarned: 0 };
+  saveState();
+  showScreen('map');
+  renderMap();
+}
+
+function exportSave() {
+  const data = JSON.stringify(STATE, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'schattenreich_save.json';
+  a.click(); URL.revokeObjectURL(url);
+}
+
+// ============================================================
+// WORLD MAP
+// ============================================================
+function renderMap() {
+  const s = $('s-map'); if(!s) return;
+  const unlocked = getUnlockedZones();
+  const levels = [
+    {label:"A1 — Die Nigerianische Wurzel", ids:Array.from({length:16},(_,i)=>i+1), badge:"badge-a1"},
+    {label:"A2 — Die Reise Beginnt", ids:Array.from({length:30},(_,i)=>i+17), badge:"badge-a2"},
+    {label:"B1 — Das Tor zur Ausbildung", ids:Array.from({length:30},(_,i)=>i+47), badge:"badge-b1"},
+  ];
+  let html = `<div id="hud" class="hud"></div><div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Wähle deine Zone, Krieger. Die Ausländerbehörde hat Schlimmeres gesehen. Wahrscheinlich.</div></div>`;
+  levels.forEach(lvl=>{
+    html += `<span class="zone-level-badge ${lvl.badge}">${lvl.label}</span>`;
+    html += `<div class="map-path">`;
+    lvl.ids.forEach(id=>{
+      const isUnlocked = unlocked.has(id);
+      const isCompleted = STATE.bossDefeated[id];
+      const isBoss = [16,46,76].includes(id);
+      let cls = 'zone-locked';
+      if(isCompleted) cls = 'zone-completed';
+      else if(isUnlocked && isBoss) cls = 'zone-boss';
+      else if(isUnlocked) cls = 'zone-unlocked';
+      const icon = isCompleted ? '✓' : isBoss ? '⚔' : id;
+      html += `<div class="zone-node ${cls}" onclick="${isUnlocked?'enterZone('+id+')':'showNotif(\'🔒 Besiege zuerst Zone '+Math.max(1,id-1)+'\')'}" title="Zone ${id}">${icon}</div>`;
+    });
+    html += `</div><br>`;
+  });
+  html += `<button class="btn btn-secondary" onclick="showScreen('start');renderStart()">← Zurück</button></div>`;
+  s.innerHTML = html;
+  updateHUD();
+}
+
+// ============================================================
+// ZONE VIEW
+// ============================================================
+let CURRENT_ZONE = null;
+
+function enterZone(id) {
+  CURRENT_ZONE = getZone(id);
+  STATE.currentZoneId = id;
+  // Check recap needed (not for zone 1, not if already done)
+  if(id > 1 && !STATE.recapCompleted[id] && STATE.bossDefeated[id-1]) {
+    showScreen('recap');
+    renderRecap(id);
+    return;
+  }
+  showScreen('zone');
+  renderZone();
+}
+
+function renderZone() {
+  const z = CURRENT_ZONE;
+  const s = $('s-zone'); if(!s) return;
+  const completedTrials = STATE.completedTrials[z.id] || [];
+  const trials = [
+    {name:"Satz-Speicher", icon:"📚", desc:"Lerne 20 Kernsätze mit der Replace-Methode"},
+    {name:"Muster-Schmiede", icon:"⚙️", desc:"Grammatik-Rätsel & Satzstruktur"},
+    {name:"Hör-Gewölbe", icon:"🎧", desc:"Hören & Transkribieren — entschlüssle das Audiosignal"},
+    {name:"Sprech-Halle", icon:"🎤", desc:"Sprechsimulation — beweise dein Deutsch"},
+    {name:"Bertrams Hack Lab", icon:"🦊", desc:"Sammle Sprachhacks und freischalte Bertrams Tricks"},
+  ];
+  const canBoss = completedTrials.length >= 4;
+  const bossWon = STATE.bossDefeated[z.id];
+  const levelBadge = z.level === "A1" ? "badge-a1" : z.level === "A2" ? "badge-a2" : "badge-b1";
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('map');renderMap()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">${z.name}</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<span class="zone-level-badge ${levelBadge}">${z.level}</span>`;
+  html += `<h2>${z.name}</h2>`;
+  html += `<p>${z.parallel}</p>`;
+  html += `<div class="card"><p style="font-size:12px;color:var(--blue)">🔮 Grammatik-Fokus</p><p style="color:var(--text-cream);font-size:14px">${z.grammar}</p></div>`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Zone ${z.id}/76. ${completedTrials.length} von 5 Trials abgeschlossen. ${bossWon ? 'Boss besiegt! 🏆' : canBoss ? 'Boss bereit! Wage es.' : 'Schließe 4 Trials ab, um den Boss freizuschalten.'}</div></div>`;
+  trials.forEach((t,i)=>{
+    const done = completedTrials.includes(i);
+    html += `<div class="trial-card ${done?'trial-done':''}" onclick="startTrial(${i})">
+      <div class="trial-num ${done?'done'}">${done?'✓':i+1}</div>
+      <div><div style="font-weight:700;color:${done?'var(--correct)':'var(--text-cream)'}">${t.icon} ${t.name}</div><div style="font-size:12px;color:var(--text-muted)">${t.desc}</div></div>
+    </div>`;
+  });
+  if(canBoss && !bossWon) {
+    html += `<button class="btn" style="background:linear-gradient(135deg,#4a0000,#8B0000);color:#fff" onclick="startBoss()">⚔️ Boss-Kampf beginnen</button>`;
+  }
+  if(bossWon) {
+    html += `<div class="card" style="text-align:center;border-color:var(--correct)"><span style="font-size:40px">🏆</span><h3 style="color:var(--correct)">Zone abgeschlossen!</h3></div>`;
+  }
+  html += `</div>`;
+  s.innerHTML = html;
+  updateHUD();
+}
+
+// ============================================================
+// TRIAL SYSTEM
+// ============================================================
+let CURRENT_TRIAL = -1;
+let TRIAL_SCORE = 0;
+
+function startTrial(trialIdx) {
+  CURRENT_TRIAL = trialIdx;
+  TRIAL_SCORE = 0;
+  showScreen('trial');
+  const renderers = [renderSatzSpeicher, renderMusterSchmiede, renderHoerGewoelbe, renderSprechHalle, renderHackLab];
+  renderers[trialIdx] && renderers[trialIdx]();
+}
+
+function completeTrialSuccess() {
+  const z = CURRENT_ZONE;
+  if(!STATE.completedTrials[z.id]) STATE.completedTrials[z.id] = [];
+  if(!STATE.completedTrials[z.id].includes(CURRENT_TRIAL)) {
+    STATE.completedTrials[z.id].push(CURRENT_TRIAL);
+  }
+  STATE.sessionStats.sentences += 5;
+  addXP(50, 30);
+  saveState();
+  flashReward('+50 XP! +30 Gold 🌟');
+  setTimeout(()=>{ showScreen('zone'); renderZone(); }, 1400);
+}
+
+// ---- TRIAL 1: SATZ-SPEICHER ----
+let satzPhase = 0; // 0=study, 1=replace, 2=quiz
+let satzIdx = 0;
+let satzQuizAnswered = [];
+let satzSelectedSlot = null;
+
+function renderSatzSpeicher() {
+  satzPhase = 0; satzIdx = 0; satzSelectedSlot = null;
+  renderSatzStudy();
+}
+
+function renderSatzStudy() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  const sentences = z.sentences.slice(0, 10);
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">📚 Satz-Speicher — Studie</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Studiere diese Sätze. Beachte die Struktur. Die Logik steckt darin.</div></div>`;
+  sentences.forEach((sent,i)=>{
+    html += `<div class="card">
+      <div class="german-text">${i+1}. ${sent.de} <button onclick="speak('${sent.de.replace(/'/g,"\\'")}', 0.85)" style="background:none;border:none;color:var(--blue);cursor:pointer;font-size:18px">🔊</button></div>
+      <div class="english-text">${sent.en}</div>
+    </div>`;
+  });
+  html += `<button class="btn" onclick="satzPhase=1;renderSatzReplace()">→ Replace Method üben</button>`;
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+function renderSatzReplace() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  const sent = z.sentences[satzIdx % z.sentences.length];
+  let sentenceHTML = sent.de;
+  sent.slots.forEach(slot=>{
+    sentenceHTML = sentenceHTML.replace(slot.word, `<span class="slot-word" onclick="openSlot('${slot.word}')">${slot.word}</span>`);
+  });
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="satzPhase=0;renderSatzStudy()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">📚 Replace Method — ${satzIdx+1}/${Math.min(5,z.sentences.length)}</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Tippe auf das goldene Wort, um es zu tauschen. Ein Satz = unendliche Varianten.</div></div>`;
+  html += `<div class="card card-gold">`;
+  html += `<p class="sentence-template">${sentenceHTML}</p>`;
+  html += `<div class="english-text" style="margin-top:8px">${sent.en}</div>`;
+  html += `<div id="slot-options-area"></div>`;
+  html += `</div>`;
+  html += `<div id="generated-sentence" style="display:none;margin:12px 0;padding:12px;background:rgba(76,175,80,0.1);border:1px solid var(--correct);border-radius:10px;font-family:Georgia,serif;font-size:16px;color:var(--correct)"></div>`;
+  if(satzIdx < Math.min(4, z.sentences.length-1)) {
+    html += `<button class="btn btn-secondary" onclick="satzIdx++;renderSatzReplace()">→ Nächster Satz</button>`;
+  } else {
+    html += `<button class="btn" onclick="satzPhase=2;renderSatzQuiz()">→ Quiz starten</button>`;
+  }
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+function openSlot(word) {
+  const z = CURRENT_ZONE;
+  const sent = z.sentences[satzIdx % z.sentences.length];
+  const slot = sent.slots.find(sl=>sl.word===word);
+  if(!slot) return;
+  satzSelectedSlot = slot;
+  const area = $('slot-options-area'); if(!area) return;
+  let html = `<div class="slot-options">`;
+  slot.opts.forEach(opt=>{
+    html += `<div class="slot-option" onclick="selectSlotOpt('${opt}','${word}')">${opt}</div>`;
+  });
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+function selectSlotOpt(newWord, oldWord) {
+  const z = CURRENT_ZONE;
+  const sent = z.sentences[satzIdx % z.sentences.length];
+  const newDe = sent.de.replace(oldWord, newWord);
+  const genDiv = $('generated-sentence');
+  if(genDiv) { genDiv.style.display='block'; genDiv.textContent = newDe; speak(newDe); }
+  flashReward('Neuer Satz! 🌟');
+}
+
+let satzQuizIdx = 0;
+function renderSatzQuiz() {
+  satzQuizIdx = 0; satzQuizAnswered = [];
+  renderSatzQuizQ();
+}
+
+function renderSatzQuizQ() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  if(satzQuizIdx >= 5) { completeTrialSuccess(); return; }
+  const sent = z.sentences[satzQuizIdx];
+  // Word reconstruction quiz: show shuffled words
+  const words = sent.de.replace(/[.,?!]/g,'').split(' ');
+  const shuffled = [...words].sort(()=>Math.random()-0.5);
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">📚 Quiz — ${satzQuizIdx+1}/5</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="quiz-progress">${[0,1,2,3,4].map(i=>`<div class="quiz-dot ${i<satzQuizIdx?'done':i===satzQuizIdx?'current':''}"></div>`).join('')}</div>`;
+  html += `<div class="quiz-question"><p style="color:var(--text-muted);margin-bottom:8px">Auf Deutsch übertragen:</p><p class="german-text" style="font-size:20px">${sent.en}</p></div>`;
+  html += `<p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">Tippe auf Wörter in der richtigen Reihenfolge:</p>`;
+  html += `<div class="answer-slots" id="answer-area"></div>`;
+  html += `<div class="word-tiles" id="word-pool">`;
+  shuffled.forEach((w,i)=>{ html += `<div class="word-tile" id="tile-${i}" onclick="addWordToAnswer('${w}',${i})">${w}</div>`; });
+  html += `</div>`;
+  html += `<div style="display:flex;gap:8px"><button class="btn btn-sm btn-secondary" onclick="clearAnswer()">↺ Reset</button><button class="btn btn-sm" onclick="checkSatzAnswer('${words.join(' ')}')">✓ Prüfen</button></div>`;
+  html += `</div>`;
+  s.innerHTML = html;
+  window._answerWords = [];
+  window._usedTiles = [];
+}
+
+function addWordToAnswer(word, tileIdx) {
+  if(window._usedTiles.includes(tileIdx)) return;
+  window._answerWords = window._answerWords || [];
+  window._answerWords.push({word, tileIdx});
+  window._usedTiles = window._usedTiles || [];
+  window._usedTiles.push(tileIdx);
+  const tile = $('tile-'+tileIdx);
+  if(tile) tile.classList.add('used');
+  const area = $('answer-area'); if(!area) return;
+  const w = el('div','answer-slot-word');
+  w.textContent = word;
+  w.onclick = ()=>removeWordFromAnswer(tileIdx, w);
+  area.appendChild(w);
+}
+
+function removeWordFromAnswer(tileIdx, wordEl) {
+  window._answerWords = (window._answerWords||[]).filter(w=>w.tileIdx!==tileIdx);
+  window._usedTiles = (window._usedTiles||[]).filter(t=>t!==tileIdx);
+  const tile = $('tile-'+tileIdx);
+  if(tile) tile.classList.remove('used');
+  if(wordEl && wordEl.parentNode) wordEl.parentNode.removeChild(wordEl);
+}
+
+function clearAnswer() {
+  window._answerWords = []; window._usedTiles = [];
+  renderSatzQuizQ();
+}
+
+function checkSatzAnswer(correctStr) {
+  const userStr = (window._answerWords||[]).map(w=>w.word).join(' ');
+  if(userStr.toLowerCase() === correctStr.toLowerCase()) {
+    flashReward('Richtig! ✓');
+    speak(correctStr);
+    satzQuizIdx++;
+    setTimeout(renderSatzQuizQ, 1000);
+  } else {
+    showNotif(`Falsch. Richtig: "${correctStr}"`);
+    logWeakSpot('sentence_reconstruction');
+  }
+}
+
+// ---- TRIAL 2: MUSTER-SCHMIEDE ----
+let musterIdx = 0;
+function renderMusterSchmiede() {
+  musterIdx = 0; renderMusterQ();
+}
+
+function renderMusterQ() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  if(musterIdx >= 5) { completeTrialSuccess(); return; }
+  // Generate grammar puzzles from zone's sentences
+  const puzzles = generateGrammarPuzzles(z);
+  const p = puzzles[musterIdx % puzzles.length];
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">⚙️ Muster-Schmiede — ${musterIdx+1}/5</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="quiz-progress">${[0,1,2,3,4].map(i=>`<div class="quiz-dot ${i<musterIdx?'done':i===musterIdx?'current':''}"></div>`).join('')}</div>`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Entziffere den Code. Die Grammatik ist das Betriebssystem der Sprache.</div></div>`;
+  html += `<div class="quiz-question"><p style="color:var(--blue);font-size:12px;margin-bottom:8px">⚙️ Grammatik-Rätsel</p><p class="german-text">${p.q}</p></div>`;
+  p.opts.forEach((opt,i)=>{
+    html += `<button class="option-btn" onclick="checkMuster(${i},${p.a},this)">${opt}</button>`;
+  });
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+function checkMuster(chosen, correct, btn) {
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b,i)=>{
+    b.disabled=true;
+    if(i===correct) b.classList.add('correct');
+    else if(i===chosen) b.classList.add('wrong');
+  });
+  if(chosen===correct) {
+    flashReward('Richtig! ⚙️');
+    musterIdx++;
+    setTimeout(renderMusterQ, 1200);
+  } else {
+    logWeakSpot('grammar_pattern');
+    setTimeout(()=>{ musterIdx++; renderMusterQ(); }, 1800);
+  }
+}
+
+function generateGrammarPuzzles(z) {
+  // Use boss questions as grammar puzzles
+  return z.bossQuestions.slice(0,5).map(q=>({q:q.q, opts:q.opts, a:q.a}));
+}
+
+// ---- TRIAL 3: HÖR-GEWÖLBE ----
+let hoerIdx = 0;
+function renderHoerGewoelbe() {
+  hoerIdx = 0; renderHoerQ();
+}
+
+function renderHoerQ() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  if(hoerIdx >= 5) { completeTrialSuccess(); return; }
+  const sent = z.sentences[hoerIdx];
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">🎧 Hör-Gewölbe — ${hoerIdx+1}/5</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="quiz-progress">${[0,1,2,3,4].map(i=>`<div class="quiz-dot ${i<hoerIdx?'done':i===hoerIdx?'current':''}"></div>`).join('')}</div>`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Entschlüssle das Audiosignal. Höre genau hin.</div></div>`;
+  html += `<div class="quiz-question">`;
+  html += `<div class="waveform" id="waveform">${Array(8).fill(0).map(()=>'<div class="wave-bar"></div>').join('')}</div>`;
+  html += `<button class="btn btn-blue btn-sm" onclick="playHoer('${sent.de.replace(/'/g,"\\'")}')">🔊 Abspielen (langsam)</button>`;
+  html += `<br><br><input type="text" class="text-input" id="hoer-input" placeholder="Was hörst du? Tippe es hier..." autocomplete="off" autocorrect="off" spellcheck="false">`;
+  html += `</div>`;
+  html += `<div id="hoer-diff"></div>`;
+  html += `<button class="btn" onclick="checkHoer('${sent.de.replace(/'/g,"\\'")}')">✓ Prüfen</button>`;
+  html += `</div>`;
+  s.innerHTML = html;
+  setTimeout(()=>playHoer(sent.de), 500);
+}
+
+function playHoer(text) {
+  const wf = $('waveform');
+  if(wf) wf.classList.remove('idle');
+  speak(text, 0.75);
+  setTimeout(()=>{ const wf=$('waveform'); if(wf) wf.classList.add('idle'); }, 3000);
+}
+
+function checkHoer(correct) {
+  const input = $('hoer-input'); if(!input) return;
+  const userText = input.value.trim().replace(/[.,?!]/g,'').toLowerCase();
+  const correctText = correct.replace(/[.,?!]/g,'').toLowerCase();
+  const userWords = userText.split(' ');
+  const correctWords = correctText.split(' ');
+  const diff = $('hoer-diff'); if(!diff) return;
+  let diffHTML = '<div class="diff-wrap">';
+  const maxLen = Math.max(userWords.length, correctWords.length);
+  let correct_count = 0;
+  correctWords.forEach((cw,i)=>{
+    const uw = userWords[i] || '';
+    if(uw === cw) { diffHTML += `<span class="diff-word diff-ok">${cw}</span>`; correct_count++; }
+    else if(uw) { diffHTML += `<span class="diff-word diff-bad">${uw}→${cw}</span>`; }
+    else { diffHTML += `<span class="diff-word diff-miss">[${cw}]</span>`; }
+  });
+  diffHTML += '</div>';
+  diff.innerHTML = diffHTML;
+  const accuracy = correct_count / correctWords.length;
+  if(accuracy >= 0.7) {
+    flashReward('Gut gehört! 🎧');
+    hoerIdx++;
+    setTimeout(renderHoerQ, 1500);
+  } else {
+    logWeakSpot('listening');
+    showNotif(`Weiter üben! Richtig: "${correct}"`);
+  }
+}
+
+// ---- TRIAL 4: SPRECH-HALLE (Self-rated) ----
+let sprechIdx = 0;
+function renderSprechHalle() {
+  sprechIdx = 0; renderSprechQ();
+}
+
+function renderSprechQ() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  const prompts = [
+    `Stelle dich auf Deutsch vor. Sage deinen Namen, deine Herkunft und was du werden willst.`,
+    `Beschreibe deine Motivation für die IT-Ausbildung.`,
+    `Erkläre, warum du Deutsch lernst und was dein Ziel ist.`
+  ];
+  if(sprechIdx >= 3) { completeTrialSuccess(); return; }
+  const prompt = prompts[sprechIdx];
+  const model = z.sentences[sprechIdx];
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">🎤 Sprech-Halle — ${sprechIdx+1}/3</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Sprich laut. Deine Aussprache war verdächtig, aber dein Selbstvertrauen ist auf nigerianischem Niveau. Arbeite an Ersterem.</div></div>`;
+  html += `<div class="quiz-question"><p style="color:var(--gold);font-weight:700;margin-bottom:12px">Prompt:</p><p class="german-text">${prompt}</p></div>`;
+  html += `<div class="card"><p style="color:var(--text-muted);font-size:12px">Modellantwort (zum Orientieren):</p><div class="german-text">${model.de} <button onclick="speak('${model.de.replace(/'/g,"\\'")}', 0.85)" style="background:none;border:none;color:var(--blue);cursor:pointer">🔊</button></div><div class="english-text">${model.en}</div></div>`;
+  html += `<p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Sprich die Antwort laut aus, dann bewertet dich selbst:</p>`;
+  html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">`;
+  html += `<button class="btn btn-secondary" style="margin:0" onclick="sprechRate(false)">😔 Nochmal üben</button>`;
+  html += `<button class="btn" style="margin:0" onclick="sprechRate(true)">✓ Gut gesagt!</button>`;
+  html += `</div></div>`;
+  s.innerHTML = html;
+}
+
+function sprechRate(good) {
+  if(good) { flashReward('Gesprochen! 🎤'); sprechIdx++; setTimeout(renderSprechQ, 800); }
+  else { showNotif('Übe die Aussprache nochmal!'); logWeakSpot('speaking'); }
+}
+
+// ---- TRIAL 5: HACK LAB ----
+let hackLabIdx = 0;
+function renderHackLab() {
+  hackLabIdx = 0; renderHackQ();
+}
+
+function renderHackQ() {
+  const s = $('s-trial'); if(!s) return;
+  const z = CURRENT_ZONE;
+  const hackIds = z.hackIds || [0,1];
+  if(hackLabIdx >= hackIds.length) { completeTrialSuccess(); return; }
+  const hack = HACKS[hackIds[hackLabIdx] % HACKS.length];
+  const alreadyUnlocked = STATE.unlockedHacks.includes(hack.id);
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('zone');renderZone()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">🦊 Hack Lab — ${hackLabIdx+1}/${hackIds.length}</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Dies ist ein Hack. Nicht um zu mogeln — um schneller zu denken. Sammle sie alle.</div></div>`;
+  html += `<div class="hack-card">`;
+  html += `<div class="hack-title">🔮 ${hack.title}</div>`;
+  html += `<div class="hack-body">${hack.body}</div>`;
+  html += `<div class="hack-example">${hack.example}</div>`;
+  html += `</div>`;
+  // Mini-puzzle: apply the hack
+  const exWords = hack.example.split(',').map(s=>s.trim()).slice(0,3);
+  html += `<div class="card"><p style="color:var(--text-muted);font-size:13px">Wende den Hack an — welches ist ein Beispiel für diesen Hack?</p>`;
+  const wrongOpts = ['das Haus', 'ich bin', 'sehr gut', 'immer'];
+  const allOpts = [exWords[0], wrongOpts[Math.floor(Math.random()*4)]].sort(()=>Math.random()-0.5);
+  const correctIdx = allOpts.indexOf(exWords[0]);
+  allOpts.forEach((opt,i)=>{
+    html += `<button class="option-btn" onclick="checkHack(${i},${correctIdx},this)">${opt}</button>`;
+  });
+  html += `</div>`;
+  if(alreadyUnlocked) { html += `<p style="text-align:center;color:var(--correct);font-size:13px">✓ Bereits in deinem Journal</p>`; }
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+function checkHack(chosen, correct, btn) {
+  const btns = document.querySelectorAll('.option-btn');
+  btns.forEach((b,i)=>{ b.disabled=true; if(i===correct) b.classList.add('correct'); else if(i===chosen) b.classList.add('wrong'); });
+  const z = CURRENT_ZONE;
+  const hack = HACKS[z.hackIds[hackLabIdx] % HACKS.length];
+  if(!STATE.unlockedHacks.includes(hack.id)) {
+    STATE.unlockedHacks.push(hack.id);
+    STATE.sessionStats.hacks++;
+    saveState();
+    flashReward(`Hack freigeschaltet! 📖`);
+  } else {
+    flashReward(chosen===correct ? 'Richtig! 🦊' : 'Fast!');
+  }
+  hackLabIdx++;
+  setTimeout(renderHackQ, 1200);
+}
+
+function logWeakSpot(key) {
+  STATE.weakSpots[key] = (STATE.weakSpots[key]||0)+1;
+  if(STATE.weakSpots[key] === 3) showNotif(`⚠️ Bertram flaggt: "${key}" — mehr Übung nötig!`);
+  saveState();
+}
+
+// ============================================================
+// RECAP QUIZ
+// ============================================================
+let recapZoneId = 1;
+let recapQs = [];
+let recapIdx = 0;
+
+function renderRecap(zoneId) {
+  recapZoneId = zoneId;
+  const prevZone = getZone(zoneId-1);
+  // Use 8 questions from previous zone's boss questions
+  recapQs = [...prevZone.bossQuestions].sort(()=>Math.random()-0.5).slice(0,8);
+  recapIdx = 0;
+  renderRecapQ();
+}
+
+function renderRecapQ() {
+  const s = $('s-recap'); if(!s) return;
+  if(recapIdx >= recapQs.length) {
+    // All correct
+    STATE.recapCompleted[recapZoneId] = true;
+    saveState();
+    showScreen('zone');
+    CURRENT_ZONE = getZone(recapZoneId);
+    renderZone();
+    return;
+  }
+  const q = recapQs[recapIdx];
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('map');renderMap()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">Tagesrückblick — ${recapIdx+1}/${recapQs.length}</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Kein Schlüpfen durch. 100% nötig. Zeig mir, dass du es wirklich weißt.</div></div>`;
+  html += `<div class="quiz-progress">${recapQs.map((_,i)=>`<div class="quiz-dot ${i<recapIdx?'done':i===recapIdx?'current':''}"></div>`).join('')}</div>`;
+  html += `<div class="quiz-question"><p class="german-text">${q.q}</p></div>`;
+  q.opts.forEach((opt,i)=>{
+    html += `<button class="option-btn" onclick="checkRecap(${i},${q.a},this)">${opt}</button>`;
+  });
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+function checkRecap(chosen, correct, btn) {
+  const btns = document.querySelectorAll('#s-recap .option-btn');
+  btns.forEach((b,i)=>{ b.disabled=true; if(i===correct) b.classList.add('correct'); else if(i===chosen) b.classList.add('wrong'); });
+  if(chosen===correct) {
+    recapIdx++;
+    setTimeout(renderRecapQ, 900);
+  } else {
+    // Reset recap
+    logWeakSpot('recap');
+    showNotif('Falsch! Neustart mit neuen Fragen...');
+    setTimeout(()=>renderRecap(recapZoneId), 1500);
+  }
+}
+
+// ============================================================
+// BOSS BATTLE
+// ============================================================
+let bossQs = [];
+let bossIdx = 0;
+let bossPlayerHP = 100;
+let bossBossHP = 100;
+let bossCorrect = 0;
+let bossTimer = null;
+let bossTimeLeft = 45;
+
+function startBoss() {
+  const z = CURRENT_ZONE;
+  bossQs = [...z.bossQuestions].sort(()=>Math.random()-0.5);
+  bossIdx = 0; bossPlayerHP = 100; bossBossHP = 100; bossCorrect = 0;
+  showScreen('boss');
+  renderBossQ();
+}
+
+function renderBossQ() {
+  const s = $('s-boss'); if(!s) return;
+  if(bossIdx >= bossQs.length) {
+    clearInterval(bossTimer);
+    const passed = bossCorrect >= 9;
+    renderBossResult(passed);
+    return;
+  }
+  const q = bossQs[bossIdx];
+  bossTimeLeft = 45;
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="clearInterval(bossTimer);showScreen('zone');renderZone()">✗</button><span style="flex:1;text-align:center;font-size:13px;color:var(--wrong-bright)">⚔️ Boss-Kampf — ${bossIdx+1}/10</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="boss-health">
+    <div class="health-bar-wrap">
+      <div class="health-bar-label">Du</div>
+      <div class="health-bar"><div class="health-fill health-player" id="player-hp" style="width:${bossPlayerHP}%"></div></div>
+    </div>
+    <div class="health-bar-wrap">
+      <div class="health-bar-label">Boss</div>
+      <div class="health-bar"><div class="health-fill health-boss" id="boss-hp" style="width:${bossBossHP}%"></div></div>
+    </div>
+  </div>`;
+  html += `<div class="timer-circle" id="boss-timer">${bossTimeLeft}</div>`;
+  html += `<div class="quiz-question"><p class="german-text">${q.q}</p></div>`;
+  q.opts.forEach((opt,i)=>{
+    html += `<button class="option-btn" id="bopt-${i}" onclick="checkBoss(${i},${q.a})">${opt}</button>`;
+  });
+  html += `</div>`;
+  s.innerHTML = html;
+  startBossTimer(q.a);
+}
+
+function startBossTimer(correct) {
+  clearInterval(bossTimer);
+  bossTimer = setInterval(()=>{
+    bossTimeLeft--;
+    const td = $('boss-timer');
+    if(td) { td.textContent = bossTimeLeft; if(bossTimeLeft<=10) td.classList.add('urgent'); }
+    if(bossTimeLeft<=0) {
+      clearInterval(bossTimer);
+      checkBoss(-1, correct);
+    }
+  }, 1000);
+}
+
+function checkBoss(chosen, correct) {
+  clearInterval(bossTimer);
+  const btns = document.querySelectorAll('#s-boss .option-btn');
+  btns.forEach((b,i)=>{ b.disabled=true; if(i===correct) b.classList.add('correct'); else if(i===chosen) b.classList.add('wrong'); });
+  if(chosen===correct) {
+    bossCorrect++;
+    bossBossHP = Math.max(0, bossBossHP - 10);
+    flashReward('⚔️ Treffer!');
+  } else {
+    bossPlayerHP = Math.max(0, bossPlayerHP - 15);
+    logWeakSpot('boss');
+  }
+  const php = $('player-hp'); if(php) php.style.width = bossPlayerHP+'%';
+  const bhp = $('boss-hp'); if(bhp) bhp.style.width = bossBossHP+'%';
+  if(bossPlayerHP <= 0) { clearInterval(bossTimer); renderBossResult(false); return; }
+  bossIdx++;
+  setTimeout(renderBossQ, 1000);
+}
+
+function renderBossResult(passed) {
+  const s = $('s-boss'); if(!s) return;
+  const z = CURRENT_ZONE;
+  if(passed) {
+    STATE.bossDefeated[z.id] = true;
+    addXP(200, 150);
+    STATE.sessionStats.sentences += 10;
+    saveState();
+  } else {
+    STATE.gold = Math.max(0, STATE.gold-40);
+    saveState();
+  }
+  let html = `<div id="hud" class="hud"></div><div class="screen-content" style="text-align:center;padding-top:40px">`;
+  if(passed) {
+    html += `<div style="font-size:60px">🏆</div><h2 style="color:var(--correct)">Boss besiegt!</h2>`;
+    html += `<p>${bossCorrect}/10 richtig</p>`;
+    html += `<div class="card" style="text-align:left"><div class="summary-stat"><span>XP gewonnen</span><span class="summary-val">+200</span></div><div class="summary-stat"><span>Gold gewonnen</span><span class="summary-val">+150</span></div></div>`;
+    html += `<div class="bertram-wrap" style="text-align:left"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Interessante Leistung. Zone ${z.id+1} wartet. Die Ausbildung wartet nicht.</div></div>`;
+    html += `<button class="btn" onclick="showSummary()">→ Sessionszusammenfassung</button>`;
+  } else {
+    html += `<div style="font-size:60px">💀</div><h2 style="color:var(--wrong-bright)">Nicht bestanden</h2>`;
+    html += `<p>${bossCorrect}/10 richtig. Benötigt: 9/10</p><p style="color:var(--text-muted)">-40 Gold Strafe</p>`;
+    html += `<div class="bertram-wrap" style="text-align:left"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Interessante Wahl. Falsch, aber interessant. Die Trials nochmal, dann nochmal kämpfen.</div></div>`;
+    html += `<button class="btn btn-secondary" onclick="startBoss()">↺ Nochmal versuchen</button>`;
+    html += `<button class="btn btn-secondary" onclick="showScreen('zone');renderZone()">← Zone zurück</button>`;
+  }
+  html += `</div>`;
+  s.innerHTML = html;
+  updateHUD();
+}
+
+// ============================================================
+// DOPAMINE SUMMARY
+// ============================================================
+function showSummary() {
+  const s = $('s-summary'); if(!s) return;
+  showScreen('summary');
+  const stats = STATE.sessionStats;
+  let html = `<div id="hud" class="hud"></div><div class="screen-content" style="text-align:center;padding-top:24px">`;
+  html += `<div style="font-size:60px">⭐</div>`;
+  html += `<h2>Session abgeschlossen!</h2>`;
+  html += `<div class="bertram-wrap" style="text-align:left;margin-top:16px"><span class="bertram-fox">🦊</span><div class="bertram-bubble">Dangote hat nicht in einem Tag gebaut. Du auch nicht. Aber du hast heute gebaut. Sei morgen wieder hier.</div></div>`;
+  html += `<div class="card" style="text-align:left;margin-top:16px">`;
+  html += `<div class="summary-stat"><span>📚 Sätze gelernt</span><span class="summary-val">${stats.sentences}</span></div>`;
+  html += `<div class="summary-stat"><span>🔮 Hacks freigeschaltet</span><span class="summary-val">${stats.hacks}</span></div>`;
+  html += `<div class="summary-stat"><span>⚡ XP verdient</span><span class="summary-val">+${stats.xpEarned}</span></div>`;
+  html += `<div class="summary-stat"><span>🔥 Streak</span><span class="summary-val">${STATE.streak} Tage</span></div>`;
+  html += `</div>`;
+  html += `<button class="btn" style="margin-top:20px" onclick="showScreen('map');renderMap()">→ Zur Weltkarte</button>`;
+  html += `<button class="btn btn-secondary" onclick="showScreen('start');renderStart()">🏠 Startseite</button>`;
+  html += `</div>`;
+  s.innerHTML = html;
+  STATE.sessionStats = { sentences: 0, hacks: 0, xpEarned: 0 };
+  saveState();
+}
+
+// ============================================================
+// HACK JOURNAL
+// ============================================================
+function renderJournal() {
+  const s = $('s-journal'); if(!s) return;
+  const unlocked = HACKS.filter(h=>STATE.unlockedHacks.includes(h.id));
+  const categories = ['Verb Hacks','Noun Hacks','Adjective Hacks','Vocabulary Hacks','Grammar Hacks','Pronunciation Hacks'];
+  let html = `<div id="hud" class="hud"><button class="back-btn" onclick="showScreen('start');renderStart()">←</button><span style="flex:1;text-align:center;font-size:13px;color:var(--gold)">📖 Bertrams Journal</span></div>`;
+  html += `<div class="screen-content">`;
+  html += `<div class="bertram-wrap"><span class="bertram-fox">🦊</span><div class="bertram-bubble">${unlocked.length} von ${HACKS.length} Hacks gesammelt. Die Ausländerbehörde hat keine Shortcuts. Aber die Sprache hat welche.</div></div>`;
+  if(unlocked.length === 0) {
+    html += `<div class="card"><p>Noch keine Hacks freigeschaltet. Schließe Hack Lab Trials ab.</p></div>`;
+  }
+  unlocked.forEach(h=>{
+    html += `<div class="hack-card"><div class="hack-title">🔮 ${h.title}</div><div class="hack-body">${h.body}</div><div class="hack-example">${h.example}</div></div>`;
+  });
+  // Show locked hacks dimmed
+  const locked = HACKS.filter(h=>!STATE.unlockedHacks.includes(h.id));
+  if(locked.length > 0) {
+    html += `<p style="color:var(--text-muted);font-size:13px;margin:16px 0 8px">Noch gesperrt:</p>`;
+    locked.forEach(h=>{
+      html += `<div class="hack-card" style="opacity:0.3"><div class="hack-title">🔒 ${h.title}</div></div>`;
+    });
+  }
+  html += `<button class="btn btn-secondary" style="margin-top:20px" onclick="showScreen('start');renderStart()">← Zurück</button>`;
+  html += `</div>`;
+  s.innerHTML = html;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function initApp() {
+  const root = $('root');
+  root.innerHTML = `
+    <div id="s-start" class="screen"></div>
+    <div id="s-map" class="screen hidden"></div>
+    <div id="s-zone" class="screen hidden"></div>
+    <div id="s-trial" class="screen hidden"></div>
+    <div id="s-boss" class="screen hidden"></div>
+    <div id="s-summary" class="screen hidden"></div>
+    <div id="s-journal" class="screen hidden"></div>
+    <div id="s-recap" class="screen hidden"></div>
+  `;
+  initSpeech();
+  updateStreak();
+  renderStart();
+  showScreen('start');
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
+</script>
+</body>
+</html>
