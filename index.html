@@ -1,0 +1,4775 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Deutsch Unlocked — Das Spiel v2</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+
+<style>
+
+:root {
+
+  --black: #0a0a0a;
+
+  --dark: #111111;
+
+  --card: #181818;
+
+  --border: #2a2a2a;
+
+  --gold: #d4a017;
+
+  --gold-light: #f0c040;
+
+  --red: #c0392b;
+
+  --green: #27ae60;
+
+  --blue: #2980b9;
+
+  --text: #e8e8e0;
+
+  --muted: #888;
+
+  --accent: #e8c84a;
+
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+
+  background: var(--black);
+
+  color: var(--text);
+
+  font-family: 'Crimson Pro', Georgia, serif;
+
+  font-size: 17px;
+
+  line-height: 1.6;
+
+  min-height: 100vh;
+
+}
+
+.screen { display: none; min-height: 100vh; }
+
+.screen.active { display: flex; flex-direction: column; }
+
+/* TITLE */
+
+#title-screen {
+
+  background: var(--black);
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 2rem;
+
+  position: relative;
+
+  overflow: hidden;
+
+}
+
+#title-screen::before {
+
+  content: '';
+
+  position: absolute;
+
+  inset: 0;
+
+  background: repeating-linear-gradient(0deg,transparent,transparent 40px,rgba(212,160,23,0.04) 40px,rgba(212,160,23,0.04) 41px);
+
+  pointer-events: none;
+
+}
+
+.title-flag { font-size: 4rem; margin-bottom: 1rem; animation: pulse 2s ease-in-out infinite; }
+
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+.title-main {
+
+  font-family: 'Bebas Neue', sans-serif;
+
+  font-size: clamp(3.5rem,12vw,7rem);
+
+  letter-spacing: 0.06em;
+
+  color: var(--accent);
+
+  text-shadow: 0 0 40px rgba(232,200,74,0.3);
+
+  line-height: 1;
+
+}
+
+.title-sub {
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.75rem;
+
+  letter-spacing: 0.3em;
+
+  color: var(--muted);
+
+  text-transform: uppercase;
+
+  margin: 0.5rem 0 2rem;
+
+}
+
+.stats-bar { display: flex; gap: 2rem; justify-content: center; margin: 1.5rem 0 2.5rem; flex-wrap: wrap; }
+
+.stat-pill {
+
+  background: var(--card);
+
+  border: 1px solid var(--border);
+
+  padding: 0.4rem 1rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.7rem;
+
+  letter-spacing: 0.15em;
+
+  color: var(--accent);
+
+}
+
+.btn-primary {
+
+  background: var(--accent);
+
+  color: var(--black);
+
+  border: none;
+
+  padding: 1rem 3rem;
+
+  font-family: 'Bebas Neue', sans-serif;
+
+  font-size: 1.4rem;
+
+  letter-spacing: 0.12em;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  display: inline-block;
+
+}
+
+.btn-primary:hover { background: var(--gold-light); transform: translateY(-2px); }
+
+.btn-secondary {
+
+  background: transparent;
+
+  color: var(--muted);
+
+  border: 1px solid var(--border);
+
+  padding: 0.6rem 1.5rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.72rem;
+
+  letter-spacing: 0.1em;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+}
+
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+/* MAP */
+
+#map-screen { background: var(--dark); }
+
+.map-header {
+
+  background: var(--black);
+
+  border-bottom: 1px solid var(--border);
+
+  padding: 1rem 1.5rem;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 1rem;
+
+  flex-wrap: wrap;
+
+}
+
+.map-header-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.08em; color: var(--accent); }
+
+.xp-bar-wrap { flex: 1; min-width: 160px; max-width: 280px; }
+
+.xp-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--muted); letter-spacing: 0.1em; margin-bottom: 4px; }
+
+.xp-bar { height: 6px; background: var(--border); position: relative; }
+
+.xp-fill { height: 100%; background: var(--accent); transition: width 0.6s ease; }
+
+.gold-badge { font-family: 'Space Mono', monospace; font-size: 0.8rem; color: var(--accent); border: 1px solid var(--accent); padding: 0.3rem 0.8rem; }
+
+.map-grid {
+
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+
+  gap: 1px;
+
+  background: var(--border);
+
+  padding: 1px;
+
+  flex: 1;
+
+}
+
+.lesson-card {
+
+  background: var(--card);
+
+  padding: 1.4rem;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  border-left: 3px solid transparent;
+
+  position: relative;
+
+}
+
+.lesson-card:hover { background: #1e1e1e; border-left-color: var(--accent); }
+
+.lesson-card.locked { opacity: 0.4; cursor: not-allowed; }
+
+.lesson-card.completed { border-left-color: var(--green); }
+
+.lesson-card.active-lesson { border-left-color: var(--accent); }
+
+.card-num { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--border); line-height: 1; margin-bottom: 0.3rem; }
+
+.lesson-card.completed .card-num { color: var(--green); }
+
+.lesson-card.active-lesson .card-num { color: var(--accent); }
+
+.card-title { font-family: 'Space Mono', monospace; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; color: var(--text); margin-bottom: 0.4rem; line-height: 1.3; }
+
+.card-meta { font-family: 'Space Mono', monospace; font-size: 0.62rem; color: var(--muted); letter-spacing: 0.08em; }
+
+.card-stars { color: var(--accent); font-size: 0.8rem; margin-top: 0.4rem; }
+
+.lock-icon { position: absolute; top: 1rem; right: 1rem; font-size: 1.1rem; }
+
+/* LESSON */
+
+#lesson-screen { background: var(--dark); }
+
+.lesson-header {
+
+  background: var(--black);
+
+  border-bottom: 1px solid var(--border);
+
+  padding: 0.8rem 1.5rem;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 1.2rem;
+
+  flex-wrap: wrap;
+
+}
+
+.back-btn {
+
+  background: none; border: 1px solid var(--border); color: var(--muted);
+
+  font-family: 'Space Mono', monospace; font-size: 0.7rem;
+
+  cursor: pointer; letter-spacing: 0.1em; padding: 0.4rem 0.8rem;
+
+  transition: all 0.2s;
+
+}
+
+.back-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+.lesson-title-bar { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.06em; color: var(--accent); flex: 1; }
+
+.progress-dots { display: flex; gap: 4px; flex-wrap: wrap; }
+
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+
+.dot.done { background: var(--green); }
+
+.dot.current { background: var(--accent); }
+
+.lesson-body { flex: 1; overflow-y: auto; padding: 1.5rem; max-width: 760px; margin: 0 auto; width: 100%; }
+
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; flex-wrap: wrap; }
+
+.tab {
+
+  padding: 0.6rem 1.2rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.65rem;
+
+  letter-spacing: 0.1em;
+
+  color: var(--muted);
+
+  cursor: pointer;
+
+  border-bottom: 2px solid transparent;
+
+  transition: all 0.2s;
+
+  background: none;
+
+  border-top: none; border-left: none; border-right: none;
+
+}
+
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* EXPLANATION PANEL */
+
+.explanation-panel {
+
+  background: linear-gradient(135deg, #0f0f0f, #1a1400);
+
+  border: 1px solid rgba(232,200,74,0.3);
+
+  border-left: 4px solid var(--accent);
+
+  padding: 1.5rem;
+
+  margin-bottom: 1.5rem;
+
+  position: relative;
+
+}
+
+.explanation-panel h3 {
+
+  font-family: 'Bebas Neue', sans-serif;
+
+  font-size: 1.4rem;
+
+  letter-spacing: 0.08em;
+
+  color: var(--accent);
+
+  margin-bottom: 0.75rem;
+
+}
+
+.explanation-panel p {
+
+  color: rgba(232,232,224,0.85);
+
+  line-height: 1.8;
+
+  font-size: 1rem;
+
+  margin-bottom: 0.5rem;
+
+}
+
+.explanation-panel .key-points {
+
+  margin-top: 1rem;
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 0.5rem;
+
+}
+
+.key-point {
+
+  background: rgba(232,200,74,0.1);
+
+  border: 1px solid rgba(232,200,74,0.25);
+
+  padding: 0.3rem 0.7rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.62rem;
+
+  color: var(--accent);
+
+  letter-spacing: 0.05em;
+
+}
+
+.narrate-btn {
+
+  position: absolute;
+
+  top: 1rem;
+
+  right: 1rem;
+
+  background: rgba(232,200,74,0.15);
+
+  border: 1px solid rgba(232,200,74,0.3);
+
+  color: var(--accent);
+
+  padding: 0.4rem 0.8rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.62rem;
+
+  cursor: pointer;
+
+  letter-spacing: 0.08em;
+
+  transition: all 0.2s;
+
+}
+
+.narrate-btn:hover { background: rgba(232,200,74,0.25); }
+
+.narrate-btn.playing { color: var(--green); border-color: var(--green); }
+
+/* EXAMPLES TABLE */
+
+.examples-table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; }
+
+.examples-table th {
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.65rem;
+
+  letter-spacing: 0.1em;
+
+  color: var(--muted);
+
+  text-align: left;
+
+  padding: 0.5rem 0.8rem;
+
+  background: var(--black);
+
+  border-bottom: 1px solid var(--border);
+
+}
+
+.examples-table td { padding: 0.6rem 0.8rem; border-bottom: 1px solid var(--border); font-size: 0.95rem; vertical-align: middle; }
+
+.examples-table tr:hover td { background: rgba(232,200,74,0.04); }
+
+.de-text { color: var(--accent); font-style: italic; }
+
+.grammar-note { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); }
+
+.speak-btn {
+
+  background: none;
+
+  border: none;
+
+  cursor: pointer;
+
+  color: var(--muted);
+
+  font-size: 1rem;
+
+  padding: 0.2rem 0.4rem;
+
+  transition: color 0.2s;
+
+  line-height: 1;
+
+}
+
+.speak-btn:hover { color: var(--accent); }
+
+/* EXERCISES */
+
+.exercise-card {
+
+  background: var(--black);
+
+  border: 1px solid var(--border);
+
+  padding: 1.4rem;
+
+  margin-bottom: 1rem;
+
+}
+
+.exercise-block-label {
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.65rem;
+
+  letter-spacing: 0.15em;
+
+  color: var(--gold);
+
+  text-transform: uppercase;
+
+  margin-bottom: 1rem;
+
+  border-bottom: 1px solid var(--border);
+
+  padding-bottom: 0.5rem;
+
+}
+
+.question-row { margin-bottom: 0.9rem; display: flex; gap: 0.8rem; align-items: flex-start; flex-wrap: wrap; }
+
+.q-label { font-family: 'Space Mono', monospace; font-size: 0.7rem; color: var(--muted); min-width: 36px; padding-top: 4px; }
+
+.q-content { flex: 1; min-width: 200px; }
+
+.q-text { margin-bottom: 0.4rem; font-size: 0.95rem; }
+
+.q-input {
+
+  width: 100%;
+
+  background: #0f0f0f;
+
+  border: 1px solid var(--border);
+
+  color: var(--text);
+
+  padding: 0.4rem 0.7rem;
+
+  font-family: 'Crimson Pro', serif;
+
+  font-size: 0.95rem;
+
+  outline: none;
+
+  transition: border-color 0.2s;
+
+}
+
+.q-input:focus { border-color: var(--accent); }
+
+.q-input.correct { border-color: var(--green); background: rgba(39,174,96,0.08); }
+
+.q-input.wrong { border-color: var(--red); background: rgba(192,57,43,0.08); }
+
+.q-options { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.3rem; }
+
+.opt-btn {
+
+  background: var(--card);
+
+  border: 1px solid var(--border);
+
+  color: var(--text);
+
+  padding: 0.35rem 0.9rem;
+
+  font-family: 'Crimson Pro', serif;
+
+  font-size: 0.9rem;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+}
+
+.opt-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+.opt-btn.selected { border-color: var(--accent); background: rgba(232,200,74,0.1); color: var(--accent); }
+
+.opt-btn.correct-ans { border-color: var(--green); background: rgba(39,174,96,0.15); color: var(--green); }
+
+.opt-btn.wrong-ans { border-color: var(--red); background: rgba(192,57,43,0.1); color: var(--red); }
+
+.feedback-row { font-family: 'Space Mono', monospace; font-size: 0.68rem; margin-top: 0.3rem; padding: 0.3rem 0.5rem; display: none; }
+
+.feedback-row.show { display: block; }
+
+.feedback-row.correct { color: var(--green); }
+
+.feedback-row.wrong { color: var(--red); }
+
+.check-row { display: flex; gap: 1rem; align-items: center; margin-top: 1.2rem; flex-wrap: wrap; }
+
+.btn-check {
+
+  background: var(--accent);
+
+  color: var(--black);
+
+  border: none;
+
+  padding: 0.55rem 1.6rem;
+
+  font-family: 'Bebas Neue', sans-serif;
+
+  font-size: 1.1rem;
+
+  letter-spacing: 0.1em;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+}
+
+.btn-check:hover { background: var(--gold-light); }
+
+.score-mini { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); }
+
+/* DICTATION BLOCK */
+
+.dictation-block {
+
+  background: #0d0d1a;
+
+  border: 1px solid rgba(41,128,185,0.4);
+
+  padding: 1.4rem;
+
+  margin-bottom: 1rem;
+
+}
+
+.dictation-block .exercise-block-label { color: var(--blue); border-color: rgba(41,128,185,0.3); }
+
+.play-audio-btn {
+
+  background: rgba(41,128,185,0.2);
+
+  border: 1px solid rgba(41,128,185,0.5);
+
+  color: #5dade2;
+
+  padding: 0.6rem 1.2rem;
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.7rem;
+
+  cursor: pointer;
+
+  letter-spacing: 0.1em;
+
+  transition: all 0.2s;
+
+  margin-bottom: 0.75rem;
+
+  display: inline-flex;
+
+  align-items: center;
+
+  gap: 0.5rem;
+
+}
+
+.play-audio-btn:hover { background: rgba(41,128,185,0.35); }
+
+/* SPEAKING BLOCK */
+
+.speaking-block {
+
+  background: #0d1a0d;
+
+  border: 1px solid rgba(39,174,96,0.4);
+
+  padding: 1.4rem;
+
+  margin-bottom: 1rem;
+
+}
+
+.speaking-block .exercise-block-label { color: var(--green); border-color: rgba(39,174,96,0.3); }
+
+.mic-btn {
+
+  width: 4rem;
+
+  height: 4rem;
+
+  border-radius: 50%;
+
+  border: 2px solid rgba(39,174,96,0.5);
+
+  background: rgba(39,174,96,0.15);
+
+  color: var(--green);
+
+  font-size: 1.5rem;
+
+  cursor: pointer;
+
+  transition: all 0.2s;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin: 0.75rem auto;
+
+}
+
+.mic-btn:hover { background: rgba(39,174,96,0.3); }
+
+.mic-btn.recording { border-color: var(--red); background: rgba(192,57,43,0.2); color: var(--red); animation: pulse-rec 1s ease-in-out infinite; }
+
+@keyframes pulse-rec { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+
+.speaking-prompt {
+
+  text-align: center;
+
+  padding: 1rem;
+
+  background: rgba(39,174,96,0.08);
+
+  border: 1px solid rgba(39,174,96,0.2);
+
+  margin-bottom: 1rem;
+
+}
+
+.speaking-prompt .de-sentence {
+
+  font-size: 1.2rem;
+
+  font-style: italic;
+
+  color: var(--accent);
+
+  font-family: 'Crimson Pro', serif;
+
+}
+
+.speaking-prompt .en-sentence { font-size: 0.85rem; color: var(--muted); margin-top: 0.25rem; }
+
+.score-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin: 0.5rem 0; }
+
+.score-bar-fill { height: 100%; transition: width 0.8s ease; border-radius: 3px; }
+
+/* RECAP MODAL */
+
+#recap-modal {
+
+  display: none;
+
+  position: fixed;
+
+  inset: 0;
+
+  background: rgba(0,0,0,0.85);
+
+  z-index: 1000;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 1rem;
+
+}
+
+#recap-modal.active { display: flex; }
+
+.recap-box {
+
+  background: var(--dark);
+
+  border: 1px solid var(--accent);
+
+  max-width: 560px;
+
+  width: 100%;
+
+  padding: 2rem;
+
+  max-height: 90vh;
+
+  overflow-y: auto;
+
+}
+
+.recap-title { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); margin-bottom: 0.5rem; }
+
+.recap-subtitle { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--muted); margin-bottom: 1.5rem; letter-spacing: 0.1em; }
+
+.recap-q { margin-bottom: 1.25rem; }
+
+.recap-q-text { margin-bottom: 0.5rem; font-size: 0.95rem; }
+
+.recap-opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.recap-result { text-align: center; padding: 1.5rem 0; }
+
+.recap-result .big-score { font-family: 'Bebas Neue', sans-serif; font-size: 4rem; color: var(--accent); line-height: 1; }
+
+.recap-result p { font-family: 'Space Mono', monospace; font-size: 0.75rem; color: var(--muted); margin-top: 0.5rem; letter-spacing: 0.1em; }
+
+/* COMPLETE CARD */
+
+.complete-card {
+
+  background: var(--black);
+
+  border: 1px solid var(--accent);
+
+  padding: 2.5rem;
+
+  text-align: center;
+
+  margin-top: 1rem;
+
+}
+
+.complete-title { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; color: var(--accent); letter-spacing: 0.08em; }
+
+.complete-stats { display: flex; gap: 2rem; justify-content: center; margin: 1.2rem 0 2rem; flex-wrap: wrap; }
+
+.c-stat { text-align: center; }
+
+.c-num { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--accent); line-height: 1; }
+
+.c-lbl { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--muted); letter-spacing: 0.1em; }
+
+/* TOAST */
+
+.toast {
+
+  position: fixed;
+
+  bottom: 2rem;
+
+  left: 50%;
+
+  transform: translateX(-50%) translateY(20px);
+
+  background: var(--accent);
+
+  color: var(--black);
+
+  font-family: 'Space Mono', monospace;
+
+  font-size: 0.75rem;
+
+  letter-spacing: 0.1em;
+
+  padding: 0.7rem 1.5rem;
+
+  opacity: 0;
+
+  transition: all 0.3s;
+
+  z-index: 9999;
+
+  pointer-events: none;
+
+  white-space: nowrap;
+
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+::-webkit-scrollbar { width: 4px; }
+
+::-webkit-scrollbar-track { background: var(--dark); }
+
+::-webkit-scrollbar-thumb { background: var(--border); }
+
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+
+@media(max-width:500px) {
+
+  .title-main { font-size: 3rem; }
+
+  .map-grid { grid-template-columns: 1fr 1fr; }
+
+  .lesson-body { padding: 1rem; }
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- TITLE SCREEN -->
+
+<div id="title-screen" class="screen active">
+
+  <div class="title-flag">🇩🇪</div>
+
+  <div class="title-main">DEUTSCH<br>UNLOCKED</div>
+
+  <div class="title-sub">Das komplette Spiel · A1 bis B2 · v2.0</div>
+
+  <div class="stats-bar">
+
+```
+<div class="stat-pill" id="title-xp">0 XP</div>
+
+<div class="stat-pill" id="title-gold">0 GOLD</div>
+
+<div class="stat-pill" id="title-progress">0 / 24 LESSONS</div>
+```
+
+  </div>
+
+<button class="btn-primary" onclick="goToMap()">SPIELEN — PLAY</button>
+
+<br><br>
+
+<button class="btn-secondary" onclick="resetProgress()">↺ RESET PROGRESS</button>
+
+  <p style="margin-top:3rem;font-family:'Space Mono',monospace;font-size:0.6rem;color:var(--muted);letter-spacing:0.15em;">
+
+```
+24 LESSONS · DICTATION · SPEAKING · RECAP QUIZZES · MALE NARRATOR
+```
+
+  </p>
+
+</div>
+
+<!-- MAP SCREEN -->
+
+<div id="map-screen" class="screen">
+
+  <div class="map-header">
+
+```
+<div class="map-header-title">🗺 LERNKARTE</div>
+
+<div class="xp-bar-wrap">
+
+  <div class="xp-label">TOTAL XP — <span id="map-xp-num">0</span></div>
+
+  <div class="xp-bar"><div class="xp-fill" id="map-xp-fill" style="width:0%"></div></div>
+
+</div>
+
+<div class="gold-badge">⚡ <span id="map-gold">0</span> GOLD</div>
+
+<button class="btn-secondary" onclick="showScreen('title-screen')">← ZURÜCK</button>
+```
+
+  </div>
+
+  <div class="map-grid" id="map-grid"></div>
+
+</div>
+
+<!-- LESSON SCREEN -->
+
+<div id="lesson-screen" class="screen">
+
+  <div class="lesson-header">
+
+```
+<button class="back-btn" onclick="showScreen('map-screen');renderMap()">← MAP</button>
+
+<div class="lesson-title-bar" id="lesson-title-bar">Lesson</div>
+
+<div class="progress-dots" id="progress-dots"></div>
+
+<div style="font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--muted)">
+
+  XP: <span id="lesson-xp-count">0</span>
+
+</div>
+```
+
+  </div>
+
+  <div class="lesson-body" id="lesson-body"></div>
+
+</div>
+
+<!-- RECAP MODAL -->
+
+<div id="recap-modal">
+
+  <div class="recap-box" id="recap-box"></div>
+
+</div>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+// ═══════════════════════════════════
+
+// VOICE ENGINE
+
+// ═══════════════════════════════════
+
+let maleVoice = null;
+
+let maleVoiceDE = null;
+
+function initVoices() {
+
+  const voices = window.speechSynthesis.getVoices();
+
+  if (!voices.length) return;
+
+  // Find best masculine English voice
+
+  const malePrefs = ['Daniel','Google UK English Male','Microsoft David','Alex','Fred','Thomas','Jorge'];
+
+  for (const pref of malePrefs) {
+
+    const v = voices.find(v => v.name.includes(pref));
+
+    if (v) { maleVoice = v; break; }
+
+  }
+
+  // Fallback: any English voice, prefer UK
+
+  if (!maleVoice) {
+
+    maleVoice = voices.find(v => v.lang === 'en-GB') ||
+
+                voices.find(v => v.lang.startsWith('en')) ||
+
+                voices[0];
+
+  }
+
+  // Find best German voice
+
+  maleVoiceDE = voices.find(v => v.lang === 'de-DE' && v.name.toLowerCase().includes('male')) ||
+
+                voices.find(v => v.lang === 'de-DE') ||
+
+                voices.find(v => v.lang.startsWith('de'));
+
+}
+
+window.speechSynthesis.onvoiceschanged = initVoices;
+
+setTimeout(initVoices, 500);
+
+function speak(text, lang = 'de-DE', onEnd = null) {
+
+  window.speechSynthesis.cancel();
+
+  const u = new SpeechSynthesisUtterance(text);
+
+  u.lang = lang;
+
+  u.pitch = 0.8;
+
+  u.rate = lang.startsWith('de') ? 0.82 : 0.9;
+
+  u.volume = 1;
+
+  if (lang.startsWith('de') && maleVoiceDE) u.voice = maleVoiceDE;
+
+  else if (lang.startsWith('en') && maleVoice) u.voice = maleVoice;
+
+  if (onEnd) u.onend = onEnd;
+
+  window.speechSynthesis.speak(u);
+
+}
+
+function narrateText(text, btnEl) {
+
+  if (btnEl) { btnEl.classList.add('playing'); btnEl.textContent = '⏹ STOP'; }
+
+  speak(text, 'en-GB', () => {
+
+    if (btnEl) { btnEl.classList.remove('playing'); btnEl.textContent = '▶ NARRATE'; }
+
+  });
+
+}
+
+function stopNarration(btnEl) {
+
+  window.speechSynthesis.cancel();
+
+  if (btnEl) { btnEl.classList.remove('playing'); btnEl.textContent = '▶ NARRATE'; }
+
+}
+
+// ═══════════════════════════════════
+
+// LESSON EXPLANATIONS
+
+// ═══════════════════════════════════
+
+const EXPLANATIONS = {
+
+  1: {
+
+    title: "The 8 Magic Verbs — Your Foundation",
+
+    text: "These eight verbs are the skeleton of German. Want, go, have, must, be, can, make, come. If you know nothing else, know these. Every sentence you will ever speak runs on at least one of them. Study each conjugation until it comes out without thinking. The moment you stop translating in your head and just say it — that is when the language begins.",
+
+    keys: ["wollen = want","gehen = go","haben = have","müssen = must","sein = be","können = can","machen = make","kommen = come"]
+
+  },
+
+  2: {
+
+    title: "Conjugation — The Pattern That Runs Everything",
+
+    text: "German verbs change their ending based on who is speaking. Ich, du, er, wir, ihr, sie. The pattern is logical and consistent for regular verbs. Ich takes -e. Du takes -st. Er, sie, es takes -t. Wir and sie take -en. Ihr takes -t. Once this is in your bones, you can conjugate any regular verb you will ever meet. Irregular verbs are exceptions you memorise one at a time.",
+
+    keys: ["ich -e","du -st","er/sie/es -t","wir -en","ihr -t","sie/Sie -en"]
+
+  },
+
+  3: {
+
+    title: "sein — The Most Important Irregular Verb",
+
+    text: "Sein, to be, breaks all the rules. Bin, bist, ist, sind, seid, sind. There is no shortcut. You memorise it completely. But once you have it, you can describe anything, state any identity, express any condition. It is the verb you will use more than any other. Learn it cold.",
+
+    keys: ["ich bin","du bist","er ist","wir sind","ihr seid","sie sind"]
+
+  },
+
+  4: {
+
+    title: "Word Order — The Golden Rule",
+
+    text: "The verb always sits in position two. Always. No matter what comes before it — time, place, subject, object — the conjugated verb holds position two like an anchor. This is the single most important structural rule in German. Break it and you sound like you do not know the language. Follow it and even simple sentences sound correct.",
+
+    keys: ["Verb = Position 2","Time first → inversion","Place first → inversion","Object first → inversion"]
+
+  },
+
+  5: {
+
+    title: "Questions — Only Two Types",
+
+    text: "German has exactly two question structures. Yes or no questions flip the verb to position one. W-questions put the question word first, then the verb second. That is it. Was, wo, wer, wann, warum, wie, wohin, woher. Master these eight question words and you can ask anything you will ever need to ask.",
+
+    keys: ["Yes/No → verb first","W-questions → W-word then verb","Was=what","Wo=where","Wer=who","Wann=when","Warum=why","Wie=how"]
+
+  },
+
+  6: {
+
+    title: "haben — To Have, and So Much More",
+
+    text: "Haben does not just mean to possess. In German, you use haben to express hunger, thirst, fear, luck, a headache, being right. You have hunger. You have fear. You have Kopfschmerzen. The negation uses kein instead of nicht. Kein, keine, kein depending on the noun gender. Mastering haben means mastering a huge range of everyday expressions.",
+
+    keys: ["Hunger haben = be hungry","Angst haben = be scared","Glück haben = be lucky","recht haben = be right","kein/keine = no/not a"]
+
+  },
+
+  7: {
+
+    title: "Gender — der, die, das",
+
+    text: "Every German noun has a gender. Masculine, feminine, neuter. There is no perfect system, but there are rules that cover most cases. Words ending in -ung are always feminine. Words ending in -chen are always neuter. Female job titles ending in -in are always feminine. All plurals use die. Beyond these patterns, you memorise gender with every new word as a package deal. Der Hund. Die Frau. Das Kind. Always learn the article with the noun.",
+
+    keys: ["-ung = die","-chen = das","-in (female job) = die","All plurals = die","Learn article with noun"]
+
+  },
+
+  8: {
+
+    title: "Nominative vs Accusative — The Cases Begin",
+
+    text: "German has four cases. You are starting with two. Nominative is the subject, who or what is doing the action. Accusative is the direct object, who or what is receiving the action. The only article that changes between nominative and accusative is masculine. Der becomes den. Ein becomes einen. Feminine, neuter, and plural stay the same. This is genuinely simpler than it looks.",
+
+    keys: ["Nominative = subject","Accusative = direct object","ONLY masculine changes","der → den","ein → einen"]
+
+  },
+
+  9: {
+
+    title: "Dative — The Indirect Object",
+
+    text: "Dative marks the indirect object, the person or thing the action is directed toward. Masculine and neuter articles become dem. Feminine becomes der. Plural becomes den, and the noun itself adds an -n. Certain verbs always take dative, helfen, danken, gehören. Certain prepositions always take dative, mit, nach, bei, von, seit. Learn these lists and dative stops feeling like guesswork.",
+
+    keys: ["masc → dem","fem → der","neut → dem","plural → den +n","mit/nach/bei/von/seit = always dative"]
+
+  },
+
+  10: {
+
+    title: "Perfekt — How German Speaks About the Past",
+
+    text: "Germans use the Perfekt tense in speech to talk about the past. It is formed with haben or sein plus a past participle. Most verbs use haben. Verbs of movement and change of state use sein. Regular past participles wrap the verb stem in ge- and -t. Irregular ones you memorise. Separable verb prefixes go between ge- and the stem. Verbs starting with be-, ver-, er- take no ge- prefix at all.",
+
+    keys: ["haben = most verbs","sein = movement + change","ge- + stem + -t = regular","be-/ver-/er- verbs = no ge-"]
+
+  },
+
+  11: {
+
+    title: "Modal Verbs — Power Words",
+
+    text: "Modal verbs modify the meaning of another verb. Can, must, want, should, may, would like. They go in position two. The infinitive they control goes to the end of the sentence. Können, müssen, wollen, sollen, dürfen, möchten. Each has its own conjugation you memorise. Möchten is the polite one. Dürfen is permission. Müssen is obligation. Sollen is expectation from outside. These six control enormous territory in everyday German.",
+
+    keys: ["Modal = position 2","Infinitive = end of sentence","können = can","müssen = must","wollen = want","dürfen = may","sollen = should","möchten = would like"]
+
+  },
+
+  12: {
+
+    title: "The Replace Method — How to Build Fluency",
+
+    text: "Take one sentence you know completely. Now replace one element at a time. Swap the subject. Swap the verb. Swap the object. Add a time word. Add a location. Add a modal verb. Each replacement gives you a new sentence using grammar you already know. This is how fluency compounds. You are not learning new rules, you are multiplying what you already have. Ten sentences become a hundred.",
+
+    keys: ["Start with a base sentence","Swap one element at a time","Add time words","Add location","Add modals","Each swap = new sentence"]
+
+  },
+
+  13: {
+
+    title: "Conjunctions and Common Words — The Glue",
+
+    text: "Conjunctions connect ideas. Some are coordinating, und, aber, oder, denn, and they keep normal word order. Others are subordinating, weil, dass, wenn, obwohl, and they send the verb to the very end of the clause. This is one of the most important rules in German grammar. A sentence with weil and the verb in the wrong position sounds completely unnatural to a native speaker. Get the verb to the end.",
+
+    keys: ["und/aber/oder = normal order","weil/dass/wenn/obwohl = verb to END","immer = always","nie = never","manchmal = sometimes"]
+
+  },
+
+  14: {
+
+    title: "Immersion — The Strategy That Actually Works",
+
+    text: "Grammar gives you the skeleton. Immersion gives you the flesh. You need massive comprehensible input, German you can understand at roughly seventy to eighty percent. YouTube beginner stories. German podcasts for learners. Music. Films with German subtitles. Daily Anki for vocabulary. A language partner to force output. The method is simple: expose yourself to German every single day, at every level from comfortable to slightly challenging. Do not wait until you are ready. You get ready by doing it.",
+
+    keys: ["Comprehensible input daily","Active = full attention","Passive = background exposure","Output = speaking and writing","Anki = vocabulary retention"]
+
+  },
+
+  15: {
+
+    title: "Konjunktiv II — The Gate to B2",
+
+    text: "Konjunktiv II is German's way of expressing hypothetical situations, polite requests, and wishful thinking. The three forms you must master are wäre, the subjunctive of sein; hätte, the subjunctive of haben; and würde plus infinitive for everything else. Wenn ich Zeit hätte, würde ich kommen. If I had time I would come. Könnten Sie bitte helfen. Could you please help. These structures mark the difference between B1 and B2 in every German exam.",
+
+    keys: ["wäre = would be (sein)","hätte = would have (haben)","würde + infinitive = everything else","Wenn ich... würde ich... = if I... I would...","Könnten/Hätten = polite requests"]
+
+  },
+
+  16: {
+
+    title: "A1 Adjectives — Describing Your World",
+
+    text: "Adjectives in German change their ending based on where they appear. After sein they stay unchanged. Der Kaffee ist heiß. The coffee is hot. Before a noun they take endings depending on the article and gender. Groß becomes großer after ein with a masculine noun. This system feels complicated but follows a logic that becomes automatic with practice. Start with predicate adjectives, those after sein, and add attributive endings gradually.",
+
+    keys: ["After sein = no ending change","Before noun = endings required","ein + masc = -er","ein + fem = -e","ein + neut = -es","der/die/das + any = -e"]
+
+  },
+
+  17: {
+
+    title: "A2 Adjectives — Personality and Character",
+
+    text: "Describing people requires a specific vocabulary. Fleißig, hardworking. Geduldig, patient. Zuverlässig, reliable. Schüchtern, shy. These adjectives follow the same ending rules but they open up an entire register of conversation. You can now talk about who people are, not just what they look like. Intensifiers like ziemlich, sehr, äußerst, and ein bisschen let you grade your descriptions and sound more natural.",
+
+    keys: ["fleißig = hardworking","geduldig = patient","zuverlässig = reliable","äußerst = extremely","ziemlich = quite","ein bisschen = a little"]
+
+  },
+
+  18: {
+
+    title: "B1 Adjectives — Nuanced Character",
+
+    text: "At B1 you move beyond simple descriptions into character analysis. Aufgeschlossen, open-minded. Einfühlsam, empathetic. Ehrgeizig, ambitious. Belastbar, resilient. These words let you speak about yourself in job interviews, describe people you admire, and engage in real conversation about human character. This vocabulary signals to native speakers that you have moved beyond tourist German into genuine communication.",
+
+    keys: ["aufgeschlossen = open-minded","einfühlsam = empathetic","ehrgeizig = ambitious","belastbar = resilient","konsequent = consistent","von Natur aus = by nature"]
+
+  },
+
+  19: {
+
+    title: "B2 Adjectives — Academic and Analytical",
+
+    text: "B2 adjectives operate in formal registers, academic writing, professional communication, and structured debate. Überzeugend, convincing. Schlüssig, coherent. Eindeutig, unambiguous. Widersprüchlich, contradictory. Nachvollziehbar, comprehensible. These words let you evaluate arguments, write reports, and engage in intellectual discourse. Reaching this level means you can think and express yourself in German at the level required by universities, employers, and citizenship examinations.",
+
+    keys: ["überzeugend = convincing","schlüssig = coherent","eindeutig = unambiguous","widersprüchlich = contradictory","anspruchsvoll = demanding","nachvollziehbar = comprehensible"]
+
+  },
+
+  20: {
+
+    title: "Separable Verbs — The Split Infinitive",
+
+    text: "Separable verbs are verbs with a detachable prefix that splits off and jumps to the very end of the sentence in the present tense. The prefix carries meaning, and it changes everything. Anrufen means to call. Aufstehen means to get up. Einkaufen means to go shopping. The rule is absolute: conjugate the base verb in position two, send the prefix to the final position. Ich rufe dich an. Ich stehe um sieben auf. With modal verbs the infinitive stays together at the end: Ich muss früh aufstehen. The most common prefixes are an, auf, aus, ein, mit, nach, vor, zu, and zurück. Learn each verb as a unit.",
+
+    keys: ["Prefix → end of clause","an- = to/on (anrufen = call)","auf- = up (aufstehen = get up)","aus- = out (ausgehen = go out)","ein- = in (einkaufen = shop)","mit- = with/along (mitkommen)","nach- = after/look up (nachschlagen)","vor- = before/present (vorstellen)","zu- = to/close (zumachen)","zurück- = back (zurückkommen)"]
+
+  },
+
+  21: {
+
+    title: "Accusative & Dative Prepositions — The Complete Sets",
+
+    text: "Every German preposition is married to a case. It never cheats. Accusative prepositions are durch, für, gegen, ohne, um, bis, and entlang. Say durch den Park. Für meinen Vater. Ohne einen Plan. The article goes accusative every time. Dative prepositions are aus, außer, bei, mit, nach, seit, von, zu, and gegenüber. Say mit dem Zug. Bei meiner Mutter. Seit einem Jahr. The article goes dative every time. There is no exception. Memorise these two lists cold. Then every time you use a preposition you know exactly which article follows.",
+
+    keys: ["ACCUSATIVE: durch für gegen ohne um bis entlang","durch = through","für = for","gegen = against","ohne = without","um = around / at (time)","DATIVE: aus außer bei mit nach seit von zu gegenüber","mit = with","seit = since/for (time)","bei = at/near","von = from/of","zu = to (person/place)"]
+
+  },
+
+  22: {
+
+    title: "Personal Pronouns — All Three Cases",
+
+    text: "Pronouns replace nouns and change form depending on their case. Nominative is the subject doing the action. Accusative is the direct object receiving the action. Dative is the indirect object, the beneficiary. Ich becomes mich in accusative and mir in dative. Du becomes dich and dir. Er becomes ihn and ihm. Sie becomes sie and ihr. Es becomes es and ihm. Wir stays wir, becomes uns, stays uns. Ihr becomes euch and euch. Sie and Sie become sie and ihnen, or Sie and Ihnen in formal address. This table is one of the highest-leverage things you can memorise in all of German. Every sentence you speak uses it.",
+
+    keys: ["ich → mich → mir","du → dich → dir","er → ihn → ihm","sie (she) → sie → ihr","es → es → ihm","wir → uns → uns","ihr → euch → euch","sie/Sie → sie/Sie → ihnen/Ihnen"]
+
+  },
+
+  23: {
+
+    title: "Imperative — Giving Commands",
+
+    text: "The imperative is how you give commands, make requests, and issue instructions. German has three imperative forms depending on who you address. For du, the informal singular, drop the -en from the infinitive and remove the pronoun entirely. Geh! Lern! Kauf! Some verbs change their stem vowel: nehmen becomes nimm, essen becomes iss, lesen becomes lies, helfen becomes hilf, sprechen becomes sprich. For ihr, the informal plural, take the ihr conjugation and drop the pronoun: Geht! Lernt! Kauft! For Sie, the formal address, keep the infinitive and add Sie after the verb: Gehen Sie! Lernen Sie! The exclamation mark is standard in writing. In softer requests you use bitte.",
+
+    keys: ["du-form: stem only, no pronoun","du irregular: nimm nehmen, iss essen, lies lesen, hilf helfen, sprich sprechen","sein → du: sei! / ihr: seid! / Sie: seien Sie!","ihr-form: ihr conjugation, drop pronoun","Sie-form: infinitive + Sie","bitte = please (softens command)"]
+
+  },
+
+  24: {
+
+    title: "Perfekt with sein — The Complete Verb List",
+
+    text: "Most German verbs form the Perfekt with haben, but a specific and important group uses sein instead. The rule covers three categories. First, verbs of motion that express a change of location: gehen, kommen, fahren, laufen, fliegen, reisen, schwimmen, rennen, wandern, steigen. Second, verbs that express a change of state: werden, aufwachen, einschlafen, sterben, wachsen, passieren, geschehen. Third, a handful of exceptions you memorise directly: bleiben, sein, and begegnen. The past participle follows the same ge- plus stem plus irregular or regular ending rules. Ich bin gegangen. Er ist geflogen. Wir sind geblieben. Sie ist aufgewacht. Get this list into long-term memory and Perfekt stops being a guessing game.",
+
+    keys: ["MOTION → sein: gehen kommen fahren laufen fliegen reisen schwimmen rennen wandern steigen","CHANGE OF STATE → sein: werden aufwachen einschlafen sterben wachsen passieren geschehen","EXCEPTIONS → sein: bleiben sein begegnen","STILL use haben: arbeiten lernen kaufen essen trinken sehen hören (no movement/change)"]
+
+  }
+
+};
+
+// ═══════════════════════════════════
+
+// LESSON DATA
+
+// ═══════════════════════════════════
+
+const LESSONS = [
+
+  { id:1, title:"The 8 Magic Verbs", level:"A1",
+
+    examples:[
+
+      ["Ich will Kaffee.","I want coffee.","wollen — wanting something"],
+
+      ["Du willst nach Hause gehen.","You want to go home.","wollen + infinitive at end"],
+
+      ["Er will Deutsch lernen.","He wants to learn German.","wollen — strong desire"],
+
+      ["Wir wollen Pizza essen.","We want to eat pizza.","wollen — group desire"],
+
+      ["Ich gehe jetzt.","I'm going now.","gehen — simple movement"],
+
+      ["Wohin gehst du?","Where are you going?","gehen — W-question"],
+
+      ["Er geht ins Büro.","He goes to the office.","gehen + destination"],
+
+      ["Wir gehen zusammen.","We're going together.","gehen — plural subject"],
+
+      ["Ich habe Zeit.","I have time.","haben — abstract noun"],
+
+      ["Hast du Hunger?","Are you hungry?","haben — common expression"],
+
+      ["Sie hat einen Hund.","She has a dog.","haben + indefinite article"],
+
+      ["Ich muss jetzt lernen.","I have to study now.","müssen + infinitive"],
+
+      ["Du musst schlafen.","You must sleep.","müssen — necessity"],
+
+      ["Ich bin müde.","I am tired.","sein — describing a state"],
+
+      ["Er ist mein Freund.","He is my friend.","sein — defining identity"],
+
+      ["Wir sind bereit.","We are ready.","sein — plural state"],
+
+      ["Ich kann schwimmen.","I can swim.","können — ability"],
+
+      ["Kannst du mir helfen?","Can you help me?","können — yes/no question"],
+
+      ["Ich mache das.","I'll do that.","machen — simple action"],
+
+      ["Wann kommst du?","When are you coming?","kommen — W-question"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"Match: wollen",options:["to go","to want","to have","to be"],answer:"to want"},
+
+      {type:"match",prompt:"Match: gehen",options:["to go","to want","to have","to be"],answer:"to go"},
+
+      {type:"match",prompt:"Match: haben",options:["to have","to want","to go","to be able to"],answer:"to have"},
+
+      {type:"match",prompt:"Match: müssen",options:["to be","must/have to","to come","to make"],answer:"must/have to"},
+
+      {type:"match",prompt:"Match: sein",options:["to be","to have","to want","to go"],answer:"to be"},
+
+      {type:"match",prompt:"Match: können",options:["to be able to/can","to go","must","to make"],answer:"to be able to/can"},
+
+      {type:"match",prompt:"Match: machen",options:["to make/do","to be","to go","to want"],answer:"to make/do"},
+
+      {type:"match",prompt:"Match: kommen",options:["to come","to go","to have","to be"],answer:"to come"},
+
+      {type:"fill",prompt:"Ich ___ müde. (I am tired.)",answer:"bin"},
+
+      {type:"fill",prompt:"Du ___ nach Hause? (You are going home?)",answer:"gehst"},
+
+      {type:"fill",prompt:"Er ___ einen Bruder. (He has a brother.)",answer:"hat"},
+
+      {type:"fill",prompt:"Wir ___ jetzt lernen. (We must study now.)",answer:"müssen"},
+
+      {type:"fill",prompt:"Ich ___ Kaffee trinken. (I want to drink coffee.)",answer:"will"},
+
+      {type:"fill",prompt:"___ du schwimmen? (Can you swim?)",answer:"Kannst"},
+
+      {type:"fill",prompt:"Sie ___ das Essen. (She makes the food.)",answer:"macht"},
+
+      {type:"fill",prompt:"Wann ___ du? (When are you coming?)",answer:"kommst"},
+
+      {type:"translate",prompt:"Translate: I want to sleep.",answer:"Ich will schlafen."},
+
+      {type:"translate",prompt:"Translate: He is my teacher.",answer:"Er ist mein Lehrer."},
+
+      {type:"translate",prompt:"Translate: We have a car.",answer:"Wir haben ein Auto."},
+
+      {type:"translate",prompt:"Translate: Can you speak German?",answer:"Kannst du Deutsch sprechen?"},
+
+      {type:"translate",prompt:"Translate: She must go now.",answer:"Sie muss jetzt gehen."},
+
+      {type:"reorder",prompt:"Arrange: ich / gehen / heute / will",answer:"Ich will heute gehen."},
+
+      {type:"reorder",prompt:"Arrange: du / hast / Zeit / keine",answer:"Du hast keine Zeit."},
+
+      {type:"reorder",prompt:"Arrange: er / kommen / kann / nicht",answer:"Er kann nicht kommen."},
+
+      {type:"fill",prompt:"Write a sentence with 'wollen' about YOUR day.",answer:""},
+
+      {type:"fill",prompt:"Write a sentence with 'müssen' about YOUR day.",answer:""},
+
+      {type:"fill",prompt:"Mini story using ALL 8 magic verbs (one sentence to start).",answer:""},
+
+    ],
+
+    dictation:["Ich will Kaffee trinken.","Du musst jetzt schlafen.","Wir gehen ins Büro."],
+
+    speaking:[["Ich bin müde und ich muss schlafen.","I am tired and I must sleep."],["Wann kommst du nach Hause?","When are you coming home?"]]
+
+  },
+
+  { id:2, title:"Conjugation Cheat Code", level:"A1",
+
+    examples:[
+
+      ["Ich lerne Deutsch.","I learn German.","ich + -e ending"],
+
+      ["Du lernst schnell.","You learn quickly.","du + -st ending"],
+
+      ["Er lernt jeden Tag.","He learns every day.","er/sie/es + -t ending"],
+
+      ["Wir lernen zusammen.","We learn together.","wir + -en (= infinitive!)"],
+
+      ["Ihr lernt im Kurs.","You all learn in the course.","ihr + -t"],
+
+      ["Sie lernen Spanisch.","They learn Spanish.","sie/Sie + -en"],
+
+      ["Ich spiele Gitarre.","I play guitar.","spielen → spiel + -e"],
+
+      ["Du spielst gut.","You play well.","spielen → spiel + -st"],
+
+      ["Er spielt Fußball.","He plays football.","spielen → spiel + -t"],
+
+      ["Wir spielen im Park.","We play in the park.","wir → same as infinitive"],
+
+      ["Ich kaufe Brot.","I buy bread.","kaufen → kauf + -e"],
+
+      ["Du kaufst einen Kaffee.","You buy a coffee.","kaufen → kauf + -st"],
+
+      ["Sie kauft ein Buch.","She buys a book.","kaufen → kauf + -t"],
+
+      ["Ich wohne in Berlin.","I live in Berlin.","wohnen → wohn + -e"],
+
+      ["Du wohnst in München.","You live in Munich.","wohnen → wohn + -st"],
+
+      ["Er wohnt alleine.","He lives alone.","wohnen → wohn + -t"],
+
+      ["Ich arbeite viel.","I work a lot.","arbeiten → arbeit + -e"],
+
+      ["Du arbeitest heute.","You are working today.","arbeiten + -est (extra e!)"],
+
+      ["Sie arbeitet im Büro.","She works in the office.","arbeiten + -et (extra e!)"],
+
+      ["Ich mache Hausaufgaben.","I do homework.","machen — regular"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"spielen → ich ___",answer:"spiele"},
+
+      {type:"fill",prompt:"spielen → du ___",answer:"spielst"},
+
+      {type:"fill",prompt:"spielen → er ___",answer:"spielt"},
+
+      {type:"fill",prompt:"spielen → wir ___",answer:"spielen"},
+
+      {type:"fill",prompt:"spielen → ihr ___",answer:"spielt"},
+
+      {type:"fill",prompt:"spielen → sie ___",answer:"spielen"},
+
+      {type:"fill",prompt:"kaufen → ich ___",answer:"kaufe"},
+
+      {type:"fill",prompt:"kaufen → du ___",answer:"kaufst"},
+
+      {type:"fill",prompt:"kaufen → er ___",answer:"kauft"},
+
+      {type:"fill",prompt:"kaufen → wir ___",answer:"kaufen"},
+
+      {type:"match",prompt:"Which ending does 'ich' take?",options:["-e","-st","-t","-en"],answer:"-e"},
+
+      {type:"match",prompt:"Which ending does 'du' take?",options:["-e","-st","-t","-en"],answer:"-st"},
+
+      {type:"match",prompt:"Which ending does 'er/sie/es' take?",options:["-e","-st","-t","-en"],answer:"-t"},
+
+      {type:"match",prompt:"Which ending does 'wir' take?",options:["-e","-st","-t","-en"],answer:"-en"},
+
+      {type:"fill",prompt:"Fix: Ich lernt Deutsch →",answer:"Ich lerne Deutsch."},
+
+      {type:"fill",prompt:"Fix: Er lerne viel →",answer:"Er lernt viel."},
+
+      {type:"fill",prompt:"Fix: Wir lernt zusammen →",answer:"Wir lernen zusammen."},
+
+      {type:"fill",prompt:"wohnen → ich ___",answer:"wohne"},
+
+      {type:"fill",prompt:"wohnen → du ___",answer:"wohnst"},
+
+      {type:"fill",prompt:"arbeiten → du ___ (special -est)",answer:"arbeitest"},
+
+      {type:"fill",prompt:"arbeiten → er ___ (special -et)",answer:"arbeitet"},
+
+      {type:"fill",prompt:"hören → ich ___",answer:"höre"},
+
+      {type:"fill",prompt:"sagen → er ___",answer:"sagt"},
+
+      {type:"translate",prompt:"Write 6 sentences — one per pronoun — using 'machen'.",answer:""},
+
+      {type:"fill",prompt:"Describe your day using 3 conjugated verbs.",answer:""},
+
+    ],
+
+    dictation:["Ich lerne jeden Tag Deutsch.","Du spielst sehr gut Gitarre.","Wir kaufen Brot und Käse."],
+
+    speaking:[["Ich lerne Deutsch und spiele Gitarre.","I learn German and play guitar."],["Er kauft Brot und wohnt in Berlin.","He buys bread and lives in Berlin."]]
+
+  },
+
+  { id:3, title:"sein — The Irregular Beast", level:"A1",
+
+    examples:[
+
+      ["Ich bin Student.","I am a student.","ich bin — identity"],
+
+      ["Du bist toll!","You are awesome!","du bist — compliment"],
+
+      ["Er ist müde.","He is tired.","er ist — state"],
+
+      ["Sie ist meine Lehrerin.","She is my teacher.","sie ist — identity feminine"],
+
+      ["Es ist kalt heute.","It is cold today.","es ist — weather"],
+
+      ["Wir sind bereit.","We are ready.","wir sind — group state"],
+
+      ["Ihr seid laut!","You all are loud!","ihr seid — group address"],
+
+      ["Sie sind Freunde.","They are friends.","sie sind — third person plural"],
+
+      ["Ich bin 25 Jahre alt.","I am 25 years old.","bin — age"],
+
+      ["Du bist mein bester Freund.","You are my best friend.","bist — relationship"],
+
+      ["Er ist aus Deutschland.","He is from Germany.","ist — origin"],
+
+      ["Wir sind zu Hause.","We are at home.","sind — location"],
+
+      ["Ist das dein Buch?","Is that your book?","ist — yes/no question"],
+
+      ["Bist du krank?","Are you sick?","bist — health question"],
+
+      ["Ich bin nicht hungrig.","I am not hungry.","bin + nicht — negation"],
+
+      ["Sie ist Ärztin.","She is a doctor.","ist — profession (no article!)"],
+
+      ["Das ist interessant.","That is interesting.","das ist — pointing"],
+
+      ["Wir sind spät dran.","We are running late.","sind — common expression"],
+
+      ["Seid ihr fertig?","Are you all done?","seid — question to group"],
+
+      ["Sie sind sehr nett.","They are very nice.","sind — describing group"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"sein → ich ___",answer:"bin"},
+
+      {type:"fill",prompt:"sein → du ___",answer:"bist"},
+
+      {type:"fill",prompt:"sein → er/sie/es ___",answer:"ist"},
+
+      {type:"fill",prompt:"sein → wir ___",answer:"sind"},
+
+      {type:"fill",prompt:"sein → ihr ___",answer:"seid"},
+
+      {type:"fill",prompt:"sein → sie/Sie ___",answer:"sind"},
+
+      {type:"fill",prompt:"Ich ___ Student.",answer:"bin"},
+
+      {type:"fill",prompt:"Du ___ toll!",answer:"bist"},
+
+      {type:"fill",prompt:"Er ___ müde.",answer:"ist"},
+
+      {type:"fill",prompt:"Wir ___ bereit.",answer:"sind"},
+
+      {type:"fill",prompt:"___ das dein Buch?",answer:"Ist"},
+
+      {type:"fill",prompt:"___ du krank?",answer:"Bist"},
+
+      {type:"fill",prompt:"___ ihr fertig?",answer:"Seid"},
+
+      {type:"fill",prompt:"Ich ___ nicht krank.",answer:"bin"},
+
+      {type:"translate",prompt:"Translate: I am a teacher.",answer:"Ich bin Lehrer."},
+
+      {type:"translate",prompt:"Translate: She is from Austria.",answer:"Sie ist aus Österreich."},
+
+      {type:"translate",prompt:"Translate: We are ready.",answer:"Wir sind bereit."},
+
+      {type:"translate",prompt:"Translate: Are you (du) tired?",answer:"Bist du müde?"},
+
+      {type:"translate",prompt:"Translate: It is cold.",answer:"Es ist kalt."},
+
+      {type:"fill",prompt:"Fix: Ich ist 20 Jahre alt →",answer:"Ich bin 20 Jahre alt."},
+
+      {type:"fill",prompt:"Fix: Du sind mein Freund →",answer:"Du bist mein Freund."},
+
+      {type:"fill",prompt:"Turn into a question: 'Du bist müde.' →",answer:"Bist du müde?"},
+
+      {type:"fill",prompt:"Describe yourself: Ich bin ___ Jahre alt.",answer:""},
+
+      {type:"fill",prompt:"Write a 5-sentence introduction using ONLY sein.",answer:""},
+
+    ],
+
+    dictation:["Ich bin Student und komme aus Deutschland.","Du bist mein bester Freund.","Wir sind heute sehr müde."],
+
+    speaking:[["Ich bin aus Lagos und ich bin zwanzig Jahre alt.","I am from Lagos and I am twenty years old."],["Bist du müde? Ich bin sehr müde heute.","Are you tired? I am very tired today."]]
+
+  },
+
+  { id:4, title:"Golden Rule of Word Order", level:"A1",
+
+    examples:[
+
+      ["Ich lerne heute Deutsch.","I learn German today.","Subject → Verb(2) → time"],
+
+      ["Heute lerne ich Deutsch.","Today I learn German.","Time first → inversion"],
+
+      ["Deutsch lerne ich jeden Tag.","I learn German every day.","Object first → inversion"],
+
+      ["Mein Freund kommt morgen.","My friend is coming tomorrow.","Normal SVO order"],
+
+      ["Morgen kommt mein Freund.","Tomorrow my friend is coming.","Time first → inversion"],
+
+      ["Jetzt esse ich.","Now I'm eating.","Jetzt forces inversion"],
+
+      ["Ich kaufe ein Buch.","I buy a book.","Basic SVO"],
+
+      ["Heute kaufe ich ein Buch.","Today I'm buying a book.","Time first → inversion"],
+
+      ["Er geht ins Kino.","He goes to the cinema.","Normal order"],
+
+      ["Ins Kino geht er heute.","To the cinema he's going today.","Place first → inversion"],
+
+      ["Wir spielen im Park.","We play in the park.","Normal SVO"],
+
+      ["Im Park spielen wir oft.","In the park we often play.","Place first → inversion"],
+
+      ["Ich bin müde.","I am tired.","sein at position 2"],
+
+      ["Manchmal bin ich müde.","Sometimes I am tired.","Adverb first → inversion"],
+
+      ["Er hat Hunger.","He is hungry.","Normal — haben at pos. 2"],
+
+      ["Hunger hat er immer.","He is always hungry.","Object first → inversion"],
+
+      ["Sie lernt Gitarre.","She learns guitar.","Simple SVO"],
+
+      ["Gitarre lernt sie seit Jahren.","Guitar she's been learning for years.","Object first + inversion"],
+
+      ["Ich bin immer pünktlich.","I am always on time.","adverb position"],
+
+      ["Pünktlich bin ich immer.","I am always on time.","adjective first → inversion"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"What position is the verb ALWAYS at?",options:["Position 1","Position 2","Position 3","The end"],answer:"Position 2"},
+
+      {type:"fill",prompt:"Rewrite starting with 'heute': Ich lerne heute Deutsch.",answer:"Heute lerne ich Deutsch."},
+
+      {type:"fill",prompt:"Rewrite starting with 'morgen': Er kommt morgen.",answer:"Morgen kommt er."},
+
+      {type:"fill",prompt:"Rewrite starting with 'jetzt': Sie spielt jetzt Klavier.",answer:"Jetzt spielt sie Klavier."},
+
+      {type:"fill",prompt:"Rewrite starting with 'manchmal': Wir essen manchmal Pizza.",answer:"Manchmal essen wir Pizza."},
+
+      {type:"fill",prompt:"Fix: Heute ich lerne Deutsch →",answer:"Heute lerne ich Deutsch."},
+
+      {type:"fill",prompt:"Fix: Morgen er kommt →",answer:"Morgen kommt er."},
+
+      {type:"fill",prompt:"Fix: Jetzt ich bin müde →",answer:"Jetzt bin ich müde."},
+
+      {type:"fill",prompt:"Fix: Im Park wir spielen →",answer:"Im Park spielen wir."},
+
+      {type:"match",prompt:"Is 'Er geht heute ins Kino.' correct?",options:["Yes","No"],answer:"Yes"},
+
+      {type:"match",prompt:"Is 'Manchmal ist das schwierig.' correct?",options:["Yes","No"],answer:"Yes"},
+
+      {type:"match",prompt:"Which is correct?",options:["Heute ich gehe.","Heute gehe ich.","Gehe heute ich."],answer:"Heute gehe ich."},
+
+      {type:"fill",prompt:"Write a sentence starting with 'Heute':",answer:""},
+
+      {type:"fill",prompt:"Write a sentence starting with 'Morgen':",answer:""},
+
+      {type:"fill",prompt:"Write a sentence starting with 'Manchmal':",answer:""},
+
+      {type:"fill",prompt:"Write 3 sentences each starting with a DIFFERENT word (not Ich).",answer:""},
+
+    ],
+
+    dictation:["Heute lerne ich Deutsch im Café.","Morgen kommt mein Freund nach Hause.","Manchmal bin ich sehr müde."],
+
+    speaking:[["Heute lerne ich Deutsch und morgen gehe ich ins Kino.","Today I learn German and tomorrow I go to the cinema."],["Manchmal bin ich müde aber ich lerne immer.","Sometimes I am tired but I always study."]]
+
+  },
+
+  { id:5, title:"Questions — 2 Types Only", level:"A1",
+
+    examples:[
+
+      ["Lernst du Deutsch?","Are you learning German?","Yes/No: flip du + lernst"],
+
+      ["Geht er heute?","Is he going today?","Yes/No: flip er + geht"],
+
+      ["Hast du Zeit?","Do you have time?","Yes/No with haben"],
+
+      ["Ist das teuer?","Is that expensive?","Yes/No with sein"],
+
+      ["Was lernst du?","What are you learning?","Was = what"],
+
+      ["Wo wohnst du?","Where do you live?","Wo = where"],
+
+      ["Wer bist du?","Who are you?","Wer = who"],
+
+      ["Wann kommst du?","When are you coming?","Wann = when"],
+
+      ["Warum lernst du Deutsch?","Why are you learning German?","Warum = why"],
+
+      ["Wie heißt du?","What is your name?","Wie = how"],
+
+      ["Wohin gehst du?","Where are you going to?","Wohin = where to"],
+
+      ["Woher kommst du?","Where are you from?","Woher = where from"],
+
+      ["Was machst du heute?","What are you doing today?","Was + action"],
+
+      ["Wie viel kostet das?","How much does that cost?","Wie viel = how much"],
+
+      ["Wie oft gehst du ins Kino?","How often do you go to cinema?","Wie oft = how often"],
+
+      ["Haben Sie Zeit?","Do you have time? (formal)","formal Sie"],
+
+      ["Sprechen Sie Deutsch?","Do you speak German? (formal)","formal question"],
+
+      ["Was ist dein Name?","What is your name?","Was + sein"],
+
+      ["Kommen sie mit?","Are they coming along?","Yes/No with kommen"],
+
+      ["Wer hat das gemacht?","Who did that?","Wer + haben"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'Lernst du Deutsch?' is a:",options:["Yes/No question","W-question"],answer:"Yes/No question"},
+
+      {type:"match",prompt:"'Was machst du?' is a:",options:["Yes/No question","W-question"],answer:"W-question"},
+
+      {type:"match",prompt:"W-word for 'what':",options:["Was","Wo","Wer","Wann"],answer:"Was"},
+
+      {type:"match",prompt:"W-word for 'where' (static):",options:["Wohin","Wo","Woher","Wann"],answer:"Wo"},
+
+      {type:"match",prompt:"W-word for 'when':",options:["Was","Wann","Warum","Wer"],answer:"Wann"},
+
+      {type:"match",prompt:"W-word for 'why':",options:["Wie","Warum","Woher","Was"],answer:"Warum"},
+
+      {type:"match",prompt:"W-word for 'who':",options:["Was","Wie","Wer","Wo"],answer:"Wer"},
+
+      {type:"match",prompt:"W-word for 'where to':",options:["Wohin","Woher","Wo","Wie"],answer:"Wohin"},
+
+      {type:"fill",prompt:"Turn 'Du lernst Deutsch.' into a yes/no question:",answer:"Lernst du Deutsch?"},
+
+      {type:"fill",prompt:"Turn 'Er kommt morgen.' into a yes/no question:",answer:"Kommt er morgen?"},
+
+      {type:"fill",prompt:"Turn 'Sie wohnt in Berlin.' into a yes/no question:",answer:"Wohnt sie in Berlin?"},
+
+      {type:"translate",prompt:"Translate: Where do you live?",answer:"Wo wohnst du?"},
+
+      {type:"translate",prompt:"Translate: Why are you learning German?",answer:"Warum lernst du Deutsch?"},
+
+      {type:"translate",prompt:"Translate: Where are you from?",answer:"Woher kommst du?"},
+
+      {type:"translate",prompt:"Translate: How much does that cost?",answer:"Wie viel kostet das?"},
+
+      {type:"fill",prompt:"Write a question to ask a new German friend:",answer:""},
+
+      {type:"fill",prompt:"Write 3 questions you'd ask in a German café.",answer:""},
+
+    ],
+
+    dictation:["Woher kommst du und wo wohnst du?","Was machst du heute Abend?","Wie viel kostet dieser Kaffee?"],
+
+    speaking:[["Woher kommst du? Ich komme aus Nigeria.","Where are you from? I am from Nigeria."],["Was lernst du? Ich lerne Deutsch jeden Tag.","What are you studying? I study German every day."]]
+
+  },
+
+  { id:6, title:"haben — To Have", level:"A1",
+
+    examples:[
+
+      ["Ich habe einen Hund.","I have a dog.","habe — possessing a pet"],
+
+      ["Du hast Zeit, oder?","You have time, right?","hast — casual check"],
+
+      ["Er hat Hunger.","He is hungry.","hat — idiom: hunger"],
+
+      ["Sie hat Durst.","She is thirsty.","hat — idiom: thirst"],
+
+      ["Wir haben eine Wohnung.","We have an apartment.","haben — accommodation"],
+
+      ["Ihr habt Glück!","You all are lucky!","habt — Glück haben"],
+
+      ["Sie haben viel Erfahrung.","They have a lot of experience.","haben — professional"],
+
+      ["Ich habe keine Zeit.","I have no time.","kein = no/none"],
+
+      ["Hast du ein Auto?","Do you have a car?","Yes/No question"],
+
+      ["Er hat kein Geld.","He has no money.","kein with neuter noun"],
+
+      ["Sie hat Angst.","She is scared.","Angst haben = to be scared"],
+
+      ["Ich habe eine Idee.","I have an idea.","common expression"],
+
+      ["Du hast recht.","You are right.","recht haben = to be right"],
+
+      ["Haben Sie einen Termin?","Do you have an appointment?","formal haben question"],
+
+      ["Wir haben keine Probleme.","We have no problems.","keine + plural"],
+
+      ["Er hat viele Freunde.","He has many friends.","viele = many"],
+
+      ["Ich habe Kopfschmerzen.","I have a headache.","Medical expression"],
+
+      ["Sie haben Recht.","You are right. (formal)","formal Sie"],
+
+      ["Wir haben Hunger — lass uns essen!","We are hungry — let's eat!","haben — trigger for action"],
+
+      ["Habt ihr Hausaufgaben?","Do you all have homework?","question to group"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"haben → ich ___",answer:"habe"},
+
+      {type:"fill",prompt:"haben → du ___",answer:"hast"},
+
+      {type:"fill",prompt:"haben → er ___",answer:"hat"},
+
+      {type:"fill",prompt:"haben → wir ___",answer:"haben"},
+
+      {type:"fill",prompt:"haben → ihr ___",answer:"habt"},
+
+      {type:"fill",prompt:"haben → sie ___",answer:"haben"},
+
+      {type:"fill",prompt:"Ich ___ einen Bruder.",answer:"habe"},
+
+      {type:"fill",prompt:"Du ___ Hunger.",answer:"hast"},
+
+      {type:"fill",prompt:"Er ___ keine Zeit.",answer:"hat"},
+
+      {type:"fill",prompt:"Negate: Ich habe Zeit → Ich habe ___ Zeit.",answer:"keine"},
+
+      {type:"fill",prompt:"Negate: Er hat ein Auto → Er hat ___ Auto.",answer:"kein"},
+
+      {type:"fill",prompt:"Negate: Sie hat Hunger → Sie hat ___ Hunger.",answer:"keinen"},
+
+      {type:"translate",prompt:"Translate: He is hungry.",answer:"Er hat Hunger."},
+
+      {type:"translate",prompt:"Translate: I am scared.",answer:"Ich habe Angst."},
+
+      {type:"translate",prompt:"Translate: You are right.",answer:"Du hast recht."},
+
+      {type:"translate",prompt:"Translate: She is lucky.",answer:"Sie hat Glück."},
+
+      {type:"translate",prompt:"Translate: I have a headache.",answer:"Ich habe Kopfschmerzen."},
+
+      {type:"fill",prompt:"Write what YOU have right now (2 sentences).",answer:""},
+
+      {type:"fill",prompt:"Write 3 haben expressions (Hunger/Angst/Glück/Zeit).",answer:""},
+
+    ],
+
+    dictation:["Ich habe Hunger und Durst.","Er hat kein Geld und keine Zeit.","Wir haben Glück heute."],
+
+    speaking:[["Ich habe Hunger und ich habe keine Zeit zu kochen.","I am hungry and I have no time to cook."],["Hast du Angst? Nein, ich habe keine Angst.","Are you scared? No, I am not scared."]]
+
+  },
+
+  { id:7, title:"Gender — der, die, das", level:"A1",
+
+    examples:[
+
+      ["Der Hund ist groß.","The dog is big.","der — masculine"],
+
+      ["Die Frau ist nett.","The woman is nice.","die — feminine"],
+
+      ["Das Kind spielt.","The child plays.","das — neuter (-chen rule)"],
+
+      ["Der Lehrer erklärt.","The teacher explains.","der — masculine (-er job)"],
+
+      ["Die Schule ist groß.","The school is big.","die — feminine (institutions)"],
+
+      ["Das Buch ist interessant.","The book is interesting.","das — memorize"],
+
+      ["Die Wohnung ist klein.","The apartment is small.","die — -ung = always die!"],
+
+      ["Das Mädchen ist klug.","The girl is smart.","das — -chen = always das!"],
+
+      ["Der Mann arbeitet.","The man works.","der — male person"],
+
+      ["Die Musik ist laut.","The music is loud.","die — memorize"],
+
+      ["Das Auto ist neu.","The car is new.","das — memorize"],
+
+      ["Die Hunde bellen.","The dogs are barking.","die — ALL plurals use die!"],
+
+      ["Der Zug kommt.","The train is coming.","der — memorize"],
+
+      ["Die Zeit ist wichtig.","Time is important.","die — abstract"],
+
+      ["Das Wetter ist schlecht.","The weather is bad.","das — memorize"],
+
+      ["Der Kaffee ist heiß.","The coffee is hot.","der — beverages"],
+
+      ["Die Rechnung ist hoch.","The bill is high.","die — -ung ending"],
+
+      ["Das Brötchen ist frisch.","The bread roll is fresh.","das — -chen"],
+
+      ["Der Arzt kommt.","The doctor is coming.","der — male professional"],
+
+      ["Die Ärztin ist freundlich.","The female doctor is friendly.","die — -in suffix = always die!"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"Article for: Mann",options:["der","die","das"],answer:"der"},
+
+      {type:"match",prompt:"Article for: Frau",options:["der","die","das"],answer:"die"},
+
+      {type:"match",prompt:"Article for: Kind",options:["der","die","das"],answer:"das"},
+
+      {type:"match",prompt:"Article for: Wohnung",options:["der","die","das"],answer:"die"},
+
+      {type:"match",prompt:"Article for: Buch",options:["der","die","das"],answer:"das"},
+
+      {type:"match",prompt:"Article for: Mädchen",options:["der","die","das"],answer:"das"},
+
+      {type:"match",prompt:"Article for: Hund",options:["der","die","das"],answer:"der"},
+
+      {type:"match",prompt:"Article for: Auto",options:["der","die","das"],answer:"das"},
+
+      {type:"match",prompt:"-ung endings always take:",options:["der","die","das"],answer:"die"},
+
+      {type:"match",prompt:"-chen endings always take:",options:["der","die","das"],answer:"das"},
+
+      {type:"match",prompt:"-in endings (female jobs) always take:",options:["der","die","das"],answer:"die"},
+
+      {type:"match",prompt:"ALL plural nouns use:",options:["der","die","das"],answer:"die"},
+
+      {type:"fill",prompt:"___ Kaffee ist heiß. (Kaffee = m)",answer:"Der"},
+
+      {type:"fill",prompt:"___ Musik ist schön. (Musik = f)",answer:"Die"},
+
+      {type:"fill",prompt:"___ Wetter ist gut. (Wetter = n)",answer:"Das"},
+
+      {type:"fill",prompt:"Name 3 'der' nouns you know:",answer:""},
+
+      {type:"fill",prompt:"Name 3 'die' nouns you know:",answer:""},
+
+      {type:"fill",prompt:"Name 3 'das' nouns you know:",answer:""},
+
+    ],
+
+    dictation:["Der Hund ist groß und die Katze ist klein.","Das Wetter ist heute schlecht.","Die Wohnung ist sehr schön und modern."],
+
+    speaking:[["Der Kaffee ist heiß und das Brot ist frisch.","The coffee is hot and the bread is fresh."],["Die Schule ist groß aber das Zimmer ist klein.","The school is big but the room is small."]]
+
+  },
+
+  { id:8, title:"Nominative vs. Accusative", level:"A2",
+
+    examples:[
+
+      ["Der Hund schläft.","The dog sleeps.","der Hund = subject (nominative)"],
+
+      ["Ich sehe den Hund.","I see the dog.","den Hund = object (accusative masc!)"],
+
+      ["Die Katze schläft.","The cat sleeps.","die Katze = subject (nom. fem.)"],
+
+      ["Ich sehe die Katze.","I see the cat.","die Katze = object (acc. fem. = same!)"],
+
+      ["Das Buch ist neu.","The book is new.","das Buch = subject (nom. neut.)"],
+
+      ["Ich lese das Buch.","I read the book.","das Buch = object (acc. neut. = same!)"],
+
+      ["Der Mann kauft ein Auto.","The man buys a car.","der Mann = subject, ein Auto = object"],
+
+      ["Ein Hund bellt.","A dog is barking.","ein = nominative indefinite masculine"],
+
+      ["Ich sehe einen Hund.","I see a dog.","einen = accusative indefinite masculine"],
+
+      ["Eine Frau kommt.","A woman is coming.","eine = nom. indefinite feminine"],
+
+      ["Er sieht eine Frau.","He sees a woman.","eine = acc. feminine (no change!)"],
+
+      ["Siehst du den Film?","Are you watching the film?","den Film = acc. masculine"],
+
+      ["Der Film ist gut.","The movie is good.","der Film = nom. — subject of sein"],
+
+      ["Ich kaufe einen Kaffee.","I buy a coffee.","einen = accusative masculine indefinite"],
+
+      ["Die Bücher sind neu.","The books are new.","die = nom. plural"],
+
+      ["Ich kaufe die Bücher.","I buy the books.","die = acc. plural (no change!)"],
+
+      ["Ich kenne den Studenten.","I know the student.","den = acc. masculine"],
+
+      ["Der Student lernt.","The student is studying.","der = nom. masculine"],
+
+      ["Ein Kind spielt.","A child is playing.","ein = nom. indefinite neuter"],
+
+      ["Sie sieht ein Kind.","She sees a child.","ein = acc. neuter (no change!)"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'Der Mann kauft Brot.' — 'Der Mann' is:",options:["Nominative","Accusative"],answer:"Nominative"},
+
+      {type:"match",prompt:"'Ich kaufe den Kaffee.' — 'den Kaffee' is:",options:["Nominative","Accusative"],answer:"Accusative"},
+
+      {type:"match",prompt:"ONLY this gender changes in accusative:",options:["Masculine","Feminine","Neuter","Plural"],answer:"Masculine"},
+
+      {type:"fill",prompt:"___ Hund schläft. (subject)",answer:"Der"},
+
+      {type:"fill",prompt:"Ich sehe ___ Hund. (object, masc)",answer:"den"},
+
+      {type:"fill",prompt:"___ Frau kommt. (subject)",answer:"Die"},
+
+      {type:"fill",prompt:"Er liebt ___ Frau. (object)",answer:"die"},
+
+      {type:"fill",prompt:"___ Kind lacht. (subject, neut)",answer:"Das"},
+
+      {type:"fill",prompt:"Wir sehen ___ Kind. (object, neut)",answer:"das"},
+
+      {type:"fill",prompt:"der → ___ (accusative masculine)",answer:"den"},
+
+      {type:"fill",prompt:"ein → ___ (accusative masculine indefinite)",answer:"einen"},
+
+      {type:"fill",prompt:"die → ___ (accusative feminine — does it change?)",answer:"die"},
+
+      {type:"translate",prompt:"Translate: I see the dog.",answer:"Ich sehe den Hund."},
+
+      {type:"translate",prompt:"Translate: She reads the book.",answer:"Sie liest das Buch."},
+
+      {type:"translate",prompt:"Translate: I buy a coffee.",answer:"Ich kaufe einen Kaffee."},
+
+      {type:"fill",prompt:"Write a sentence where 'der Mann' is the SUBJECT:",answer:""},
+
+      {type:"fill",prompt:"Write a sentence where 'den Mann' is the OBJECT:",answer:""},
+
+    ],
+
+    dictation:["Ich sehe den Mann und die Frau.","Er kauft einen Kaffee und ein Buch.","Sie liest das Buch jeden Tag."],
+
+    speaking:[["Ich sehe den Hund und ich kaufe einen Kaffee.","I see the dog and I buy a coffee."],["Siehst du den Film? Er ist sehr gut.","Are you watching the film? It is very good."]]
+
+  },
+
+  { id:9, title:"Dative — The Indirect Object", level:"A2",
+
+    examples:[
+
+      ["Ich gebe dem Mann das Buch.","I give the man the book.","dem Mann = dative masculine"],
+
+      ["Ich helfe der Frau.","I help the woman.","der Frau = dative feminine"],
+
+      ["Er gibt dem Kind Schokolade.","He gives the child chocolate.","dem Kind = dative neuter"],
+
+      ["Ich danke dem Lehrer.","I thank the teacher.","danken always takes dative"],
+
+      ["Das Buch gehört dem Mann.","The book belongs to the man.","gehören takes dative"],
+
+      ["Ich gebe den Kindern Süßigkeiten.","I give the children sweets.","den Kindern = dative plural +n"],
+
+      ["Mit dem Bus fahre ich.","I travel by bus.","mit always takes dative"],
+
+      ["Nach dem Kurs gehe ich heim.","After the course I go home.","nach takes dative"],
+
+      ["Von dem Buch habe ich viel gelernt.","From the book I learned a lot.","von takes dative"],
+
+      ["Seit dem Kurs lerne ich täglich.","Since the course I learn daily.","seit takes dative"],
+
+      ["Kannst du mir helfen?","Can you help me?","mir = dative of ich"],
+
+      ["Er gibt mir das Geld.","He gives me the money.","mir = dative personal pronoun"],
+
+      ["Ich zeige dir das Haus.","I show you the house.","dir = dative of du"],
+
+      ["Wir helfen euch.","We help you all.","euch = dative of ihr"],
+
+      ["Sie erklärt ihm die Aufgabe.","She explains the task to him.","ihm = dative of er"],
+
+      ["Er dankt ihr für die Hilfe.","He thanks her for the help.","ihr = dative of sie"],
+
+      ["Ich zeige ihnen den Weg.","I show them the way.","ihnen = dative of sie (plural)"],
+
+      ["Bei dem Freund wohne ich.","I live at my friend's.","bei takes dative"],
+
+      ["Ich kaufe dem Freund ein Geschenk.","I buy my friend a gift.","dative + accusative together"],
+
+      ["Ich erkläre dem Lehrer die Aufgabe.","I explain the task to the teacher.","dative verb: erklären"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"Dative: masculine article → ___",answer:"dem"},
+
+      {type:"fill",prompt:"Dative: feminine article → ___",answer:"der"},
+
+      {type:"fill",prompt:"Dative: neuter article → ___",answer:"dem"},
+
+      {type:"fill",prompt:"Dative: plural article → ___ (+n to noun)",answer:"den"},
+
+      {type:"fill",prompt:"Ich helfe ___ Mann. (masc, dative)",answer:"dem"},
+
+      {type:"fill",prompt:"Er dankt ___ Frau. (fem, dative)",answer:"der"},
+
+      {type:"fill",prompt:"Das gehört ___ Kind. (neut, dative)",answer:"dem"},
+
+      {type:"fill",prompt:"Mit ___ Zug fahre ich. (masc, dative)",answer:"dem"},
+
+      {type:"fill",prompt:"Nach ___ Schule. (die Schule, dative)",answer:"der"},
+
+      {type:"fill",prompt:"Dative of 'ich': ___",answer:"mir"},
+
+      {type:"fill",prompt:"Dative of 'du': ___",answer:"dir"},
+
+      {type:"fill",prompt:"Dative of 'er': ___",answer:"ihm"},
+
+      {type:"translate",prompt:"Translate: I help the woman.",answer:"Ich helfe der Frau."},
+
+      {type:"translate",prompt:"Translate: She thanks the teacher.",answer:"Sie dankt dem Lehrer."},
+
+      {type:"translate",prompt:"Translate: Can you help me?",answer:"Kannst du mir helfen?"},
+
+      {type:"translate",prompt:"Translate: I show you the way.",answer:"Ich zeige dir den Weg."},
+
+      {type:"fill",prompt:"Write a sentence using 'geben' with a dative object.",answer:""},
+
+    ],
+
+    dictation:["Ich gebe dem Mann das Buch.","Kannst du mir bitte helfen?","Mit dem Bus fahre ich zur Schule."],
+
+    speaking:[["Ich helfe der Frau und er gibt dem Kind Schokolade.","I help the woman and he gives the child chocolate."],["Kannst du mir helfen? Ich zeige dir den Weg.","Can you help me? I will show you the way."]]
+
+  },
+
+  { id:10, title:"Perfekt — The Spoken Past", level:"A2",
+
+    examples:[
+
+      ["Ich habe Deutsch gelernt.","I learned German.","haben + gelernt (regular -t)"],
+
+      ["Du hast Kaffee gemacht.","You made coffee.","haben + gemacht (machen)"],
+
+      ["Er hat das Buch gelesen.","He read the book.","haben + gelesen (irregular)"],
+
+      ["Wir haben Pizza gegessen.","We ate pizza.","haben + gegessen (essen)"],
+
+      ["Sie hat geschlafen.","She slept.","haben + geschlafen (schlafen)"],
+
+      ["Ich bin nach Hause gegangen.","I went home.","sein + gegangen (movement!)"],
+
+      ["Du bist früh aufgestanden.","You got up early.","sein + aufgestanden (change of state)"],
+
+      ["Er ist nach Berlin gefahren.","He drove to Berlin.","sein + gefahren (movement A→B)"],
+
+      ["Wir sind gekommen.","We came.","sein + gekommen (movement)"],
+
+      ["Sie ist eingeschlafen.","She fell asleep.","sein + eingeschlafen (change of state)"],
+
+      ["Hast du geschlafen?","Did you sleep?","Question in Perfekt"],
+
+      ["Er hat nicht gearbeitet.","He didn't work.","Negation in Perfekt"],
+
+      ["Was hast du gestern gemacht?","What did you do yesterday?","W-question + Perfekt"],
+
+      ["Ich habe ein Buch gekauft.","I bought a book.","haben + gekauft (kaufen)"],
+
+      ["Er hat besucht.","He visited.","be- verbs: NO ge- prefix!"],
+
+      ["Ich habe verstanden.","I understood.","ver- verbs: NO ge- prefix!"],
+
+      ["Bist du gelaufen?","Did you run?","sein + gelaufen (movement)"],
+
+      ["Wir haben Musik gehört.","We listened to music.","haben + gehört"],
+
+      ["Sie haben erklärt.","They explained.","er- verbs: NO ge- prefix!"],
+
+      ["Ich habe das gemacht.","I did that.","haben + gemacht — most common"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"Perfekt helper for 'lernen':",options:["haben","sein"],answer:"haben"},
+
+      {type:"match",prompt:"Perfekt helper for 'gehen':",options:["haben","sein"],answer:"sein"},
+
+      {type:"match",prompt:"Perfekt helper for 'kaufen':",options:["haben","sein"],answer:"haben"},
+
+      {type:"match",prompt:"Perfekt helper for 'kommen':",options:["haben","sein"],answer:"sein"},
+
+      {type:"match",prompt:"Perfekt helper for 'essen':",options:["haben","sein"],answer:"haben"},
+
+      {type:"match",prompt:"Perfekt helper for 'fahren':",options:["haben","sein"],answer:"sein"},
+
+      {type:"fill",prompt:"lernen → ge___t = ___",answer:"gelernt"},
+
+      {type:"fill",prompt:"machen → ge___t = ___",answer:"gemacht"},
+
+      {type:"fill",prompt:"gehen → ge___en = ___",answer:"gegangen"},
+
+      {type:"fill",prompt:"kommen → ge___en = ___",answer:"gekommen"},
+
+      {type:"fill",prompt:"besuchen → ___ (no ge-!)",answer:"besucht"},
+
+      {type:"fill",prompt:"verstehen → ___ (no ge-!)",answer:"verstanden"},
+
+      {type:"fill",prompt:"Perfekt (ich) lernen: Ich ___ Deutsch ___.",answer:"habe...gelernt"},
+
+      {type:"fill",prompt:"Perfekt (ich) gehen: Ich ___ nach Hause ___.",answer:"bin...gegangen"},
+
+      {type:"fill",prompt:"Perfekt (ich) essen: Ich ___ Pizza ___.",answer:"habe...gegessen"},
+
+      {type:"translate",prompt:"Translate: I learned German yesterday.",answer:"Ich habe gestern Deutsch gelernt."},
+
+      {type:"translate",prompt:"Translate: She went to the supermarket.",answer:"Sie ist in den Supermarkt gegangen."},
+
+      {type:"fill",prompt:"Write 3 Perfekt sentences about what you did today.",answer:""},
+
+    ],
+
+    dictation:["Ich habe gestern Deutsch gelernt.","Er ist nach Berlin gefahren.","Was hast du heute gemacht?"],
+
+    speaking:[["Ich habe Pizza gegessen und einen Film gesehen.","I ate pizza and watched a film."],["Bist du heute Morgen früh aufgestanden? Ja, ich bin um sechs aufgestanden.","Did you get up early this morning? Yes, I got up at six."]]
+
+  },
+
+  { id:11, title:"Modal Verbs — Power-Up", level:"A2",
+
+    examples:[
+
+      ["Ich kann Deutsch sprechen.","I can speak German.","können + infinitive at end"],
+
+      ["Du musst jetzt schlafen.","You must sleep now.","müssen + infinitive at end"],
+
+      ["Er will ein Buch lesen.","He wants to read a book.","wollen + infinitive"],
+
+      ["Wir sollen pünktlich sein.","We should be on time.","sollen = external expectation"],
+
+      ["Darf ich gehen?","May I leave?","dürfen in a question"],
+
+      ["Ich möchte Kaffee.","I would like coffee.","möchten (no infinitive needed)"],
+
+      ["Kannst du mir helfen?","Can you help me?","können — polite request"],
+
+      ["Er muss jeden Tag üben.","He must practise every day.","müssen — routine obligation"],
+
+      ["Sie will Ärztin werden.","She wants to become a doctor.","wollen — ambition"],
+
+      ["Dürfen wir hier parken?","Are we allowed to park here?","dürfen — permission"],
+
+      ["Ich soll das nicht machen.","I'm not supposed to do that.","sollen — prohibition"],
+
+      ["Möchten Sie bestellen?","Would you like to order?","formal möchten"],
+
+      ["Ich kann das nicht verstehen.","I can't understand that.","können + nicht"],
+
+      ["Du musst nicht kommen.","You don't have to come.","musst nicht = no obligation"],
+
+      ["Er darf nicht rauchen.","He is not allowed to smoke.","darf nicht = prohibition"],
+
+      ["Können Sie das wiederholen?","Can you repeat that? (formal)","formal können"],
+
+      ["Ich muss morgen arbeiten.","I have to work tomorrow.","müssen — commitment"],
+
+      ["Ich möchte gerne bezahlen.","I would like to pay.","möchten + gerne = very polite"],
+
+      ["Wir wollen reisen.","We want to travel.","wollen — future desire"],
+
+      ["Sie können gehen.","You may go.","können — permission"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"können → ich ___",answer:"kann"},
+
+      {type:"fill",prompt:"können → du ___",answer:"kannst"},
+
+      {type:"fill",prompt:"können → er ___",answer:"kann"},
+
+      {type:"fill",prompt:"müssen → ich ___",answer:"muss"},
+
+      {type:"fill",prompt:"müssen → du ___",answer:"musst"},
+
+      {type:"fill",prompt:"Ich ___ Deutsch sprechen. (can)",answer:"kann"},
+
+      {type:"fill",prompt:"Du ___ jetzt schlafen. (must)",answer:"musst"},
+
+      {type:"fill",prompt:"Er ___ ein Buch lesen. (wants to)",answer:"will"},
+
+      {type:"fill",prompt:"___ ich gehen? (may I)",answer:"Darf"},
+
+      {type:"fill",prompt:"Ich ___ Kaffee, bitte. (would like)",answer:"möchte"},
+
+      {type:"reorder",prompt:"Build: ich / können / Deutsch / sprechen",answer:"Ich kann Deutsch sprechen."},
+
+      {type:"reorder",prompt:"Build: du / müssen / heute / lernen",answer:"Du musst heute lernen."},
+
+      {type:"reorder",prompt:"Build: er / wollen / nach Berlin / fahren",answer:"Er will nach Berlin fahren."},
+
+      {type:"translate",prompt:"Translate: I can't understand that.",answer:"Ich kann das nicht verstehen."},
+
+      {type:"translate",prompt:"Translate: You don't have to come.",answer:"Du musst nicht kommen."},
+
+      {type:"translate",prompt:"Translate: May I ask a question?",answer:"Darf ich eine Frage stellen?"},
+
+      {type:"fill",prompt:"Transform 'Ich lerne Deutsch.' with KÖNNEN, MÜSSEN, WOLLEN.",answer:""},
+
+    ],
+
+    dictation:["Ich kann Deutsch sprechen und ich will Deutsch lernen.","Darf ich eine Frage stellen?","Du musst nicht kommen, aber du kannst."],
+
+    speaking:[["Ich kann Deutsch sprechen und ich will nach Deutschland gehen.","I can speak German and I want to go to Germany."],["Darf ich fragen? Ich möchte Kaffee, bitte.","May I ask? I would like coffee, please."]]
+
+  },
+
+  { id:12, title:"The Replace Method", level:"B1",
+
+    examples:[
+
+      ["Ich lerne Deutsch.","I learn German.","Base sentence"],
+
+      ["Du lernst Deutsch.","You learn German.","Swap subject: ich → du"],
+
+      ["Er lernt Deutsch.","He learns German.","Swap subject: ich → er"],
+
+      ["Ich spreche Deutsch.","I speak German.","Swap verb: lernen → sprechen"],
+
+      ["Ich lerne Englisch.","I learn English.","Swap object"],
+
+      ["Ich lerne jeden Tag.","I learn every day.","Add time"],
+
+      ["Er kauft ein Buch.","He buys a book.","New base"],
+
+      ["Sie kauft ein Buch.","She buys a book.","Swap subject"],
+
+      ["Er liest ein Buch.","He reads a book.","Swap verb"],
+
+      ["Er kauft eine Zeitung.","He buys a newspaper.","Swap object"],
+
+      ["Er kauft ein teures Buch.","He buys an expensive book.","Add adjective"],
+
+      ["Er kauft das Buch morgen.","He'll buy the book tomorrow.","Add time"],
+
+      ["Ich bin müde.","I am tired.","Adjective base"],
+
+      ["Ich bin sehr müde.","I am very tired.","Add intensifier"],
+
+      ["Wir spielen Fußball.","We play football.","Activity base"],
+
+      ["Wir spielen Fußball im Park.","We play football in the park.","Add location"],
+
+      ["Wir wollen Fußball spielen.","We want to play football.","Add modal"],
+
+      ["Ich trinke Kaffee.","I drink coffee.","Beverage base"],
+
+      ["Ich trinke jeden Morgen Kaffee.","I drink coffee every morning.","Add time"],
+
+      ["Ich trinke gerne Kaffee.","I like to drink coffee.","Add gerne"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"Base 'Ich lerne Deutsch.' → Swap subject to 'du':",answer:"Du lernst Deutsch."},
+
+      {type:"fill",prompt:"Swap subject to 'er':",answer:"Er lernt Deutsch."},
+
+      {type:"fill",prompt:"Swap subject to 'wir':",answer:"Wir lernen Deutsch."},
+
+      {type:"fill",prompt:"Base 'Er kauft ein Buch.' → Swap verb to 'lesen':",answer:"Er liest ein Buch."},
+
+      {type:"fill",prompt:"Swap verb to 'brauchen':",answer:"Er braucht ein Buch."},
+
+      {type:"fill",prompt:"Add modal 'wollen' to 'Er kauft ein Buch.':",answer:"Er will ein Buch kaufen."},
+
+      {type:"fill",prompt:"Base 'Ich trinke Kaffee.' → Swap to Tee:",answer:"Ich trinke Tee."},
+
+      {type:"fill",prompt:"Add 'heute' to 'Ich lerne Deutsch.':",answer:"Ich lerne heute Deutsch."},
+
+      {type:"fill",prompt:"Add 'im Café' to 'Ich lerne Deutsch.':",answer:"Ich lerne Deutsch im Café."},
+
+      {type:"fill",prompt:"Add modal 'wollen' to 'Wir spielen Fußball.':",answer:"Wir wollen Fußball spielen."},
+
+      {type:"fill",prompt:"Create YOUR OWN base sentence:",answer:""},
+
+      {type:"fill",prompt:"Variation 1 — swap the subject:",answer:""},
+
+      {type:"fill",prompt:"Variation 2 — swap the verb:",answer:""},
+
+      {type:"fill",prompt:"Variation 3 — add a time word:",answer:""},
+
+      {type:"fill",prompt:"Variation 4 — add a location:",answer:""},
+
+    ],
+
+    dictation:["Ich lerne jeden Tag Deutsch im Café.","Er will ein Buch kaufen und nach Berlin fahren.","Wir spielen morgen Fußball im Park."],
+
+    speaking:[["Ich lerne heute Deutsch und ich will jeden Tag üben.","I am learning German today and I want to practise every day."],["Wir spielen Fußball im Park und wir wollen gewinnen.","We play football in the park and we want to win."]]
+
+  },
+
+  { id:13, title:"500 Most Common Words", level:"B1",
+
+    examples:[
+
+      ["Ich lerne, weil ich nach Deutschland gehen will.","I learn because I want to go to Germany.","weil = because → verb to END"],
+
+      ["Er kommt, aber er hat keine Zeit.","He's coming, but he has no time.","aber = but (normal order)"],
+
+      ["Sie sagt, dass du toll bist.","She says that you're great.","dass = that → verb to END"],
+
+      ["Wenn du Zeit hast, komm bitte.","If you have time, please come.","wenn = when/if → verb to END"],
+
+      ["Er ist immer pünktlich — nie zu spät.","He is always on time — never late.","immer / nie opposites"],
+
+      ["Dann gehe ich nach Hause.","Then I'll go home.","dann = then"],
+
+      ["Jetzt lerne ich, später mache ich Sport.","Now I study, later I do sport.","jetzt/später"],
+
+      ["Obwohl es regnet, gehe ich spazieren.","Although it's raining, I'm going for a walk.","obwohl → verb to END"],
+
+      ["Ich bin glücklich, weil ich Deutsch lerne.","I am happy because I'm learning German.","emotional + weil"],
+
+      ["Das ist gut, aber ich bin müde.","That's good, but I'm tired.","simple connector: aber"],
+
+      ["Ich denke, dass das falsch ist.","I think that's wrong.","denken + dass clause"],
+
+      ["Wenn ich Zeit habe, gehe ich ins Kino.","When I have time, I go to cinema.","wenn = conditional"],
+
+      ["Zuerst lerne ich, dann mache ich Pause.","First I study, then I take a break.","zuerst / dann — sequence"],
+
+      ["Ich hoffe, dass wir bald sprechen können.","I hope that we can speak soon.","dass + modal at end"],
+
+      ["Er ist nie zu Hause, immer unterwegs.","He is never home, always on the go.","frequency adverbs"],
+
+      ["Also, was machst du heute?","So, what are you doing today?","also = so — filler"],
+
+      ["Ich verstehe das, aber es ist schwierig.","I understand that, but it's difficult.","honest learner sentence"],
+
+      ["Das Haus ist groß und das Zimmer ist klein.","The house is big and the room is small.","und — linking"],
+
+      ["Ich bin gut, danke. Und du?","I'm good, thanks. And you?","everyday opener"],
+
+      ["Er ist reich, aber unglücklich.","He is rich, but unhappy.","contrast with aber"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'weil' sends the verb to:",options:["Position 2","The end","Position 1"],answer:"The end"},
+
+      {type:"match",prompt:"'aber' word order:",options:["Verb goes to end","Normal order stays","Verb to position 1"],answer:"Normal order stays"},
+
+      {type:"match",prompt:"'dass' sends the verb to:",options:["Position 2","The end","Position 1"],answer:"The end"},
+
+      {type:"match",prompt:"'wenn' sends the verb to:",options:["Position 2","The end","Position 1"],answer:"The end"},
+
+      {type:"match",prompt:"'obwohl' sends the verb to:",options:["Position 2","The end","Position 1"],answer:"The end"},
+
+      {type:"match",prompt:"Verb-to-end conjunctions:",options:["weil/dass/wenn/obwohl","und/aber/also","immer/nie/jetzt"],answer:"weil/dass/wenn/obwohl"},
+
+      {type:"fill",prompt:"Ich lerne, ___ es wichtig ist. (because)",answer:"weil"},
+
+      {type:"fill",prompt:"Er kommt, ___ er müde ist. (although)",answer:"obwohl"},
+
+      {type:"fill",prompt:"Ich denke, ___ du toll bist. (that)",answer:"dass"},
+
+      {type:"fill",prompt:"___ ich fertig bin, gehe ich schlafen. (when/if)",answer:"Wenn"},
+
+      {type:"fill",prompt:"Complete: Ich lerne Deutsch, weil ich ___ (nach Deutschland gehen will).",answer:"nach Deutschland gehen will."},
+
+      {type:"fill",prompt:"Complete: Ich hoffe, dass wir ___ (bald reden können).",answer:"bald reden können."},
+
+      {type:"translate",prompt:"Translate: I am happy because I'm learning German.",answer:"Ich bin glücklich, weil ich Deutsch lerne."},
+
+      {type:"translate",prompt:"Translate: Although it's difficult, I don't give up.",answer:"Obwohl es schwierig ist, gebe ich nicht auf."},
+
+      {type:"translate",prompt:"Translate: When I have time, I listen to music.",answer:"Wenn ich Zeit habe, höre ich Musik."},
+
+      {type:"fill",prompt:"Write a 'weil' sentence about YOUR reason for learning German:",answer:""},
+
+      {type:"fill",prompt:"Write an 'obwohl' sentence about a challenge you face:",answer:""},
+
+    ],
+
+    dictation:["Ich lerne Deutsch, weil ich nach Deutschland gehen will.","Obwohl es schwierig ist, lerne ich jeden Tag.","Wenn ich Zeit habe, höre ich Musik auf Deutsch."],
+
+    speaking:[["Ich lerne Deutsch, weil ich in Deutschland leben will.","I learn German because I want to live in Germany."],["Obwohl es schwierig ist, gebe ich nicht auf.","Although it is difficult, I do not give up."]]
+
+  },
+
+  { id:14, title:"B2 Immersion Plan", level:"B1",
+
+    examples:[
+
+      ["Ich schaue jeden Tag Easy German auf YouTube.","I watch Easy German on YouTube every day.","Routine immersion"],
+
+      ["Ich wiederhole den Satz dreimal.","I repeat the sentence three times.","Active listening technique"],
+
+      ["Ich verstehe schon 40% des Podcasts.","I already understand 40% of the podcast.","Progress measurement"],
+
+      ["Kannst du das bitte langsamer sagen?","Can you say that more slowly, please?","Learner self-advocacy"],
+
+      ["Ich mache jeden Abend eine Aufnahme.","I make a recording every evening.","Self-recording habit"],
+
+      ["Ich höre Musik auf Deutsch.","I listen to music in German.","Passive immersion"],
+
+      ["Ich lese deutsche Nachrichten online.","I read German news online.","Reading immersion"],
+
+      ["Was bedeutet dieses Wort?","What does this word mean?","Classic learner question"],
+
+      ["Ich lerne 30 Karten pro Tag mit Anki.","I learn 30 cards per day with Anki.","SRS study habit"],
+
+      ["Ich chatte täglich auf HelloTalk.","I chat daily on HelloTalk.","Speaking output habit"],
+
+      ["Mein Sprachpartner korrigiert meine Fehler.","My language partner corrects my mistakes.","Partner feedback"],
+
+      ["Ich denke manchmal auf Deutsch.","I sometimes think in German.","Advanced immersion goal"],
+
+      ["Wie sagt man das auf Deutsch?","How do you say that in German?","Classic learner question"],
+
+      ["Ich schaue eine Folge ohne Untertitel.","I watch an episode without subtitles.","Advanced listening challenge"],
+
+      ["Ich habe heute ein neues Wort gelernt: gemütlich.","Today I learned a new word: cozy.","Daily vocabulary logging"],
+
+      ["Ich mache täglich 20 Minuten Anki.","I do Anki for 20 minutes every day.","Study habit"],
+
+      ["Das klingt wie Deutsch!","That sounds like German!","Recognition moment"],
+
+      ["Ich lese diesen Artikel auf Deutsch.","I am reading this article in German.","Reading habit"],
+
+      ["Träume ich schon auf Deutsch?","Am I already dreaming in German?","Fluency milestone"],
+
+      ["Hör mal zu — kannst du das verstehen?","Listen — can you understand that?","Partner challenge"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"Watching Easy German with German subs:",options:["Active listening","Passive listening","Speaking output","Reading"],answer:"Active listening"},
+
+      {type:"match",prompt:"Playing German music while cooking:",options:["Active listening","Passive listening","Speaking output","Reading"],answer:"Passive listening"},
+
+      {type:"match",prompt:"Texting a language partner for 15 min:",options:["Active listening","Passive listening","Speaking output","Writing"],answer:"Speaking output"},
+
+      {type:"match",prompt:"Reading a German Wikipedia article:",options:["Active listening","Passive listening","Speaking output","Reading"],answer:"Reading"},
+
+      {type:"match",prompt:"Recording yourself speaking for 60 seconds:",options:["Active listening","Passive listening","Speaking output","Writing"],answer:"Speaking output"},
+
+      {type:"translate",prompt:"Translate: What does this word mean?",answer:"Was bedeutet dieses Wort?"},
+
+      {type:"translate",prompt:"Translate: Can you say that more slowly?",answer:"Kannst du das langsamer sagen?"},
+
+      {type:"translate",prompt:"Translate: How do you say that in German?",answer:"Wie sagt man das auf Deutsch?"},
+
+      {type:"translate",prompt:"Translate: I didn't understand that.",answer:"Ich habe das nicht verstanden."},
+
+      {type:"translate",prompt:"Translate: I learn 20 new words every day with Anki.",answer:"Ich lerne jeden Tag 20 neue Wörter mit Anki."},
+
+      {type:"fill",prompt:"Write your Monday immersion plan (20 min):",answer:""},
+
+      {type:"fill",prompt:"Write your weekly immersion goals in German:",answer:""},
+
+      {type:"fill",prompt:"Write a letter to your future German-speaking self (2 sentences):",answer:""},
+
+    ],
+
+    dictation:["Ich schaue jeden Tag ein deutsches YouTube-Video.","Was bedeutet dieses Wort auf Deutsch?","Ich lerne dreißig neue Wörter pro Tag mit Anki."],
+
+    speaking:[["Ich lerne Deutsch mit YouTube-Videos und Anki jeden Tag.","I learn German with YouTube videos and Anki every day."],["Was bedeutet dieses Wort? Kannst du das bitte langsamer sagen?","What does this word mean? Can you please say that more slowly?"]]
+
+  },
+
+  { id:15, title:"Konjunktiv II — The B2 Gate", level:"B2",
+
+    examples:[
+
+      ["Ich wäre glücklich.","I would be happy.","wäre = would be — most common!"],
+
+      ["Ich hätte gern einen Kaffee.","I would like a coffee.","hätte gern = very polite ordering"],
+
+      ["Ich würde das machen.","I would do that.","würde + infinitive — the formula"],
+
+      ["Wenn ich reich wäre, würde ich reisen.","If I were rich, I would travel.","wenn + wäre + würde"],
+
+      ["Könnten Sie bitte helfen?","Could you please help?","Könnten = polite request"],
+
+      ["Ich würde gerne kommen.","I would like to come.","gerne = gladly"],
+
+      ["Wenn ich du wäre, würde ich lernen.","If I were you, I would study.","classic advice phrase"],
+
+      ["Hätten Sie Zeit?","Would you have time? (formal)","hätten = formal hypothetical"],
+
+      ["Ich wünschte, ich hätte mehr Zeit.","I wish I had more time.","wünschen + hätte"],
+
+      ["Das wäre toll!","That would be great!","common reaction"],
+
+      ["Ohne dich wäre ich verloren.","Without you, I would be lost.","emotional use of wäre"],
+
+      ["Ich würde lieber zu Hause bleiben.","I would rather stay home.","lieber = rather/prefer"],
+
+      ["Das könnte klappen.","That could work.","könnte = polite speculation"],
+
+      ["Müsste ich das wirklich machen?","Would I really have to do that?","müsste — soft obligation"],
+
+      ["Dürfte ich Sie etwas fragen?","Might I ask you something?","dürfte — very formal"],
+
+      ["Ich hätte das anders gemacht.","I would have done that differently.","hätte + past participle"],
+
+      ["Wenn das so wäre, wäre es gut.","If that were the case, it would be good.","double wäre"],
+
+      ["Das sollte eigentlich funktionieren.","That should actually work.","sollte — expectation"],
+
+      ["Ich würde dir empfehlen zu lernen.","I would recommend you to study.","würde + recommendation"],
+
+      ["An deiner Stelle würde ich Deutsch lernen.","In your position I would learn German.","an deiner Stelle = in your position"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"Konjunktiv II of 'sein' (ich): ___",answer:"wäre"},
+
+      {type:"fill",prompt:"Konjunktiv II of 'haben' (ich): ___",answer:"hätte"},
+
+      {type:"fill",prompt:"Universal Konjunktiv II helper: ___ + infinitive",answer:"würde"},
+
+      {type:"fill",prompt:"wäre → du ___",answer:"wärst"},
+
+      {type:"fill",prompt:"wäre → wir ___",answer:"wären"},
+
+      {type:"fill",prompt:"Transform 'Ich gehe.' → Ich ___ ___.",answer:"würde gehen"},
+
+      {type:"fill",prompt:"Transform 'Du lernst.' → Du ___ ___.",answer:"würdest lernen"},
+
+      {type:"fill",prompt:"sein → use wäre, NOT 'würde sein'. Ich ___ müde.",answer:"wäre"},
+
+      {type:"fill",prompt:"haben → use hätte, NOT 'würde haben'. Er ___ Zeit.",answer:"hätte"},
+
+      {type:"fill",prompt:"Complete: Wenn ich Zeit hätte, ___ ich mehr Deutsch lernen.",answer:"würde"},
+
+      {type:"fill",prompt:"Complete: Wenn ich reich wäre, ___ ich die Welt bereisen.",answer:"würde"},
+
+      {type:"fill",prompt:"Polite: 'Kannst du mir helfen?' → ___ du mir helfen?",answer:"Könntest"},
+
+      {type:"fill",prompt:"Polite: 'Haben Sie Zeit?' → ___ Sie Zeit?",answer:"Hätten"},
+
+      {type:"translate",prompt:"Translate: That would be great!",answer:"Das wäre toll!"},
+
+      {type:"translate",prompt:"Translate: I would rather stay home.",answer:"Ich würde lieber zu Hause bleiben."},
+
+      {type:"translate",prompt:"Translate: I wish I had more time.",answer:"Ich wünschte, ich hätte mehr Zeit."},
+
+      {type:"translate",prompt:"Translate: Could you please help? (formal)",answer:"Könnten Sie bitte helfen?"},
+
+      {type:"fill",prompt:"Write 3 'Wenn ich...' dream sentences about your life in Germany:",answer:""},
+
+      {type:"fill",prompt:"Final Boss: Write 5 sentences about your life IF you already lived in Germany:",answer:""},
+
+    ],
+
+    dictation:["Wenn ich Zeit hätte, würde ich mehr reisen.","Das wäre wirklich toll für mich.","Könnten Sie bitte langsamer sprechen?"],
+
+    speaking:[["Wenn ich in Deutschland wäre, würde ich jeden Tag Deutsch sprechen.","If I were in Germany, I would speak German every day."],["Das wäre toll! Ich würde gerne nach Berlin gehen.","That would be great! I would like to go to Berlin."]]
+
+  },
+
+  { id:16, title:"A1 Adjectives — Foundation", level:"A1",
+
+    examples:[
+
+      ["Der Kaffee ist heiß.","The coffee is hot.","sein + adjective (predicate)"],
+
+      ["Das Buch ist interessant.","The book is interesting.","predicate adjective"],
+
+      ["Er ist groß und stark.","He is tall and strong.","two predicate adjectives"],
+
+      ["Die Wohnung ist klein aber schön.","The apartment is small but pretty.","contrast"],
+
+      ["Ich bin müde und hungrig.","I am tired and hungry.","personal state"],
+
+      ["Das Wetter ist schlecht.","The weather is bad.","weather adjective"],
+
+      ["Sie ist nett und freundlich.","She is nice and friendly.","personality"],
+
+      ["Der Film ist lang und langweilig.","The movie is long and boring.","opinion"],
+
+      ["Das Essen ist lecker!","The food is delicious!","food review"],
+
+      ["Ich bin sehr glücklich.","I am very happy.","sehr = very"],
+
+      ["ein großer Mann","a tall man","attributive adj. (der noun → -er)"],
+
+      ["eine kleine Frau","a small woman","attributive adj. (die noun → -e)"],
+
+      ["ein altes Buch","an old book","attributive adj. (das noun → -es)"],
+
+      ["Der große Mann läuft.","The tall man walks.","definite + adj. (der → -e)"],
+
+      ["Die kleine Frau spricht.","The small woman speaks.","definite + adj. (die → -e)"],
+
+      ["Das alte Buch ist wertvoll.","The old book is valuable.","definite + adj. (das → -e)"],
+
+      ["ein schnelles Auto","a fast car","schnell = fast"],
+
+      ["Das Kind ist süß.","The child is cute.","common opinion"],
+
+      ["Das Zimmer ist sauber.","The room is clean.","apartment vocab"],
+
+      ["Die Aufgabe ist schwierig.","The task is difficult.","study vocab"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'heiß' means:",options:["hot","cold","big","small"],answer:"hot"},
+
+      {type:"match",prompt:"'groß' means:",options:["small","old","big/tall","new"],answer:"big/tall"},
+
+      {type:"match",prompt:"'klein' means:",options:["big","small","fast","slow"],answer:"small"},
+
+      {type:"match",prompt:"'schön' means:",options:["ugly","boring","beautiful/nice","old"],answer:"beautiful/nice"},
+
+      {type:"match",prompt:"'langweilig' means:",options:["interesting","boring","exciting","fun"],answer:"boring"},
+
+      {type:"match",prompt:"'lecker' means:",options:["awful","delicious","hot","cold"],answer:"delicious"},
+
+      {type:"fill",prompt:"Predicate: Der Kaffee ist ___. (hot)",answer:"heiß"},
+
+      {type:"fill",prompt:"Predicate: Das Buch ist ___. (interesting)",answer:"interessant"},
+
+      {type:"fill",prompt:"Attributive (ein + masc): ein ___ Mann (tall → großer)",answer:"großer"},
+
+      {type:"fill",prompt:"Attributive (eine + fem): eine ___ Frau (small → kleine)",answer:"kleine"},
+
+      {type:"fill",prompt:"Attributive (ein + neut): ein ___ Buch (old → altes)",answer:"altes"},
+
+      {type:"fill",prompt:"Definite (der + masc): Der ___ Mann (tall → große)",answer:"große"},
+
+      {type:"translate",prompt:"Translate: The coffee is hot.",answer:"Der Kaffee ist heiß."},
+
+      {type:"translate",prompt:"Translate: The food is delicious.",answer:"Das Essen ist lecker."},
+
+      {type:"fill",prompt:"Describe yourself using 3 adjectives (predicate):",answer:""},
+
+      {type:"fill",prompt:"Write 5 sentences describing things around you:",answer:""},
+
+    ],
+
+    dictation:["Der Kaffee ist heiß und das Brot ist frisch.","Das Zimmer ist klein aber sehr schön.","Ich bin müde und hungrig heute."],
+
+    speaking:[["Das Essen ist lecker und der Kaffee ist heiß.","The food is delicious and the coffee is hot."],["Ich bin müde aber glücklich. Das Wetter ist schön heute.","I am tired but happy. The weather is nice today."]]
+
+  },
+
+  { id:17, title:"A2 Adjectives — Personality", level:"A2",
+
+    examples:[
+
+      ["Er ist sehr fleißig.","He is very hardworking.","personality — positive"],
+
+      ["Sie ist ein bisschen schüchtern.","She is a little shy.","ein bisschen = a little"],
+
+      ["Ich bin ziemlich entspannt.","I am quite relaxed.","ziemlich = quite"],
+
+      ["Das war wirklich lustig!","That was really funny!","wirklich = really"],
+
+      ["Er ist unglaublich geduldig.","He is incredibly patient.","unglaublich = incredibly"],
+
+      ["Sie ist eher introvertiert.","She is rather introverted.","eher = rather"],
+
+      ["Er ist total verrückt!","He is totally crazy!","total = totally"],
+
+      ["Ich finde sie sehr klug.","I find her very clever.","finden + adjective"],
+
+      ["Er wirkt freundlich.","He seems friendly.","wirken = to seem"],
+
+      ["Sie ist äußerst zuverlässig.","She is extremely reliable.","äußerst = extremely"],
+
+      ["Ich bin nicht besonders sportlich.","I am not particularly athletic.","nicht besonders"],
+
+      ["Er ist sowohl ernst als auch lustig.","He is both serious and funny.","sowohl...als auch"],
+
+      ["Sie ist weder arrogant noch unfreundlich.","She is neither arrogant nor unfriendly.","weder...noch"],
+
+      ["Ich werde immer geduldiger.","I am becoming more and more patient.","immer + comparative"],
+
+      ["Er hat eine offene Persönlichkeit.","He has an open personality.","Persönlichkeit"],
+
+      ["Ich bin zu perfektionistisch.","I am too perfectionist.","zu = too"],
+
+      ["Das macht sie sehr sympathisch.","That makes her very likeable.","sympathisch"],
+
+      ["Sie ist nicht so selbstbewusst.","She is not so self-confident.","nicht so"],
+
+      ["Bist du eher kreativ oder logisch?","Are you more creative or logical?","eher...oder"],
+
+      ["Ich bin manchmal ungeduldig.","I am sometimes impatient.","manchmal = sometimes"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'fleißig' means:",options:["lazy","hardworking","friendly","boring"],answer:"hardworking"},
+
+      {type:"match",prompt:"'geduldig' means:",options:["impatient","patient","friendly","shy"],answer:"patient"},
+
+      {type:"match",prompt:"'schüchtern' means:",options:["confident","shy","funny","serious"],answer:"shy"},
+
+      {type:"match",prompt:"'zuverlässig' means:",options:["unreliable","reliable","creative","lazy"],answer:"reliable"},
+
+      {type:"match",prompt:"'lustig' means:",options:["boring","sad","funny","angry"],answer:"funny"},
+
+      {type:"fill",prompt:"'ziemlich' means:",answer:"quite"},
+
+      {type:"fill",prompt:"'äußerst' means:",answer:"extremely"},
+
+      {type:"fill",prompt:"Describe yourself: Ich bin ___ (ein bisschen/ziemlich/sehr) ___.",answer:""},
+
+      {type:"fill",prompt:"Complete: Er ist ___ ernst ___ auch lustig. (both...and)",answer:"sowohl...als"},
+
+      {type:"fill",prompt:"Complete: Sie ist weder arrogant ___ unfreundlich.",answer:"noch"},
+
+      {type:"translate",prompt:"Translate: She is extremely reliable.",answer:"Sie ist äußerst zuverlässig."},
+
+      {type:"translate",prompt:"Translate: He seems friendly.",answer:"Er wirkt freundlich."},
+
+      {type:"fill",prompt:"Opposite of 'fleißig':",answer:"faul"},
+
+      {type:"fill",prompt:"Opposite of 'geduldig':",answer:"ungeduldig"},
+
+      {type:"fill",prompt:"Write 5 sentences about your own personality:",answer:""},
+
+    ],
+
+    dictation:["Er ist sehr fleißig und äußerst zuverlässig.","Ich bin manchmal ungeduldig aber meistens entspannt.","Sie wirkt freundlich und sehr sympathisch."],
+
+    speaking:[["Ich bin ziemlich fleißig und ein bisschen schüchtern.","I am quite hardworking and a little shy."],["Er ist sowohl ernst als auch sehr lustig — ich mag ihn sehr.","He is both serious and very funny — I like him very much."]]
+
+  },
+
+  { id:18, title:"B1 Adjectives — Character", level:"B1",
+
+    examples:[
+
+      ["Er ist aufgeschlossen und weltoffen.","He is open-minded and cosmopolitan.","compound personality traits"],
+
+      ["Sie ist sehr einfühlsam.","She is very empathetic.","einfühlsam = empathetic"],
+
+      ["Er wirkt manchmal überheblich.","He sometimes comes across as arrogant.","überheblich = arrogant"],
+
+      ["Ich bin von Natur aus neugierig.","I am naturally curious.","von Natur aus = by nature"],
+
+      ["Sie hat einen starken Willen.","She has a strong will.","starker Wille"],
+
+      ["Er ist pragmatisch veranlagt.","He has a pragmatic disposition.","pragmatisch"],
+
+      ["Sie ist bemerkenswert belastbar.","She is remarkably resilient.","belastbar = resilient"],
+
+      ["Ich schätze ehrliche Menschen.","I value honest people.","schätzen = to value"],
+
+      ["Er tendiert zur Überanalyse.","He tends toward over-analysis.","tendieren"],
+
+      ["Er zeigt viel Mitgefühl.","He shows a lot of compassion.","Mitgefühl = compassion"],
+
+      ["Ich bin ein Mensch der Tat.","I am a person of action.","Mensch der Tat"],
+
+      ["Sie hat ein ausgeprägtes Gerechtigkeitsgefühl.","She has a strong sense of justice.","ausgeprägt"],
+
+      ["Er ist manchmal zu selbstkritisch.","He is sometimes too self-critical.","selbstkritisch"],
+
+      ["Sie hat eine positive Grundeinstellung.","She has a positive basic attitude.","Grundeinstellung"],
+
+      ["Er ist zielorientiert und ehrgeizig.","He is goal-oriented and ambitious.","ehrgeizig"],
+
+      ["Ich versuche, konsequent zu handeln.","I try to act consistently.","konsequent"],
+
+      ["Sie denkt immer an andere.","She always thinks of others.","altruistic"],
+
+      ["Er geht mit gutem Beispiel voran.","He leads by example.","mit gutem Beispiel vorangehen"],
+
+      ["Ich arbeite an meinen Schwächen.","I work on my weaknesses.","Schwächen = weaknesses"],
+
+      ["Sie ist jemand, auf den man sich verlassen kann.","She is someone you can rely on.","sich verlassen auf"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'einfühlsam' means:",options:["boring","empathetic","reliable","clever"],answer:"empathetic"},
+
+      {type:"match",prompt:"'aufgeschlossen' means:",options:["closed-off","open-minded","shy","arrogant"],answer:"open-minded"},
+
+      {type:"match",prompt:"'ehrgeizig' means:",options:["lazy","ambitious","patient","creative"],answer:"ambitious"},
+
+      {type:"match",prompt:"'belastbar' means:",options:["fragile","resilient","sensitive","weak"],answer:"resilient"},
+
+      {type:"match",prompt:"'konsequent' means:",options:["inconsistent","consistent","patient","creative"],answer:"consistent"},
+
+      {type:"fill",prompt:"'von Natur aus' means:",answer:"by nature"},
+
+      {type:"fill",prompt:"'Mitgefühl' means:",answer:"compassion"},
+
+      {type:"fill",prompt:"'schätzen' means:",answer:"to value/appreciate"},
+
+      {type:"translate",prompt:"Translate: She is remarkably resilient.",answer:"Sie ist bemerkenswert belastbar."},
+
+      {type:"translate",prompt:"Translate: He shows a lot of compassion.",answer:"Er zeigt viel Mitgefühl."},
+
+      {type:"translate",prompt:"Translate: I work on my weaknesses.",answer:"Ich arbeite an meinen Schwächen."},
+
+      {type:"fill",prompt:"Describe your character: Ich bin von Natur aus ___.",answer:""},
+
+      {type:"fill",prompt:"Write your Stärken (strengths) in German — 3 traits:",answer:""},
+
+      {type:"fill",prompt:"Write a 5-sentence character self-portrait using B1 adjectives:",answer:""},
+
+    ],
+
+    dictation:["Sie ist bemerkenswert belastbar und sehr einfühlsam.","Ich bin von Natur aus neugierig und ehrgeizig.","Er geht immer mit gutem Beispiel voran."],
+
+    speaking:[["Ich bin von Natur aus neugierig und ich schätze ehrliche Menschen sehr.","I am naturally curious and I value honest people greatly."],["Sie ist zielorientiert und ehrgeizig — sie ist wirklich bemerkenswert belastbar.","She is goal-oriented and ambitious — she is truly remarkably resilient."]]
+
+  },
+
+  { id:19, title:"B2 Adjectives — Academic", level:"B2",
+
+    examples:[
+
+      ["Das Argument ist überzeugend.","The argument is convincing.","überzeugen = to convince"],
+
+      ["Ihre Analyse ist äußerst präzise.","Her analysis is extremely precise.","präzise = precise"],
+
+      ["Der Ansatz ist innovativ und bahnbrechend.","The approach is innovative and groundbreaking.","bahnbrechend"],
+
+      ["Das Konzept ist komplex aber nachvollziehbar.","The concept is complex but comprehensible.","nachvollziehbar"],
+
+      ["Seine Position ist nicht haltbar.","His position is not tenable.","haltbar = tenable"],
+
+      ["Das Ergebnis ist eindeutig.","The result is clear/unambiguous.","eindeutig = unambiguous"],
+
+      ["Der Befund ist beunruhigend.","The finding is worrying.","beunruhigend = worrying"],
+
+      ["Die These ist weitgehend akzeptiert.","The thesis is widely accepted.","weitgehend = widely"],
+
+      ["Seine Argumentation ist schlüssig.","His argumentation is coherent.","schlüssig = coherent"],
+
+      ["Die Aussage ist widersprüchlich.","The statement is contradictory.","widersprüchlich"],
+
+      ["Der Diskurs ist vielschichtig.","The discourse is multi-layered.","vielschichtig"],
+
+      ["Sein Stil ist nüchtern und sachlich.","His style is sober and factual.","nüchtern/sachlich"],
+
+      ["Die Schlussfolgerung ist plausibel.","The conclusion is plausible.","Schlussfolgerung"],
+
+      ["Der Text ist anspruchsvoll.","The text is demanding/challenging.","anspruchsvoll"],
+
+      ["Die Debatte ist nach wie vor offen.","The debate is still open.","nach wie vor"],
+
+      ["Das Vorgehen ist methodisch korrekt.","The approach is methodologically correct.","methodisch"],
+
+      ["Die Daten sind nicht repräsentativ.","The data is not representative.","repräsentativ"],
+
+      ["Das ist eine weitreichende Entscheidung.","That is a far-reaching decision.","weitreichend"],
+
+      ["Das Ergebnis ist nicht verallgemeinerbar.","The result cannot be generalized.","verallgemeinerbar"],
+
+      ["Das Phänomen ist schwer zu erfassen.","The phenomenon is hard to grasp.","erfassen = to grasp"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'überzeugend' means:",options:["boring","convincing","contradictory","precise"],answer:"convincing"},
+
+      {type:"match",prompt:"'bahnbrechend' means:",options:["outdated","groundbreaking","irrelevant","complex"],answer:"groundbreaking"},
+
+      {type:"match",prompt:"'nachvollziehbar' means:",options:["incomprehensible","comprehensible/understandable","precise","complex"],answer:"comprehensible/understandable"},
+
+      {type:"match",prompt:"'eindeutig' means:",options:["ambiguous","unambiguous/clear","complex","vague"],answer:"unambiguous/clear"},
+
+      {type:"match",prompt:"'schlüssig' means:",options:["incoherent","coherent/logical","emotional","vague"],answer:"coherent/logical"},
+
+      {type:"match",prompt:"'anspruchsvoll' means:",options:["easy","demanding/challenging","boring","simple"],answer:"demanding/challenging"},
+
+      {type:"fill",prompt:"'weitgehend' means:",answer:"widely/largely"},
+
+      {type:"fill",prompt:"'vielschichtig' means:",answer:"multi-layered"},
+
+      {type:"fill",prompt:"'präzise' means:",answer:"precise"},
+
+      {type:"translate",prompt:"Translate: The argument is convincing.",answer:"Das Argument ist überzeugend."},
+
+      {type:"translate",prompt:"Translate: His argumentation is coherent.",answer:"Seine Argumentation ist schlüssig."},
+
+      {type:"translate",prompt:"Translate: The finding is worrying.",answer:"Der Befund ist beunruhigend."},
+
+      {type:"translate",prompt:"Translate: The text is demanding.",answer:"Der Text ist anspruchsvoll."},
+
+      {type:"fill",prompt:"Write 3 sentences analyzing why learning German is important (B2 style):",answer:""},
+
+      {type:"fill",prompt:"🏆 Final Boss: Write a paragraph (5 sentences) evaluating your German progress using B2 adjectives:",answer:""},
+
+    ],
+
+    dictation:["Das Argument ist überzeugend und sehr gut strukturiert.","Die Schlussfolgerung ist eindeutig und plausibel.","Der Text ist anspruchsvoll aber nachvollziehbar."],
+
+    speaking:[["Das Argument ist überzeugend und die Analyse ist äußerst präzise.","The argument is convincing and the analysis is extremely precise."],["Die Debatte ist vielschichtig und nach wie vor offen — das ist sehr interessant.","The debate is multi-layered and still open — that is very interesting."]]
+
+  },
+
+  { id:20, title:"Separable Verbs (Trennbare Verben)", level:"A2",
+
+    examples:[
+
+      ["Ich stehe um 7 Uhr auf.","I get up at 7 o'clock.","aufstehen — prefix 'auf' goes to end"],
+
+      ["Er ruft mich jeden Tag an.","He calls me every day.","anrufen — 'an' at end"],
+
+      ["Wir kaufen im Supermarkt ein.","We shop at the supermarket.","einkaufen — 'ein' at end"],
+
+      ["Sie kommt morgen zurück.","She is coming back tomorrow.","zurückkommen — 'zurück' at end"],
+
+      ["Ich mache das Fenster zu.","I close the window.","zumachen — 'zu' at end"],
+
+      ["Der Bus fährt um 8 Uhr ab.","The bus departs at 8 o'clock.","abfahren — 'ab' at end"],
+
+      ["Er sieht jeden Abend fern.","He watches TV every evening.","fernsehen — 'fern' at end"],
+
+      ["Wir bereiten das Essen vor.","We prepare the food.","vorbereiten — 'vor' at end"],
+
+      ["Sie lädt ihre Freunde ein.","She invites her friends.","einladen — 'ein' at end"],
+
+      ["Ich ziehe meine Jacke aus.","I take off my jacket.","ausziehen — 'aus' at end"],
+
+      ["Er kommt mit uns mit.","He comes along with us.","mitkommen — 'mit' at end"],
+
+      ["Ich schlage das Wort nach.","I look up the word.","nachschlagen — 'nach' at end"],
+
+      ["Sie stellt sich vor.","She introduces herself.","vorstellen — 'vor' at end"],
+
+      ["Ich rufe dich morgen an.","I will call you tomorrow.","anrufen — 'an' at end"],
+
+      ["Wir gehen heute Abend aus.","We're going out tonight.","ausgehen — 'aus' at end"],
+
+      ["Er macht die Tür auf.","He opens the door.","aufmachen — 'auf' at end"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"Ich ___ um 6 Uhr ___. (aufstehen — fill verb + prefix)",answer:"stehe / auf"},
+
+      {type:"fill",prompt:"Er ___ mich morgen ___. (anrufen)",answer:"ruft / an"},
+
+      {type:"fill",prompt:"Wir ___ heute Abend ___. (ausgehen)",answer:"gehen / aus"},
+
+      {type:"fill",prompt:"Sie ___ ihre Freunde ___. (einladen)",answer:"lädt / ein"},
+
+      {type:"fill",prompt:"Der Zug ___ um 9 Uhr ___. (abfahren)",answer:"fährt / ab"},
+
+      {type:"fill",prompt:"Ich ___ das Licht ___. (anmachen — turn on)",answer:"mache / an"},
+
+      {type:"fill",prompt:"Er ___ das Wort ___. (nachschlagen)",answer:"schlägt / nach"},
+
+      {type:"fill",prompt:"Sie ___ sich ___. (vorstellen — introduces herself)",answer:"stellt / vor"},
+
+      {type:"match",prompt:"aufstehen means:",options:["to call","to get up","to go out","to invite"],answer:"to get up"},
+
+      {type:"match",prompt:"anrufen means:",options:["to get up","to call","to go out","to close"],answer:"to call"},
+
+      {type:"match",prompt:"einkaufen means:",options:["to look up","to go shopping","to open","to depart"],answer:"to go shopping"},
+
+      {type:"match",prompt:"zurückkommen means:",options:["to go back","to come back","to call back","to stay"],answer:"to come back"},
+
+      {type:"match",prompt:"fernsehen means:",options:["to watch TV","to read","to listen","to sleep"],answer:"to watch TV"},
+
+      {type:"reorder",prompt:"Arrange: ich / auf / stehe / um 7 Uhr",answer:"Ich stehe um 7 Uhr auf."},
+
+      {type:"reorder",prompt:"Arrange: er / mich / ruft / an / morgen",answer:"Er ruft mich morgen an."},
+
+      {type:"reorder",prompt:"Arrange: wir / ein / kaufen / heute",answer:"Wir kaufen heute ein."},
+
+      {type:"reorder",prompt:"Arrange: sie / zurück / kommt / morgen",answer:"Sie kommt morgen zurück."},
+
+      {type:"translate",prompt:"Translate: I get up at 6 o'clock.",answer:"Ich stehe um 6 Uhr auf."},
+
+      {type:"translate",prompt:"Translate: He calls me every day.",answer:"Er ruft mich jeden Tag an."},
+
+      {type:"translate",prompt:"Translate: We are going out tonight.",answer:"Wir gehen heute Abend aus."},
+
+      {type:"translate",prompt:"Translate: She invites her friends.",answer:"Sie lädt ihre Freunde ein."},
+
+      {type:"fill",prompt:"Write a sentence using 'anrufen' with 'ich':",answer:""},
+
+      {type:"fill",prompt:"Write a sentence using 'aufstehen' about your morning routine:",answer:""},
+
+      {type:"fill",prompt:"Create 3 sentences about your evening using separable verbs:",answer:""},
+
+    ],
+
+    dictation:["Ich stehe jeden Morgen um sieben Uhr auf.","Er ruft seine Mutter jeden Abend an.","Wir kaufen im Supermarkt ein und kommen dann zurück."],
+
+    speaking:[["Ich stehe früh auf und rufe dann meine Freunde an.","I get up early and then call my friends."],["Sie lädt uns ein und wir bereiten das Essen zusammen vor.","She invites us and we prepare the food together."]]
+
+  },
+
+  { id:21, title:"Accusative & Dative Prepositions", level:"A2",
+
+    examples:[
+
+      ["Ich gehe durch den Park.","I walk through the park.","durch + accusative → den Park (masc acc)"],
+
+      ["Das Geschenk ist für meinen Vater.","The gift is for my father.","für + accusative → meinen Vater"],
+
+      ["Er ist gegen die Idee.","He is against the idea.","gegen + accusative → die Idee"],
+
+      ["Sie geht ohne einen Schirm.","She goes without an umbrella.","ohne + accusative → einen Schirm"],
+
+      ["Wir gehen um den See.","We walk around the lake.","um + accusative → den See"],
+
+      ["Bis nächsten Montag!","Until next Monday!","bis + accusative → nächsten Montag"],
+
+      ["Sie laufen die Straße entlang.","They walk along the street.","entlang + accusative (follows noun)"],
+
+      ["Ich komme aus Deutschland.","I come from Germany.","aus + dative — origin"],
+
+      ["Außer ihm ist niemand da.","Apart from him no one is there.","außer + dative → ihm"],
+
+      ["Ich wohne bei meiner Mutter.","I live at my mother's place.","bei + dative → meiner Mutter"],
+
+      ["Wir fahren mit dem Zug.","We travel by train.","mit + dative → dem Zug"],
+
+      ["Nach der Schule gehe ich heim.","After school I go home.","nach + dative → der Schule"],
+
+      ["Ich lerne seit einem Jahr Deutsch.","I have been learning German for a year.","seit + dative → einem Jahr"],
+
+      ["Das ist ein Brief von meiner Freundin.","That is a letter from my friend.","von + dative → meiner Freundin"],
+
+      ["Ich gehe zu meinem Bruder.","I am going to my brother's place.","zu + dative → meinem Bruder"],
+
+      ["Die Bank liegt gegenüber dem Bahnhof.","The bank is opposite the station.","gegenüber + dative → dem Bahnhof"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'durch' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Accusative"},
+
+      {type:"match",prompt:"'mit' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Dative"},
+
+      {type:"match",prompt:"'für' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Accusative"},
+
+      {type:"match",prompt:"'seit' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Dative"},
+
+      {type:"match",prompt:"'ohne' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Accusative"},
+
+      {type:"match",prompt:"'von' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Dative"},
+
+      {type:"match",prompt:"'gegen' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Accusative"},
+
+      {type:"match",prompt:"'bei' takes which case?",options:["Nominative","Accusative","Dative","Genitive"],answer:"Dative"},
+
+      {type:"fill",prompt:"Ich gehe durch ___ Park. (der → acc masc)",answer:"den"},
+
+      {type:"fill",prompt:"Das ist für ___ Mutter. (die → acc fem)",answer:"die"},
+
+      {type:"fill",prompt:"Wir fahren mit ___ Zug. (der → dat masc)",answer:"dem"},
+
+      {type:"fill",prompt:"Ich wohne bei ___ Eltern. (die → dat pl)",answer:"den"},
+
+      {type:"fill",prompt:"Sie kommt aus ___ Stadt. (die → dat fem)",answer:"der"},
+
+      {type:"fill",prompt:"Ich lerne seit ___ Jahr. (ein → dat neut)",answer:"einem"},
+
+      {type:"fill",prompt:"Er geht zu ___ Arzt. (der → dat masc)",answer:"dem"},
+
+      {type:"fill",prompt:"Das Haus liegt gegenüber ___ Park. (der → dat masc)",answer:"dem"},
+
+      {type:"translate",prompt:"Translate: We are going through the city.",answer:"Wir gehen durch die Stadt."},
+
+      {type:"translate",prompt:"Translate: This is a gift for my sister.",answer:"Das ist ein Geschenk für meine Schwester."},
+
+      {type:"translate",prompt:"Translate: I travel by bus.",answer:"Ich fahre mit dem Bus."},
+
+      {type:"translate",prompt:"Translate: I have been living here since a year.",answer:"Ich wohne seit einem Jahr hier."},
+
+      {type:"fill",prompt:"List ALL 7 accusative prepositions from memory:",answer:""},
+
+      {type:"fill",prompt:"List ALL 9 dative prepositions from memory:",answer:""},
+
+      {type:"fill",prompt:"Write 3 sentences — one with 'für', one with 'mit', one with 'seit':",answer:""},
+
+    ],
+
+    dictation:["Ich gehe jeden Tag durch den Park ohne meinen Hund.","Das Geschenk ist für meinen besten Freund.","Ich lerne seit zwei Jahren mit einem Lehrer Deutsch."],
+
+    speaking:[["Ich fahre mit dem Zug durch die Stadt zu meiner Mutter.","I travel by train through the city to my mother's place."],["Das Paket ist für ihn — ohne Absender, von einer unbekannten Person.","The package is for him — without a sender, from an unknown person."]]
+
+  },
+
+  { id:22, title:"Personal Pronouns — All 3 Cases", level:"A2",
+
+    examples:[
+
+      ["Ich sehe ihn jeden Tag.","I see him every day.","er → ihn (accusative)"],
+
+      ["Er gibt mir das Buch.","He gives me the book.","ich → mir (dative, indirect object)"],
+
+      ["Wir helfen euch gerne.","We are happy to help you.","ihr → euch (dative)"],
+
+      ["Sie liebt ihn sehr.","She loves him very much.","er → ihn (accusative)"],
+
+      ["Er dankt ihr für die Hilfe.","He thanks her for the help.","sie → ihr (dative)"],
+
+      ["Ich sehe sie im Park.","I see her/them in the park.","sie → sie (acc, same form)"],
+
+      ["Das Buch gehört mir.","The book belongs to me.","ich → mir (dative)"],
+
+      ["Er schreibt uns eine E-Mail.","He writes us an email.","wir → uns (dative)"],
+
+      ["Ich vermisse dich sehr.","I miss you very much.","du → dich (accusative)"],
+
+      ["Sie zeigt ihm die Stadt.","She shows him the city.","er → ihm (dative)"],
+
+      ["Kannst du mir helfen?","Can you help me?","ich → mir (dative with helfen)"],
+
+      ["Er fragt mich nach dem Weg.","He asks me for directions.","ich → mich (accusative)"],
+
+      ["Das ist für dich.","That is for you.","du → dich (accusative after 'für')"],
+
+      ["Wir kennen ihn schon lange.","We have known him for a long time.","er → ihn (accusative)"],
+
+      ["Sie erzählt uns eine Geschichte.","She tells us a story.","wir → uns (dative)"],
+
+      ["Ich danke Ihnen sehr.","I thank you very much (formal).","Sie → Ihnen (dative formal)"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'ich' in accusative is:",options:["mir","mich","ich","mein"],answer:"mich"},
+
+      {type:"match",prompt:"'ich' in dative is:",options:["mich","mir","ich","mein"],answer:"mir"},
+
+      {type:"match",prompt:"'er' in accusative is:",options:["ihm","er","ihn","sein"],answer:"ihn"},
+
+      {type:"match",prompt:"'er' in dative is:",options:["ihn","er","ihm","sein"],answer:"ihm"},
+
+      {type:"match",prompt:"'wir' in accusative AND dative is:",options:["euch","ihr","uns","wir"],answer:"uns"},
+
+      {type:"match",prompt:"'du' in accusative is:",options:["dir","du","dich","dein"],answer:"dich"},
+
+      {type:"match",prompt:"'du' in dative is:",options:["dich","dir","du","dein"],answer:"dir"},
+
+      {type:"match",prompt:"'sie (they)' in dative is:",options:["sie","ihnen","ihr","deren"],answer:"ihnen"},
+
+      {type:"fill",prompt:"Ich sehe ___ (er) jeden Tag.",answer:"ihn"},
+
+      {type:"fill",prompt:"Er gibt ___ (ich) das Buch.",answer:"mir"},
+
+      {type:"fill",prompt:"Wir helfen ___ (ihr) gerne.",answer:"euch"},
+
+      {type:"fill",prompt:"Sie liebt ___ (er) sehr.",answer:"ihn"},
+
+      {type:"fill",prompt:"Ich danke ___ (Sie — formal) sehr.",answer:"Ihnen"},
+
+      {type:"fill",prompt:"Das gehört ___ (ich).",answer:"mir"},
+
+      {type:"fill",prompt:"Er schreibt ___ (wir) eine Nachricht.",answer:"uns"},
+
+      {type:"fill",prompt:"Kannst du ___ (ich) helfen?",answer:"mir"},
+
+      {type:"translate",prompt:"Translate: I see him every day.",answer:"Ich sehe ihn jeden Tag."},
+
+      {type:"translate",prompt:"Translate: He gives me the book.",answer:"Er gibt mir das Buch."},
+
+      {type:"translate",prompt:"Translate: Can you help us?",answer:"Kannst du uns helfen?"},
+
+      {type:"translate",prompt:"Translate: She thanks him for the help.",answer:"Sie dankt ihm für die Hilfe."},
+
+      {type:"fill",prompt:"Write the full pronoun table (nom/acc/dat) for all 8 pronouns from memory:",answer:""},
+
+      {type:"fill",prompt:"Write 3 sentences using dative pronouns with 'geben', 'helfen', 'zeigen':",answer:""},
+
+    ],
+
+    dictation:["Ich sehe ihn jeden Tag, aber er sieht mich nicht.","Er gibt mir das Buch und ich danke ihm sehr.","Wir helfen euch, wenn ihr uns auch helft."],
+
+    speaking:[["Er gibt mir das Buch und ich gebe es ihr.","He gives me the book and I give it to her."],["Kannst du mir helfen? Ich helfe dir auch sehr gerne!","Can you help me? I am also very happy to help you!"]]
+
+  },
+
+  { id:23, title:"Imperative — Giving Commands", level:"A2",
+
+    examples:[
+
+      ["Geh nach Hause!","Go home! (du)","du-form: gehen → geh"],
+
+      ["Schlaf gut!","Sleep well! (du)","du-form: schlafen → schlaf"],
+
+      ["Lern jeden Tag!","Study every day! (du)","du-form: lernen → lern"],
+
+      ["Nimm das Buch!","Take the book! (du — irregular)","nehmen → nimm (vowel change!)"],
+
+      ["Iss dein Gemüse!","Eat your vegetables! (du — irregular)","essen → iss (vowel change!)"],
+
+      ["Lies das Buch!","Read the book! (du — irregular)","lesen → lies (vowel change!)"],
+
+      ["Hilf mir bitte!","Help me please! (du — irregular)","helfen → hilf (vowel change!)"],
+
+      ["Sprich langsamer!","Speak more slowly! (du — irregular)","sprechen → sprich (vowel change!)"],
+
+      ["Seid bitte ruhig!","Please be quiet! (ihr)","ihr-form: sein → seid"],
+
+      ["Geht nach Hause!","Go home! (ihr)","ihr-form: gehen → geht"],
+
+      ["Lernt für die Prüfung!","Study for the exam! (ihr)","ihr-form: lernen → lernt"],
+
+      ["Kauft mehr Brot!","Buy more bread! (ihr)","ihr-form: kaufen → kauft"],
+
+      ["Gehen Sie bitte rein!","Please go inside! (Sie)","Sie-form: infinitive + Sie"],
+
+      ["Sprechen Sie bitte lauter!","Please speak louder! (Sie)","Sie-form: infinitive + Sie"],
+
+      ["Seien Sie bitte geduldig!","Please be patient! (Sie)","sein — Sie-form: seien Sie"],
+
+      ["Ruf mich bitte an!","Please call me! (du + separable)","anrufen → ruf... an"],
+
+    ],
+
+    exercises:[
+
+      {type:"fill",prompt:"gehen → du-Imperativ: ___!",answer:"Geh"},
+
+      {type:"fill",prompt:"lernen → du-Imperativ: ___!",answer:"Lern"},
+
+      {type:"fill",prompt:"nehmen → du-Imperativ: ___! (irregular)",answer:"Nimm"},
+
+      {type:"fill",prompt:"essen → du-Imperativ: ___! (irregular)",answer:"Iss"},
+
+      {type:"fill",prompt:"lesen → du-Imperativ: ___! (irregular)",answer:"Lies"},
+
+      {type:"fill",prompt:"helfen → du-Imperativ: ___! (irregular)",answer:"Hilf"},
+
+      {type:"fill",prompt:"sprechen → du-Imperativ: ___! (irregular)",answer:"Sprich"},
+
+      {type:"fill",prompt:"schlafen → du-Imperativ: ___!",answer:"Schlaf"},
+
+      {type:"fill",prompt:"gehen → ihr-Imperativ: ___!",answer:"Geht"},
+
+      {type:"fill",prompt:"lernen → ihr-Imperativ: ___!",answer:"Lernt"},
+
+      {type:"fill",prompt:"kaufen → ihr-Imperativ: ___!",answer:"Kauft"},
+
+      {type:"fill",prompt:"sein → ihr-Imperativ: ___!",answer:"Seid"},
+
+      {type:"fill",prompt:"gehen → Sie-Imperativ: ___ ___!",answer:"Gehen Sie"},
+
+      {type:"fill",prompt:"sprechen → Sie-Imperativ: ___ ___!",answer:"Sprechen Sie"},
+
+      {type:"fill",prompt:"sein → Sie-Imperativ: ___ ___!",answer:"Seien Sie"},
+
+      {type:"match",prompt:"Which du-imperative is irregular?",options:["geh","lern","nimm","mach"],answer:"nimm"},
+
+      {type:"match",prompt:"Which is correct for 'Sie' form of 'kommen'?",options:["Komm Sie!","Kommen Sie!","Kommt Sie!","Komme Sie!"],answer:"Kommen Sie!"},
+
+      {type:"match",prompt:"ihr-form of 'sein' is:",options:["Sei!","Seid!","Seien Sie!","Ist!"],answer:"Seid!"},
+
+      {type:"translate",prompt:"Translate (du): Take the book!",answer:"Nimm das Buch!"},
+
+      {type:"translate",prompt:"Translate (Sie): Please speak more slowly.",answer:"Sprechen Sie bitte langsamer."},
+
+      {type:"translate",prompt:"Translate (ihr): Learn for the exam!",answer:"Lernt für die Prüfung!"},
+
+      {type:"reorder",prompt:"Arrange (du): das / nimm / Buch / bitte",answer:"Nimm bitte das Buch!"},
+
+      {type:"reorder",prompt:"Arrange (Sie): Sie / langsamer / sprechen / bitte",answer:"Sprechen Sie bitte langsamer!"},
+
+      {type:"fill",prompt:"Write a 3-command recipe in German using du-Imperativ:",answer:""},
+
+      {type:"fill",prompt:"Write a polite request in Sie-form, then translate it to du-form:",answer:""},
+
+    ],
+
+    dictation:["Nimm das Buch und lies das erste Kapitel!","Sprecht bitte lauter — ich kann euch nicht hören!","Gehen Sie bitte rein und nehmen Sie Platz."],
+
+    speaking:[["Iss dein Frühstück und geh dann sofort zur Schule!","Eat your breakfast and then go to school immediately!"],["Sprechen Sie bitte langsamer — ich lerne noch Deutsch.","Please speak more slowly — I am still learning German."]]
+
+  },
+
+  { id:24, title:"Perfekt with sein — The Verb List", level:"B1",
+
+    examples:[
+
+      ["Ich bin heute früh aufgestanden.","I got up early today.","aufstehen → aufgestanden (sein — motion)"],
+
+      ["Er ist nach Berlin gefahren.","He drove/went to Berlin.","fahren → gefahren (sein — motion)"],
+
+      ["Wir sind ins Kino gegangen.","We went to the cinema.","gehen → gegangen (sein — motion)"],
+
+      ["Sie ist um 8 Uhr gekommen.","She came at 8 o'clock.","kommen → gekommen (sein — motion)"],
+
+      ["Das Kind ist schnell gewachsen.","The child grew quickly.","wachsen → gewachsen (sein — change)"],
+
+      ["Er ist leider gestorben.","He unfortunately died.","sterben → gestorben (sein — change)"],
+
+      ["Sie ist Ärztin geworden.","She became a doctor.","werden → geworden (sein — change)"],
+
+      ["Ich bin die ganze Nacht geblieben.","I stayed the whole night.","bleiben → geblieben (sein — exception)"],
+
+      ["Er ist nach Paris geflogen.","He flew to Paris.","fliegen → geflogen (sein — motion)"],
+
+      ["Wir sind am Meer geschwommen.","We swam in the sea.","schwimmen → geschwommen (sein — motion)"],
+
+      ["Was ist passiert?","What happened?","passieren → passiert (sein — event)"],
+
+      ["Ich bin morgens aufgewacht.","I woke up in the morning.","aufwachen → aufgewacht (sein — change)"],
+
+      ["Sie ist durch Europa gereist.","She travelled through Europe.","reisen → gereist (sein — motion)"],
+
+      ["Er ist ins Wasser gefallen.","He fell into the water.","fallen → gefallen (sein — motion/change)"],
+
+      ["Ich bin früh eingeschlafen.","I fell asleep early.","einschlafen → eingeschlafen (sein — change)"],
+
+      ["Das ist mir nicht passiert.","That didn't happen to me.","passieren + sein"],
+
+    ],
+
+    exercises:[
+
+      {type:"match",prompt:"'gehen' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"sein"},
+
+      {type:"match",prompt:"'kaufen' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"haben"},
+
+      {type:"match",prompt:"'fahren' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"sein"},
+
+      {type:"match",prompt:"'essen' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"haben"},
+
+      {type:"match",prompt:"'bleiben' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"sein"},
+
+      {type:"match",prompt:"'werden' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"sein"},
+
+      {type:"match",prompt:"'lernen' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"haben"},
+
+      {type:"match",prompt:"'sterben' Perfekt uses:",options:["haben","sein","beide","keines"],answer:"sein"},
+
+      {type:"fill",prompt:"gehen → Partizip: ge___en",answer:"gegangen"},
+
+      {type:"fill",prompt:"fahren → Partizip: ge___en",answer:"gefahren"},
+
+      {type:"fill",prompt:"kommen → Partizip: ge___en",answer:"gekommen"},
+
+      {type:"fill",prompt:"bleiben → Partizip: ge___en",answer:"geblieben"},
+
+      {type:"fill",prompt:"werden → Partizip: ge___en",answer:"geworden"},
+
+      {type:"fill",prompt:"fliegen → Partizip: ge___en",answer:"geflogen"},
+
+      {type:"fill",prompt:"passieren → Partizip: passier___",answer:"passiert"},
+
+      {type:"fill",prompt:"aufwachen → Partizip: aufge___t",answer:"aufgewacht"},
+
+      {type:"fill",prompt:"Ich ___ nach Berlin gefahren. (haben/sein?)",answer:"bin"},
+
+      {type:"fill",prompt:"Er ___ das Buch gelesen. (haben/sein?)",answer:"hat"},
+
+      {type:"fill",prompt:"Wir ___ ins Kino gegangen. (haben/sein?)",answer:"sind"},
+
+      {type:"fill",prompt:"Sie ___ Ärztin geworden. (haben/sein?)",answer:"ist"},
+
+      {type:"translate",prompt:"Translate: We went to the cinema.",answer:"Wir sind ins Kino gegangen."},
+
+      {type:"translate",prompt:"Translate: She became a doctor.",answer:"Sie ist Ärztin geworden."},
+
+      {type:"translate",prompt:"Translate: He flew to Paris.",answer:"Er ist nach Paris geflogen."},
+
+      {type:"translate",prompt:"Translate: What happened?",answer:"Was ist passiert?"},
+
+      {type:"fill",prompt:"List 8 verbs that use 'sein' in Perfekt from memory:",answer:""},
+
+      {type:"fill",prompt:"Describe your day yesterday in 4 Perfekt sentences (mix haben and sein verbs):",answer:""},
+
+    ],
+
+    dictation:["Ich bin heute Morgen früh aufgestanden und dann sofort losgegangen.","Er ist nach München gefahren und dort drei Tage geblieben.","Was ist eigentlich passiert? Sie ist einfach gegangen und nicht zurückgekommen."],
+
+    speaking:[["Ich bin gestern ins Kino gegangen und danach nach Hause gefahren.","I went to the cinema yesterday and then drove home afterwards."],["Sie ist durch ganz Europa gereist und ist dann in Berlin geblieben.","She travelled through all of Europe and then stayed in Berlin."]]
+
+  }
+
+];
+
+// ═══════════════════════════════════
+
+// STATE
+
+// ═══════════════════════════════════
+
+let state = { xp:0, gold:0, completed:[], lessonXP:{}, stars:{} };
+
+function loadState() {
+
+  const s = localStorage.getItem('deutschUnlockedV2');
+
+  if (s) state = JSON.parse(s);
+
+}
+
+function saveState() {
+
+  localStorage.setItem('deutschUnlockedV2', JSON.stringify(state));
+
+}
+
+function resetProgress() {
+
+  if (!confirm('Reset ALL progress? Cannot be undone.')) return;
+
+  localStorage.removeItem('deutschUnlockedV2');
+
+  state = { xp:0, gold:0, completed:[], lessonXP:{}, stars:{} };
+
+  updateTitleStats();
+
+  showToast('Progress reset. Viel Erfolg! 🇩🇪');
+
+}
+
+// ═══════════════════════════════════
+
+// NAVIGATION
+
+// ═══════════════════════════════════
+
+function showScreen(id) {
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+
+  document.getElementById(id).classList.add('active');
+
+  window.scrollTo(0,0);
+
+}
+
+function goToMap() { renderMap(); showScreen('map-screen'); }
+
+// ═══════════════════════════════════
+
+// UI UPDATES
+
+// ═══════════════════════════════════
+
+function updateTitleStats() {
+
+  document.getElementById('title-xp').textContent = state.xp + ' XP';
+
+  document.getElementById('title-gold').textContent = state.gold + ' GOLD';
+
+  document.getElementById('title-progress').textContent = state.completed.length + ' / 24 LESSONS';
+
+}
+
+function renderMap() {
+
+  document.getElementById('map-xp-num').textContent = state.xp;
+
+  document.getElementById('map-xp-fill').style.width = Math.min(100,(state.xp/6000)*100) + '%';
+
+  document.getElementById('map-gold').textContent = state.gold;
+
+  const grid = document.getElementById('map-grid');
+
+  grid.innerHTML = '';
+
+  LESSONS.forEach((lesson,idx) => {
+
+    const isCompleted = state.completed.includes(lesson.id);
+
+    const isUnlocked = idx === 0 || state.completed.includes(LESSONS[idx-1].id);
+
+    const stars = state.stars[lesson.id] || 0;
+
+    const isNext = !isCompleted && isUnlocked;
+
+    const card = document.createElement('div');
+
+    card.className = 'lesson-card' + (isCompleted?' completed':'') + (!isUnlocked?' locked':'') + (isNext?' active-lesson':'');
+
+    let starsHTML = '';
+
+    for (let i=0;i<3;i++) starsHTML += i<stars?'★':'☆';
+
+    card.innerHTML = `
+
+      <div class="card-num">${String(lesson.id).padStart(2,'0')}</div>
+
+      <div class="card-title">${lesson.title}</div>
+
+      <div class="card-meta">${lesson.level} · ${lesson.examples.length} EXAMPLES · ${lesson.exercises.length} EXERCISES</div>
+
+      ${isCompleted?`<div class="card-stars">${starsHTML}</div>`:''}
+
+      ${!isUnlocked?'<div class="lock-icon">🔒</div>':''}
+
+    `;
+
+    if (isUnlocked) card.addEventListener('click', () => tryOpenLesson(lesson.id, idx));
+
+    grid.appendChild(card);
+
+  });
+
+}
+
+// ═══════════════════════════════════
+
+// RECAP QUIZ SYSTEM
+
+// ═══════════════════════════════════
+
+let recapTarget = null;
+
+function tryOpenLesson(id, idx) {
+
+  if (idx === 0 || state.completed.includes(LESSONS[idx-1].id) === false) {
+
+    openLesson(id); return;
+
+  }
+
+  // Check if lesson already completed — no recap needed
+
+  if (state.completed.includes(id)) { openLesson(id); return; }
+
+  // First time opening a new lesson → show recap
+
+  const prevStart = Math.max(0, idx-3);
+
+  const prevLessons = LESSONS.slice(prevStart, idx);
+
+  const completedPrev = prevLessons.filter(l => state.completed.includes(l.id));
+
+  if (completedPrev.length === 0) { openLesson(id); return; }
+
+  recapTarget = id;
+
+  showRecap(completedPrev);
+
+}
+
+function showRecap(prevLessons) {
+
+  // Pull 8 questions from examples of previous lessons
+
+  let pool = [];
+
+  prevLessons.forEach(lesson => {
+
+    lesson.examples.forEach(ex => {
+
+      pool.push({ de: ex[0], en: ex[1], lesson: lesson.title });
+
+    });
+
+  });
+
+  // Shuffle
+
+  pool = pool.sort(() => Math.random()-0.5).slice(0, 8);
+
+  const wrongBank = pool.map(p => p.en);
+
+  let html = `
+
+    <div class="recap-title">RECAP QUIZ</div>
+
+    <div class="recap-subtitle">SCORE 6/8 TO UNLOCK THE NEXT LESSON · REVIEWING PREVIOUS MATERIAL</div>
+
+  `;
+
+  pool.forEach((item, i) => {
+
+    const wrongs = wrongBank.filter(w => w !== item.en).sort(() => Math.random()-0.5).slice(0,3);
+
+    const opts = [item.en, ...wrongs].sort(() => Math.random()-0.5);
+
+    html += `
+
+      <div class="recap-q" id="rq-${i}">
+
+        <div class="recap-q-text">${i+1}. What does this mean? <em style="color:var(--accent)">"${item.de}"</em>
+
+          <button class="speak-btn" onclick="speak('${item.de.replace(/'/g,"\\'")}','de-DE')" title="Play audio">🔊</button>
+
+        </div>
+
+        <div class="recap-opts">
+
+          ${opts.map(o => `<button class="opt-btn" onclick="recapAnswer(${i},'${o.replace(/'/g,"\\'")}','${item.en.replace(/'/g,"\\'")}',this)">${o}</button>`).join('')}
+
+        </div>
+
+        <div id="rfb-${i}" class="feedback-row"></div>
+
+      </div>
+
+    `;
+
+  });
+
+  html += `
+
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap">
+
+      <button class="btn-primary" id="recap-submit-btn" onclick="submitRecap(${pool.length})">CHECK ANSWERS</button>
+
+      <button class="btn-secondary" onclick="closeRecap()">CANCEL</button>
+
+    </div>
+
+    <div id="recap-result-area"></div>
+
+  `;
+
+  document.getElementById('recap-box').innerHTML = html;
+
+  document.getElementById('recap-modal').classList.add('active');
+
+  window.recapAnswers = {};
+
+  window.recapTotal = pool.length;
+
+}
+
+function recapAnswer(idx, chosen, correct, btn) {
+
+  if (window.recapAnswers[idx] !== undefined) return;
+
+  window.recapAnswers[idx] = chosen;
+
+  const parent = btn.parentElement;
+
+  parent.querySelectorAll('.opt-btn').forEach(b => {
+
+    if (b.textContent === correct) b.classList.add('correct-ans');
+
+    else if (b === btn && chosen !== correct) b.classList.add('wrong-ans');
+
+  });
+
+  const fb = document.getElementById('rfb-'+idx);
+
+  if (chosen === correct) { fb.textContent = '✓ Correct!'; fb.className = 'feedback-row correct show'; }
+
+  else { fb.textContent = `✗ Correct: ${correct}`; fb.className = 'feedback-row wrong show'; }
+
+}
+
+function submitRecap(total) {
+
+  let correct = 0;
+
+  for (let i=0;i<total;i++) {
+
+    // count from feedback
+
+    const fb = document.getElementById('rfb-'+i);
+
+    if (fb && fb.classList.contains('correct')) correct++;
+
+  }
+
+  const passed = correct >= 6;
+
+  const area = document.getElementById('recap-result-area');
+
+  area.innerHTML = `
+
+    <div class="recap-result">
+
+      <div class="big-score">${correct}/${total}</div>
+
+      <p>${passed ? '✓ PASSED — LESSON UNLOCKED' : '✗ NEED 6/8 — TRY AGAIN'}</p>
+
+      ${passed
+
+        ? `<button class="btn-primary" style="margin-top:1rem" onclick="closeRecap();openLesson(${recapTarget})">CONTINUE →</button>`
+
+        : `<button class="btn-primary" style="margin-top:1rem" onclick="showRecap([])">RETRY</button>`
+
+      }
+
+    </div>
+
+  `;
+
+  document.getElementById('recap-submit-btn').style.display = 'none';
+
+  if (passed) { state.xp += correct*5; state.gold += correct*2; saveState(); }
+
+}
+
+function closeRecap() {
+
+  document.getElementById('recap-modal').classList.remove('active');
+
+}
+
+// ═══════════════════════════════════
+
+// LESSON ENGINE
+
+// ═══════════════════════════════════
+
+let currentLesson = null;
+
+let currentTab = 'explain';
+
+let exerciseAnswers = {};
+
+let checkedBlocks = {};
+
+let dictationAnswers = {};
+
+let speakingScores = {};
+
+let currentSpeakingIdx = 0;
+
+let isRecording = false;
+
+let recognition = null;
+
+function openLesson(id) {
+
+  currentLesson = LESSONS.find(l => l.id === id);
+
+  currentTab = 'explain';
+
+  exerciseAnswers = {};
+
+  checkedBlocks = {};
+
+  dictationAnswers = {};
+
+  speakingScores = {};
+
+  currentSpeakingIdx = 0;
+
+  document.getElementById('lesson-title-bar').textContent = `L${id}: ${currentLesson.title}`;
+
+  const dots = document.getElementById('progress-dots');
+
+  const total = currentLesson.exercises.length;
+
+  dots.innerHTML = Array.from({length:Math.min(total,30)},(_,i) => `<div class="dot" id="dot-${i}"></div>`).join('');
+
+  document.getElementById('lesson-xp-count').textContent = state.lessonXP[id] || 0;
+
+  showScreen('lesson-screen');
+
+  renderLessonContent();
+
+}
+
+function renderLessonContent() {
+
+  const body = document.getElementById('lesson-body');
+
+  const tabs = `
+
+    <div class="tab-bar">
+
+      <button class="tab ${currentTab==='explain'?'active':''}" onclick="switchTab('explain')">📖 LESSON</button>
+
+      <button class="tab ${currentTab==='examples'?'active':''}" onclick="switchTab('examples')">📚 EXAMPLES (${currentLesson.examples.length})</button>
+
+      <button class="tab ${currentTab==='exercises'?'active':''}" onclick="switchTab('exercises')">🎮 EXERCISES (${currentLesson.exercises.length})</button>
+
+      <button class="tab ${currentTab==='dictation'?'active':''}" onclick="switchTab('dictation')">🎧 DICTATION</button>
+
+      <button class="tab ${currentTab==='speaking'?'active':''}" onclick="switchTab('speaking')">🎤 SPEAKING</button>
+
+    </div>
+
+  `;
+
+  if (currentTab === 'explain') body.innerHTML = tabs + renderExplainTab();
+
+  else if (currentTab === 'examples') body.innerHTML = tabs + renderExamplesTab();
+
+  else if (currentTab === 'exercises') body.innerHTML = tabs + renderExercisesTab();
+
+  else if (currentTab === 'dictation') body.innerHTML = tabs + renderDictationTab();
+
+  else if (currentTab === 'speaking') body.innerHTML = tabs + renderSpeakingTab();
+
+}
+
+function switchTab(tab) { currentTab = tab; renderLessonContent(); }
+
+// ── EXPLAIN TAB ──
+
+function renderExplainTab() {
+
+  const exp = EXPLANATIONS[currentLesson.id];
+
+  if (!exp) return `<p style="color:var(--muted)">No explanation available.</p>`;
+
+  const btnId = 'narrate-btn-' + currentLesson.id;
+
+  const keysHTML = exp.keys.map(k => `<div class="key-point">${k}</div>`).join('');
+
+  return `
+
+    <div class="explanation-panel">
+
+      <button class="narrate-btn" id="${btnId}" onclick="toggleNarration('${btnId}','${exp.text.replace(/'/g,"\\'").replace(/\n/g,' ')}')">▶ NARRATE</button>
+
+      <h3>${exp.title}</h3>
+
+      <p>${exp.text}</p>
+
+      <div class="key-points">${keysHTML}</div>
+
+    </div>
+
+    <div style="text-align:center;margin-top:1rem">
+
+      <button class="btn-primary" onclick="switchTab('examples')">VIEW EXAMPLES →</button>
+
+    </div>
+
+  `;
+
+}
+
+function toggleNarration(btnId, text) {
+
+  const btn = document.getElementById(btnId);
+
+  if (btn && btn.classList.contains('playing')) {
+
+    stopNarration(btn);
+
+  } else {
+
+    narrateText(text, btn);
+
+  }
+
+}
+
+// ── EXAMPLES TAB ──
+
+function renderExamplesTab() {
+
+  let html = `<table class="examples-table"><thead><tr>
+
+    <th></th><th>#</th><th>DEUTSCH</th><th>ENGLISH</th><th>GRAMMAR FOCUS</th>
+
+  </tr></thead><tbody>`;
+
+  currentLesson.examples.forEach((ex,i) => {
+
+    const safeDe = ex[0].replace(/'/g,"\\'");
+
+    html += `<tr>
+
+      <td><button class="speak-btn" onclick="speak('${safeDe}','de-DE')" title="Play audio">🔊</button></td>
+
+      <td class="grammar-note">${i+1}</td>
+
+      <td class="de-text">${ex[0]}</td>
+
+      <td>${ex[1]}</td>
+
+      <td class="grammar-note">${ex[2]}</td>
+
+    </tr>`;
+
+  });
+
+  html += `</tbody></table>
+
+    <div style="text-align:center;margin-top:1rem">
+
+      <button class="btn-primary" onclick="switchTab('exercises')">START EXERCISES →</button>
+
+    </div>`;
+
+  return html;
+
+}
+
+// ── EXERCISES TAB ──
+
+function renderExercisesTab() {
+
+  const exercises = currentLesson.exercises;
+
+  const BLOCK_SIZE = 8;
+
+  const blockNames = ['A','B','C','D','E','F'];
+
+  let html = '';
+
+  let blockIdx = 0;
+
+  let i = 0;
+
+  while (i < exercises.length) {
+
+    const end = Math.min(i+BLOCK_SIZE, exercises.length);
+
+    const blockExs = exercises.slice(i,end);
+
+    html += `<div class="exercise-card">
+
+      <div class="exercise-block-label">BLOCK ${blockNames[blockIdx]} — Questions ${i+1}–${end}</div>`;
+
+    blockExs.forEach((ex,relIdx) => { html += renderQuestion(ex, i+relIdx); });
+
+    const blockId = `block-${blockIdx}`;
+
+    html += `<div class="check-row">
+
+      <button class="btn-check" onclick="checkBlock(${i},${end-1},'${blockId}')">CHECK ANSWERS</button>
+
+      <span class="score-mini" id="${blockId}-score"></span>
+
+    </div></div>`;
+
+    i = end; blockIdx++;
+
+  }
+
+  html += `<div id="complete-section"></div>`;
+
+  return html;
+
+}
+
+function renderQuestion(ex, idx) {
+
+  const savedAnswer = exerciseAnswers[idx] || '';
+
+  const isChecked = checkedBlocks[Math.floor(idx/8)] !== undefined;
+
+  if (ex.type === 'match') {
+
+    const opts = ex.options.map(opt => {
+
+      let cls = 'opt-btn';
+
+      if (isChecked) {
+
+        if (opt === ex.answer) cls += ' correct-ans';
+
+        else if (opt === savedAnswer && opt !== ex.answer) cls += ' wrong-ans';
+
+        else if (opt === savedAnswer) cls += ' selected';
+
+      } else { if (opt === savedAnswer) cls += ' selected'; }
+
+      return `<button class="${cls}" onclick="selectOption(${idx},'${escQ(opt)}')">${opt}</button>`;
+
+    }).join('');
+
+    const fbClass = isChecked ? (savedAnswer===ex.answer?'correct':'wrong') : '';
+
+    const fbText = isChecked ? (savedAnswer===ex.answer?'✓ Correct!':`✗ Answer: ${ex.answer}`) : '';
+
+    return `<div class="question-row">
+
+      <div class="q-label">Q${idx+1}</div>
+
+      <div class="q-content">
+
+        <div class="q-text">${ex.prompt}</div>
+
+        <div class="q-options">${opts}</div>
+
+        <div class="feedback-row ${fbClass} ${isChecked?'show':''}">${fbText}</div>
+
+      </div></div>`;
+
+  } else {
+
+    const isOpen = ex.answer === '';
+
+    let inputClass = 'q-input';
+
+    let fbClass = '', fbText = '';
+
+    if (isChecked && !isOpen) {
+
+      const correct = checkTextAnswer(savedAnswer, ex.answer);
+
+      if (correct) { inputClass += ' correct'; fbClass = 'correct'; fbText = '✓ Correct!'; }
+
+      else { inputClass += ' wrong'; fbClass = 'wrong'; fbText = `✗ Expected: ${ex.answer}`; }
+
+    }
+
+    const typeLabel = ex.type==='translate'?'[TRANSLATE] ':ex.type==='reorder'?'[REORDER] ':'';
+
+    return `<div class="question-row">
+
+      <div class="q-label">Q${idx+1}</div>
+
+      <div class="q-content">
+
+        <div class="q-text">${typeLabel}${ex.prompt}</div>
+
+        <input class="${inputClass}" id="inp-${idx}" type="text"
+
+          placeholder="${isOpen?'Write your answer...':'Type your answer...'}"
+
+          value="${escQ(savedAnswer)}"
+
+          oninput="saveAnswer(${idx},this.value)"
+
+          ${isChecked&&!isOpen?'readonly':''}>
+
+        <div class="feedback-row ${fbClass} ${isChecked&&!isOpen?'show':''}">${fbText}</div>
+
+      </div></div>`;
+
+  }
+
+}
+
+function escQ(str) { return String(str).replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+
+function selectOption(idx, value) {
+
+  exerciseAnswers[idx] = value;
+
+  if (!checkedBlocks[Math.floor(idx/8)]) renderLessonContent();
+
+}
+
+function saveAnswer(idx, value) { exerciseAnswers[idx] = value; }
+
+function checkTextAnswer(userAns, correctAns) {
+
+  if (!correctAns) return true;
+
+  const u = userAns.trim().toLowerCase().replace(/[.,!?]/g,'');
+
+  const c = correctAns.trim().toLowerCase().replace(/[.,!?]/g,'');
+
+  return u === c || userAns.trim() === correctAns.trim();
+
+}
+
+function checkBlock(startIdx, endIdx, blockId) {
+
+  for (let i=startIdx;i<=endIdx;i++) {
+
+    const inp = document.getElementById(`inp-${i}`);
+
+    if (inp) exerciseAnswers[i] = inp.value;
+
+  }
+
+  const exercises = currentLesson.exercises;
+
+  let correct = 0, total = 0;
+
+  for (let i=startIdx;i<=endIdx;i++) {
+
+    const ex = exercises[i];
+
+    if (ex.answer === '') continue;
+
+    total++;
+
+    if (ex.type==='match') { if (exerciseAnswers[i]===ex.answer) correct++; }
+
+    else { if (checkTextAnswer(exerciseAnswers[i]||'',ex.answer)) correct++; }
+
+  }
+
+  checkedBlocks[Math.floor(startIdx/8)] = {correct,total};
+
+  const scoreEl = document.getElementById(blockId+'-score');
+
+  if (scoreEl) scoreEl.textContent = total>0?`${correct}/${total} correct`:'Open answers recorded';
+
+  const xpGained = correct*10;
+
+  state.xp += xpGained;
+
+  state.gold += Math.floor(xpGained/5);
+
+  state.lessonXP[currentLesson.id] = (state.lessonXP[currentLesson.id]||0) + xpGained;
+
+  document.getElementById('lesson-xp-count').textContent = state.lessonXP[currentLesson.id];
+
+  for (let i=startIdx;i<=Math.min(endIdx,29);i++) {
+
+    const dot = document.getElementById(`dot-${i}`);
+
+    if (dot) dot.classList.add('done');
+
+  }
+
+  saveState(); renderLessonContent();
+
+  if (xpGained>0) showToast(`+${xpGained} XP · ${correct}/${total} correct`);
+
+  checkAllComplete();
+
+}
+
+function checkAllComplete() {
+
+  const totalBlocks = Math.ceil(currentLesson.exercises.length/8);
+
+  const allDone = Object.keys(checkedBlocks).length >= totalBlocks;
+
+  if (allDone && !state.completed.includes(currentLesson.id)) {
+
+    const totalEx = currentLesson.exercises.filter(e=>e.answer!=='').length;
+
+    let totalCorrect = 0;
+
+    for (const b of Object.values(checkedBlocks)) totalCorrect += b.correct;
+
+    const pct = totalEx>0?totalCorrect/totalEx:1;
+
+    const stars = pct>=0.9?3:pct>=0.7?2:1;
+
+    state.completed.push(currentLesson.id);
+
+    state.stars[currentLesson.id] = stars;
+
+    const bonusGold = stars*50;
+
+    state.gold += bonusGold;
+
+    saveState();
+
+    const cs = document.getElementById('complete-section');
+
+    if (cs) {
+
+      cs.innerHTML = `
+
+        <div class="complete-card">
+
+          <div class="complete-title">LEKTION COMPLETE!</div>
+
+          <div style="font-size:2rem;margin:0.5rem 0">${'★'.repeat(stars)}${'☆'.repeat(3-stars)}</div>
+
+          <div class="complete-stats">
+
+            <div class="c-stat"><div class="c-num">${totalCorrect}</div><div class="c-lbl">CORRECT</div></div>
+
+            <div class="c-stat"><div class="c-num">${state.lessonXP[currentLesson.id]}</div><div class="c-lbl">XP EARNED</div></div>
+
+            <div class="c-stat"><div class="c-num">+${bonusGold}</div><div class="c-lbl">BONUS GOLD</div></div>
+
+          </div>
+
+          <button class="btn-primary" onclick="goToMap()">BACK TO MAP →</button>
+
+        </div>`;
+
+      cs.scrollIntoView({behavior:'smooth'});
+
+    }
+
+    showToast(`🏆 Lesson ${currentLesson.id} complete! +${bonusGold} bonus gold!`);
+
+    updateTitleStats();
+
+  }
+
+}
+
+// ── DICTATION TAB ──
+
+function renderDictationTab() {
+
+  const sentences = currentLesson.dictation || [];
+
+  if (!sentences.length) return `<p style="color:var(--muted);padding:1rem">No dictation for this lesson.</p>`;
+
+  let html = `<div class="dictation-block">
+
+    <div class="exercise-block-label">🎧 DICTATION — LISTEN AND TYPE WHAT YOU HEAR</div>
+
+    <p style="font-size:0.85rem;color:var(--muted);margin-bottom:1rem;font-family:'Space Mono',monospace;letter-spacing:0.05em">
+
+      Click PLAY to hear each sentence. Type exactly what you hear. Aim for 80%+ accuracy.
+
+    </p>`;
+
+  sentences.forEach((sentence, i) => {
+
+    const saved = dictationAnswers[i] || '';
+
+    const isChecked = dictationAnswers[`checked-${i}`];
+
+    let inputClass = 'q-input';
+
+    let fbText = '', fbClass = '';
+
+    if (isChecked) {
+
+      const sim = stringSimilarity(saved.toLowerCase(), sentence.toLowerCase());
+
+      if (sim >= 0.8) { inputClass += ' correct'; fbClass = 'correct'; fbText = `✓ ${Math.round(sim*100)}% match — Well done!`; }
+
+      else { inputClass += ' wrong'; fbClass = 'wrong'; fbText = `✗ ${Math.round(sim*100)}% — Answer: ${sentence}`; }
+
+    }
+
+    const safeSentence = sentence.replace(/'/g,"\\'");
+
+    html += `
+
+      <div class="question-row">
+
+        <div class="q-label">D${i+1}</div>
+
+        <div class="q-content">
+
+          <button class="play-audio-btn" onclick="speak('${safeSentence}','de-DE')">🔊 PLAY SENTENCE ${i+1}</button>
+
+          <input class="${inputClass}" id="dict-inp-${i}" type="text"
+
+            placeholder="Type what you hear..."
+
+            value="${escQ(saved)}"
+
+            oninput="saveDictation(${i},this.value)"
+
+            ${isChecked?'readonly':''}>
+
+          <div class="feedback-row ${fbClass} ${isChecked?'show':''}">${fbText}</div>
+
+        </div>
+
+      </div>`;
+
+  });
+
+  html += `
+
+    <div class="check-row">
+
+      <button class="btn-check" onclick="checkDictation(${sentences.length})">CHECK DICTATION</button>
+
+      <span class="score-mini" id="dict-score"></span>
+
+    </div></div>`;
+
+  return html;
+
+}
+
+function saveDictation(idx, value) { dictationAnswers[idx] = value; }
+
+function checkDictation(total) {
+
+  for (let i=0;i<total;i++) {
+
+    const inp = document.getElementById(`dict-inp-${i}`);
+
+    if (inp) dictationAnswers[i] = inp.value;
+
+  }
+
+  const sentences = currentLesson.dictation || [];
+
+  let correct = 0;
+
+  sentences.forEach((sentence, i) => {
+
+    dictationAnswers[`checked-${i}`] = true;
+
+    const sim = stringSimilarity((dictationAnswers[i]||'').toLowerCase(), sentence.toLowerCase());
+
+    if (sim >= 0.8) correct++;
+
+  });
+
+  const xpGained = correct * 15;
+
+  state.xp += xpGained;
+
+  state.gold += Math.floor(xpGained/4);
+
+  saveState();
+
+  const scoreEl = document.getElementById('dict-score');
+
+  if (scoreEl) scoreEl.textContent = `${correct}/${total} correct`;
+
+  if (xpGained>0) showToast(`+${xpGained} XP from dictation!`);
+
+  renderLessonContent();
+
+}
+
+function stringSimilarity(a, b) {
+
+  const wa = a.split(/\s+/).filter(Boolean);
+
+  const wb = b.split(/\s+/).filter(Boolean);
+
+  const matches = wa.filter(w => wb.includes(w)).length;
+
+  return matches / Math.max(wa.length, wb.length, 1);
+
+}
+
+// ── SPEAKING TAB ──
+
+function renderSpeakingTab() {
+
+  const prompts = currentLesson.speaking || [];
+
+  if (!prompts.length) return `<p style="color:var(--muted);padding:1rem">No speaking exercises for this lesson.</p>`;
+
+  const srSupported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+
+  let html = `<div class="speaking-block">
+
+    <div class="exercise-block-label">🎤 SPEAKING — READ THE SENTENCE ALOUD IN GERMAN</div>`;
+
+  if (!srSupported) {
+
+    html += `<div style="background:rgba(192,57,43,0.15);border:1px solid rgba(192,57,43,0.3);padding:1rem;margin-bottom:1rem;font-family:'Space Mono',monospace;font-size:0.7rem;color:#e74c3c;">
+
+      Speech recognition not supported in this browser. Use Chrome for full functionality.
+
+    </div>`;
+
+  }
+
+  prompts.forEach((prompt, i) => {
+
+    const score = speakingScores[i];
+
+    const safeDe = prompt[0].replace(/'/g,"\\'");
+
+    html += `
+
+      <div class="speaking-prompt" id="sp-prompt-${i}">
+
+        <div class="de-sentence">${prompt[0]}</div>
+
+        <div class="en-sentence">${prompt[1]}</div>
+
+        <div style="margin-top:0.75rem;display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap">
+
+          <button class="play-audio-btn" onclick="speak('${safeDe}','de-DE')" style="margin-bottom:0">🔊 HEAR IT</button>
+
+          ${srSupported
+
+            ? `<button class="mic-btn" id="mic-${i}" onclick="toggleRecording(${i},'${safeDe}')">🎤</button>`
+
+            : '<span style="color:var(--muted);font-size:0.75rem;font-family:\'Space Mono\',monospace">Rate yourself below</span>'
+
+          }
+
+        </div>
+
+        ${score !== undefined
+
+          ? `<div style="margin-top:0.75rem">
+
+              <div style="font-family:'Space Mono',monospace;font-size:0.68rem;color:var(--muted);margin-bottom:4px">ACCURACY: ${Math.round(score*100)}%</div>
+
+              <div class="score-bar"><div class="score-bar-fill" style="width:${score*100}%;background:${score>0.7?'var(--green)':score>0.4?'var(--gold)':'var(--red)'}"></div></div>
+
+            </div>`
+
+          : ''
+
+        }
+
+      </div>`;
+
+  });
+
+  const totalScore = Object.values(speakingScores).reduce((a,b)=>a+b,0);
+
+  const avgScore = Object.keys(speakingScores).length > 0 ? totalScore/Object.keys(speakingScores).length : 0;
+
+  if (Object.keys(speakingScores).length === prompts.length) {
+
+    const xp = Math.round(avgScore*40);
+
+    html += `
+
+      <div style="text-align:center;margin-top:1rem;padding:1rem;background:rgba(39,174,96,0.1);border:1px solid rgba(39,174,96,0.3)">
+
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:2rem;color:var(--green)">SPEAKING COMPLETE</div>
+
+        <div style="font-family:'Space Mono',monospace;font-size:0.75rem;color:var(--muted)">Average accuracy: ${Math.round(avgScore*100)}% · +${xp} XP earned</div>
+
+      </div>`;
+
+  }
+
+  html += `</div>`;
+
+  return html;
+
+}
+
+function toggleRecording(idx, sentence) {
+
+  const btn = document.getElementById(`mic-${idx}`);
+
+  if (isRecording) {
+
+    if (recognition) recognition.stop();
+
+    isRecording = false;
+
+    if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+
+    return;
+
+  }
+
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  if (!SR) return;
+
+  recognition = new SR();
+
+  recognition.lang = 'de-DE';
+
+  recognition.interimResults = false;
+
+  recognition.maxAlternatives = 1;
+
+  recognition.onresult = (e) => {
+
+    const said = e.results[0][0].transcript;
+
+    const score = stringSimilarity(said.toLowerCase().replace(/[.,!?]/g,''), sentence.toLowerCase().replace(/[.,!?]/g,''));
+
+    speakingScores[idx] = score;
+
+    const xpGained = Math.round(score*20);
+
+    state.xp += xpGained;
+
+    state.gold += Math.round(xpGained/4);
+
+    saveState();
+
+    if (xpGained>0) showToast(`+${xpGained} XP · ${Math.round(score*100)}% accuracy`);
+
+    isRecording = false;
+
+    if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+
+    renderLessonContent();
+
+  };
+
+  recognition.onerror = () => {
+
+    isRecording = false;
+
+    if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+
+  };
+
+  recognition.onend = () => {
+
+    isRecording = false;
+
+    if (btn) { btn.classList.remove('recording'); btn.textContent = '🎤'; }
+
+  };
+
+  recognition.start();
+
+  isRecording = true;
+
+  if (btn) { btn.classList.add('recording'); btn.textContent = '⏹'; }
+
+  // Auto-stop after 8 seconds
+
+  setTimeout(() => { if (isRecording && recognition) recognition.stop(); }, 8000);
+
+}
+
+// ═══════════════════════════════════
+
+// TOAST
+
+// ═══════════════════════════════════
+
+function showToast(msg) {
+
+  const toast = document.getElementById('toast');
+
+  toast.textContent = msg;
+
+  toast.classList.add('show');
+
+  setTimeout(() => toast.classList.remove('show'), 2800);
+
+}
+
+// ═══════════════════════════════════
+
+// INIT
+
+// ═══════════════════════════════════
+
+loadState();
+
+updateTitleStats();
+
+</script>
+
+</body>
+
+</html>
